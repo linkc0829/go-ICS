@@ -1,2 +1,2 @@
 # go-ICS
-A Income-Cost-Sharer written in Go
+An Income-Cost-Sharer written in Go
