@@ -4,7 +4,7 @@ import(
 	"log"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"github.com/linkc0829/internal/handler"
+	"github.com/linkc0829/go-ics/internal/handler"
 )
 
 var Host, Port string

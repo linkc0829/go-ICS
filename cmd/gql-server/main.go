@@ -1,7 +1,7 @@
 package main
 
 import(
-	"github.com/linkc0829/go-ICS/pkg/server"
+	"github.com/linkc0829/go-ics/pkg/server"
 )
 
 func main(){
