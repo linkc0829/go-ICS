@@ -3,26 +3,38 @@ package server
 import(
 	"log"
 	"github.com/gin-gonic/gin"
-	"github.com/linkc0829/go-ics/internal/handler"
+	"github.com/linkc0829/go-ics/internal/handlers"
 	"github.com/linkc0829/go-ics/pkg/utils"
 )
 
-var host, port string
+var host, port, gqlPath, gqlPgPath string
+var isPgEnabled bool
 
 func init(){
 	host = utils.MustGet("GQL_SERVER_HOST")
 	port = utils.MustGet("GQL_SERVER_PORT")
+	gqlPath = utils.MustGet("GQL_SERVER_GRAPHQL_PATH")
+    gqlPgPath = utils.MustGet("GQL_SERVER_GRAPHQL_PLAYGROUND_PATH")
+    isPgEnabled = utils.MustGetBool("GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED")
 }
 
 func Run(){
-	
-	pathGQL := "/graphql"
+
+	endpoint := "http://" + host + ":" + port
+
 
 	r := gin.Default()
-	r.GET("/", handler.FreeTrialHandler())
+	r.GET("/", handlers.FreeTrialHandler())
+	log.Println("Free Trial Page @ " + endpoint)
 
+	r.POST(gqlPath, handlers.GraphqlHandler())
 
-	log.Println("Connect to Graphql Server @ http://" + host + ":" + port + pathGQL)
+	if isPgEnabled{
+		r.GET(gqlPgPath, handlers.PlaygroundHandler(gqlPath))
+		log.Println("GraphQL Playground @ " + endpoint + gqlPgPath)
+	}
+
+	log.Println("Graphql Server @ " + endpoint + gqlPath)
 
 	log.Fatalln(r.Run(host + ":" + port))
 
