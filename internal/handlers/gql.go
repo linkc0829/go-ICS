@@ -5,13 +5,16 @@ import (
     gql "github.com/linkc0829/go-ics/internal/graph/generated"
     "github.com/linkc0829/go-ics/internal/graph/resolvers"
     "github.com/gin-gonic/gin"
+    "github.com/linkc0829/go-ics/internal/mongodb"
 )
 
 // GraphqlHandler defines the GQLGen GraphQL server handler
-func GraphqlHandler() gin.HandlerFunc {
+func GraphqlHandler(db mongodb.MongoDB) gin.HandlerFunc {
     // NewExecutableSchema and Config are in the generated.go file
     c := gql.Config{
-        Resolvers: &resolvers.Resolver{},
+        Resolvers: &resolvers.Resolver{
+            DB: db,
+        },
     }
 
     h := handler.GraphQL(gql.NewExecutableSchema(c))

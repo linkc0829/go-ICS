@@ -7,9 +7,12 @@ import (
 
 	"github.com/linkc0829/go-ics/internal/graph/generated"
 	"github.com/linkc0829/go-ics/internal/graph/models"
+	"github.com/linkc0829/go-ics/internal/mongodb"
 )
 
-type Resolver struct{}
+type Resolver struct{
+	DB mongo.MongoDB
+}
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input models.UserInput) (*models.User, error) {
 	panic("not implemented")

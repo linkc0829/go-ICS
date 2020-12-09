@@ -3,7 +3,7 @@
 package models
 
 type User struct {
-	ID      *string `json:"id"`
+	ID      *string `json:"id" bson:"_id"`
 	Email   *string `json:"email"`
 	UserID  *string `json:"userId"`
 	Friends []*User `json:"friends"`

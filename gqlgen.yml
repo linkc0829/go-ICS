@@ -19,7 +19,7 @@ model:
 
 # Where should the resolver implementations go?
 resolver:
-  filename: internal/graph/resolvers/generated.go
+  filename: internal/graph/resolvers/generated/generated.go
   type: Resolver
   package: resolvers
 

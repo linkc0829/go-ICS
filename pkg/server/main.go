@@ -5,6 +5,7 @@ import(
 	"github.com/gin-gonic/gin"
 	"github.com/linkc0829/go-ics/internal/handlers"
 	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-ics/internal/mongodb"
 )
 
 var host, port, gqlPath, gqlPgPath string
@@ -18,7 +19,7 @@ func init(){
     isPgEnabled = utils.MustGetBool("GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED")
 }
 
-func Run(){
+func Run(db mongodb.MongoDB){
 
 	endpoint := "http://" + host + ":" + port
 
@@ -27,14 +28,13 @@ func Run(){
 	r.GET("/", handlers.FreeTrialHandler())
 	log.Println("Free Trial Page @ " + endpoint)
 
-	r.POST(gqlPath, handlers.GraphqlHandler())
+	r.POST(gqlPath, handlers.GraphqlHandler(db))
+	log.Println("Graphql Server @ " + endpoint + gqlPath)
 
 	if isPgEnabled{
 		r.GET(gqlPgPath, handlers.PlaygroundHandler(gqlPath))
 		log.Println("GraphQL Playground @ " + endpoint + gqlPgPath)
 	}
-
-	log.Println("Graphql Server @ " + endpoint + gqlPath)
 
 	log.Fatalln(r.Run(host + ":" + port))
 
