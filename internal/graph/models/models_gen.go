@@ -2,14 +2,135 @@
 
 package models
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+	"time"
+)
+
+type Cost struct {
+	ID          string    `json:"id"`
+	Author      *User     `json:"author"`
+	Number      int       `json:"number"`
+	Date        time.Time `json:"date"`
+	Category    Category  `json:"category"`
+	Description *string   `json:"description"`
+	Vote        *Users    `json:"vote"`
+}
+
+type CostInput struct {
+	Number      *int       `json:"number"`
+	Date        *time.Time `json:"date"`
+	Category    *string    `json:"category"`
+	Description *string    `json:"description"`
+}
+
+type Costs struct {
+	Total int     `json:"total"`
+	List  []*Cost `json:"list"`
+}
+
+type Income struct {
+	ID          string    `json:"id"`
+	Author      *User     `json:"author"`
+	Number      int       `json:"number"`
+	Date        time.Time `json:"date"`
+	Category    Category  `json:"category"`
+	Description *string   `json:"description"`
+	Vote        *Users    `json:"vote"`
+}
+
+type IncomeInput struct {
+	Number      *int       `json:"number"`
+	Date        *time.Time `json:"date"`
+	Category    *string    `json:"category"`
+	Description *string    `json:"description"`
+}
+
+type Incomes struct {
+	Total int       `json:"total"`
+	List  []*Income `json:"list"`
+}
+
+// List current or historical protfolio
+type Protfolio struct {
+	Total  int      `json:"total"`
+	Income *Incomes `json:"income"`
+	Cost   *Costs   `json:"cost"`
+}
+
 type User struct {
-	ID      *string `json:"id" bson:"_id"`
-	Email   *string `json:"email"`
-	UserID  *string `json:"userId"`
-	Friends []*User `json:"friends"`
+	ID        string    `json:"id"`
+	Email     string    `json:"email"`
+	UserID    string    `json:"userId"`
+	NickName  *string   `json:"nickName"`
+	CreatedAt time.Time `json:"createdAt"`
+	Token     *string   `json:"token"`
+	Friends   *Users    `json:"friends"`
+	// granted permission to friends to view portfolio
+	Followers *Users `json:"followers"`
+	// permission to view followers' portfolio
+	LastQuery time.Time `json:"lastQuery"`
 }
 
 type UserInput struct {
-	Email  *string `json:"email"`
-	UserID *string `json:"userId"`
+	Email    *string `json:"email"`
+	UserID   *string `json:"userId"`
+	Name     *string `json:"name"`
+	NickName *string `json:"nickName"`
+}
+
+type Users struct {
+	Count *int    `json:"count"`
+	List  []*User `json:"list"`
+}
+
+type Category string
+
+const (
+	CategoryInvestment Category = "INVESTMENT"
+	CategorySalory     Category = "SALORY"
+	CategoryOthers     Category = "OTHERS"
+	CategoryDaily      Category = "DAILY"
+	CategoryLearning   Category = "LEARNING"
+	CategoryCharity    Category = "CHARITY"
+)
+
+var AllCategory = []Category{
+	CategoryInvestment,
+	CategorySalory,
+	CategoryOthers,
+	CategoryDaily,
+	CategoryLearning,
+	CategoryCharity,
+}
+
+func (e Category) IsValid() bool {
+	switch e {
+	case CategoryInvestment, CategorySalory, CategoryOthers, CategoryDaily, CategoryLearning, CategoryCharity:
+		return true
+	}
+	return false
+}
+
+func (e Category) String() string {
+	return string(e)
+}
+
+func (e *Category) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Category(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Category", str)
+	}
+	return nil
+}
+
+func (e Category) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

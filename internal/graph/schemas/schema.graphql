@@ -1,39 +1,44 @@
+scalar Time
+
 # Types
 type User {
   id: ID!
   email: String!
-  userId: String
-  name: String
+  userId: String!
   nickName: String
   createdAt: Time!
   token: String
-  friends: [User]
-  incomes: [income]
-  cost: [cost]
+  friends: Users!	"granted permission to friends to view portfolio"
+  followers: Users!	"permission to view followers' portfolio"
   lastQuery: Time!
 }
 
 # List Types
 type Users{
-  count: int
-  list: [User!]!
+  count: Int
+  list: [User]
+}
+
+"List current or historical protfolio"
+type Protfolio{
+	total: Int!
+	income: Incomes!
+	cost: Costs!
 }
 
 type Incomes{
-  total: int!
-  list: [Income!]
+  total: Int!
+  list: [Income]
 }
 
 type Costs{
-  total: int!
-  list: [Cost!]
+  total: Int!
+  list: [Cost]
 }
 
 enum Category{
-  """used both in income and cost"""
   INVESTMENT
   SALORY
-  """used both in income and cost"""
   OTHERS
 
   DAILY
@@ -44,34 +49,22 @@ enum Category{
 
 type Income{
   id: ID!
-  number: int!
+  author: User!
+  number: Int!
   date: Time!
   category: Category!
   description: String
-  vote: [User!]
+  vote: Users!
 }
 
 type Cost{
   id: ID!
-  number: int!
+  author: User!
+  number: Int!
   date: Time!
   category: Category!
   description: String
-  vote: [User!]
-}
-
-enum Source{
-  INCOME
-  COST
-}
-
-type History{
-  id: ID!
-  number: int!
-  date: Time!
-  category: Category!
-  description: String
-  source: Source!
+  vote: Users!
 }
 
 # Input Types
@@ -83,14 +76,14 @@ input UserInput {
 }
 
 input IncomeInput{
-  number: int
+  number: Int
   date: Time
   category: String
   description: String
 }
 
 input CostInput{
-  number: int
+  number: Int
   date: Time
   category: String
   description: String
@@ -98,8 +91,8 @@ input CostInput{
 
 # Define mutations here
 type Mutation {
+  
   createUser(input: UserInput!): User!
-  updateUser(id: ID!, input: UserInput!): User!
   deleteUser(id: ID!): Boolean!
 
   createIncome(input: IncomeInput!): Income!
@@ -109,13 +102,25 @@ type Mutation {
   createCost(input: CostInput!): Cost!
   updateCost(id: ID!, input: CostInput!): Cost!
   deleteCost(id: ID!): Boolean!
+  
+  addFriends(userId: String!): User
+  likeCost(id: ID!): Int!
+  likeIncome(id: ID!): Int!
 
 }
 
 # Define queries here
 type Query {
-  users(id: ID): Users!
-  incomes(id: ID): Incomes!
-  costs(id: ID): Costs!
-  history(id:ID): History!
+  "query current user portfolio"
+  me: User!
+  myPortfolio: Protfolio!
+  myHistory(range: Int!): Protfolio!
+  myFriends: Users!
+  myFollowers: Users!
+  
+  "query followers' portfolio"
+  getUser(userId: String!): User!
+  getPortfolio(userId: String!): Protfolio!
+  getHistory(userId: String!, range: Int!): Protfolio!
+  
 }

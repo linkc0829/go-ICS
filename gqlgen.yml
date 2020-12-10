@@ -21,7 +21,7 @@ model:
 resolver:
   filename: internal/graph/resolvers/generated/generated.go
   type: Resolver
-  package: resolvers
+  package: generated
 
 # Optional: turn on use `gqlgen:"fieldName"` tags in your models
 # struct_tag: json

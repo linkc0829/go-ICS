@@ -1,5 +1,9 @@
 package models
 
+import (
+	"time"
+)
+
 // UserModel struct
 type UserModel struct {
 	ID        primitive.ObjectID `bson:"_id" json:"_id,omitempty"`
