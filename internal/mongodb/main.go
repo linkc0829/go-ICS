@@ -9,16 +9,16 @@ import (
 	"github.com/linkc0829/go-ics/pkg/utils"
 )
 
-var dbUser, pwd, dbName string
+var dbUser, pwd, dbName, dsn string
 
 type MongoDB struct{
-	session 		*mongo.Client
-	users 			*mongo.Collection
-	deleted_users 	*mongo.Collection
-	income			*mongo.Collection
-	cost			*mongo.Collection
-	incomeHistory	*mongo.Collection
-	costHistory		*mongo.Collection
+	Session 		*mongo.Client
+	Users 			*mongo.Collection
+	Deleted_users 	*mongo.Collection
+	Income			*mongo.Collection
+	Cost			*mongo.Collection
+	IncomeHistory	*mongo.Collection
+	CostHistory		*mongo.Collection
 }
 
 func init(){
@@ -38,19 +38,19 @@ func ConnectDB() MongoDB{
 		log.Fatal(err)
 	}
 	return MongoDB{
-		session: 		client,
-		users:			client.Database("ics").Collection("users"),
-		deleted_users: 	client.Database("ics").Collection("deleted_users")
-		income:			client.Database("ics").Collection("income")
-		cost:			client.Database("ics").Collection("cost")
-		incomeHistory:	client.Database("ics").Collection("incomeHistory")
-		costHistory: 	client.Database("ics").Collection("costHistory")
+		Session: 		client,
+		Users:			client.Database("ics").Collection("users"),
+		Deleted_users: 	client.Database("ics").Collection("deleted_users"),
+		Income:			client.Database("ics").Collection("income"),
+		Cost:			client.Database("ics").Collection("cost"),
+		IncomeHistory:	client.Database("ics").Collection("incomeHistory"),
+		CostHistory: 	client.Database("ics").Collection("costHistory"),
 	}
 }
 
 //CloseDB will dissconnect to MongoDB
 func CloseDB(db MongoDB){
-	err := db.session.Disconnect(context.Background())
+	err := db.Session.Disconnect(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -13,7 +13,7 @@ func GraphqlHandler(db mongodb.MongoDB) gin.HandlerFunc {
     // NewExecutableSchema and Config are in the generated.go file
     c := gql.Config{
         Resolvers: &resolvers.Resolver{
-            DB: db,
+            DB: &db,
         },
     }
 

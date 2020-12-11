@@ -19,8 +19,8 @@ type Users{
   list: [User]
 }
 
-"List current or historical protfolio"
-type Protfolio{
+"List current or historical portfolio"
+type Portfolio{
 	total: Int!
 	income: Incomes!
 	cost: Costs!
@@ -74,18 +74,18 @@ input UserInput {
 }
 
 input IncomeInput{
-  owner: User!
-  amount: Int!
-  date: Time!
-  category: Category!
+  owner: ID
+  amount: Int
+  date: Time
+  category: Category
   description: String
 }
 
 input CostInput{
-  owner: User!
-  amount: Int!
-  date: Time!
-  category: Category!
+  owner: ID
+  amount: Int
+  date: Time
+  category: Category
   description: String
 }
 
@@ -114,14 +114,14 @@ type Mutation {
 type Query {
   "query current user portfolio"
   me: User!
-  myPortfolio: Protfolio!
-  myHistory(range: Int!): Protfolio!
+  myPortfolio: Portfolio!
+  myHistory(range: Int!): Portfolio!
   myFriends: Users!
   myFollowers: Users!
   
   "query followers' portfolio"
   getUser(userId: String!): User!
-  getPortfolio(userId: String!): Protfolio!
-  getHistory(userId: String!, range: Int!): Protfolio!
+  getPortfolio(userId: String!): Portfolio!
+  getHistory(userId: String!, range: Int!): Portfolio!
   
 }
