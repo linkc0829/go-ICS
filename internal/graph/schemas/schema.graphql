@@ -7,8 +7,8 @@ type User {
   userId: String!
   nickName: String
   createdAt: Time!
-  token: String
-  friends: Users!	"granted permission to friends to view portfolio"
+  apiKey: String
+  friends: Users!	  "granted permission to friends to view portfolio"
   followers: Users!	"permission to view followers' portfolio"
   lastQuery: Time!
 }
@@ -40,7 +40,6 @@ enum Category{
   INVESTMENT
   SALORY
   OTHERS
-
   DAILY
   LEARNING
   CHARITY
@@ -49,9 +48,9 @@ enum Category{
 
 type Income{
   id: ID!
-  author: User!
-  number: Int!
-  date: Time!
+  owner: User!
+  amount: Int!
+  occurDate: Time!
   category: Category!
   description: String
   vote: Users!
@@ -59,9 +58,9 @@ type Income{
 
 type Cost{
   id: ID!
-  author: User!
-  number: Int!
-  date: Time!
+  owner: User!
+  amount: Int!
+  occurDate: Time!
   category: Category!
   description: String
   vote: Users!
@@ -71,21 +70,22 @@ type Cost{
 input UserInput {
   email: String
   userId: String
-  name: String
   nickName: String
 }
 
 input IncomeInput{
-  number: Int
-  date: Time
-  category: String
+  owner: User!
+  amount: Int!
+  date: Time!
+  category: Category!
   description: String
 }
 
 input CostInput{
-  number: Int
-  date: Time
-  category: String
+  owner: User!
+  amount: Int!
+  date: Time!
+  category: Category!
   description: String
 }
 
@@ -93,6 +93,7 @@ input CostInput{
 type Mutation {
   
   createUser(input: UserInput!): User!
+  updateUser(input: UserInput!): User!
   deleteUser(id: ID!): Boolean!
 
   createIncome(input: IncomeInput!): Income!

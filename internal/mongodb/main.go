@@ -12,11 +12,13 @@ import (
 var dbUser, pwd, dbName string
 
 type MongoDB struct{
-	session *mongo.Client
-	users 	*mongo.Collection
-	deleted_users *mongo.Collection
-	incomes	*mongo.Collection
-	costs	*mongo.Collection
+	session 		*mongo.Client
+	users 			*mongo.Collection
+	deleted_users 	*mongo.Collection
+	income			*mongo.Collection
+	cost			*mongo.Collection
+	incomeHistory	*mongo.Collection
+	costHistory		*mongo.Collection
 }
 
 func init(){
@@ -36,11 +38,13 @@ func ConnectDB() MongoDB{
 		log.Fatal(err)
 	}
 	return MongoDB{
-		session: 	client,
-		users:		client.Database("ics").Collection("users"),
-		deleted_users: client.Database("ics").Collection("deleted_users")
-		incomes:	client.Database("ics").Collection("incomes")
-		costs:		client.Database("ics").Collection("costs")
+		session: 		client,
+		users:			client.Database("ics").Collection("users"),
+		deleted_users: 	client.Database("ics").Collection("deleted_users")
+		income:			client.Database("ics").Collection("income")
+		cost:			client.Database("ics").Collection("cost")
+		incomeHistory:	client.Database("ics").Collection("incomeHistory")
+		costHistory: 	client.Database("ics").Collection("costHistory")
 	}
 }
 

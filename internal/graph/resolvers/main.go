@@ -2,14 +2,12 @@ package resolvers
 
 import (
 	"context"
-
 	"github.com/linkc0829/go-ics/internal/graph/generated"
-	"github.com/linkc0829/go-ics/internal/graph/models"
 )
 
 //Resolver contains db element
 type Resolver struct{
-	DB mongo.MongoDB
+	db mongo.MongoDB
 }
 
 // Mutation returns generated.MutationResolver implementation.

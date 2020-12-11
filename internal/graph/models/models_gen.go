@@ -65,11 +65,11 @@ type User struct {
 	Email     string    `json:"email"`
 	UserID    string    `json:"userId"`
 	NickName  *string   `json:"nickName"`
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt time.Time `json:"createdAt"` 
 	Token     *string   `json:"token"`
 	Friends   *Users    `json:"friends"`
 	// granted permission to friends to view portfolio
-	Followers *Users `json:"followers"`
+	Followers *Users 	`json:"followers"`
 	// permission to view followers' portfolio
 	LastQuery time.Time `json:"lastQuery"`
 }

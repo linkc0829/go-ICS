@@ -3,7 +3,6 @@ package resolvers
 import (
 	"context"
 
-	"github.com/linkc0829/go-ics/internal/graph/generated"
 	"github.com/linkc0829/go-ics/internal/graph/models"
 )
 
