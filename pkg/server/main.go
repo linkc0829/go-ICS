@@ -6,36 +6,31 @@ import(
 	"github.com/linkc0829/go-ics/internal/handlers"
 	"github.com/linkc0829/go-ics/pkg/utils"
 	"github.com/linkc0829/go-ics/internal/mongodb"
+	"github.com/linkc0829/go-ics/pkg/server/routes"
 )
 
 var host, port, gqlPath, gqlPgPath string
 var isPgEnabled bool
 
-func init(){
-	host = utils.MustGet("GQL_SERVER_HOST")
-	port = utils.MustGet("GQL_SERVER_PORT")
-	gqlPath = utils.MustGet("GQL_SERVER_GRAPHQL_PATH")
-    gqlPgPath = utils.MustGet("GQL_SERVER_GRAPHQL_PLAYGROUND_PATH")
-    isPgEnabled = utils.MustGetBool("GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED")
+func RegisterRoutes(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB){
+	routes.Auth(cfg, r, db)
+	routes.Graph(cfg, r, db)
+	routes.FreeTrial(cdg, r)
+	
 }
 
-func Run(db mongodb.MongoDB){
-
-	endpoint := "http://" + host + ":" + port
-
+func Run(serverconf *utils.ServerConfig, db *mongodb.MongoDB){
 
 	r := gin.Default()
-	r.GET("/", handlers.FreeTrialHandler())
-	log.Println("Free Trial Page @ " + endpoint)
 
-	r.POST(gqlPath, handlers.GraphqlHandler(db))
-	log.Println("Graphql Server @ " + endpoint + gqlPath)
+	InitalizeAuthProviders(serverconf)
+	RegisterRoutes(serverconf, r, db)
 
-	if isPgEnabled{
-		r.GET(gqlPgPath, handlers.PlaygroundHandler(gqlPath))
-		log.Println("GraphQL Playground @ " + endpoint + gqlPgPath)
-	}
+	// Inform the user where the server is listening
+	log.Println("Running @ " + serverconf.SchemaVersioningEndpoint(""))
 
-	log.Fatalln(r.Run(host + ":" + port))
+	// Run the server
+	// Print out and exit(1) to the OS if the server cannot run
+	log.Fatal(r.Run(serverconf.ListenEndpoint()))
 
 }

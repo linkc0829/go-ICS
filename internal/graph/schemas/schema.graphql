@@ -7,10 +7,10 @@ type User {
   userId: String!
   nickName: String
   createdAt: Time!
-  apiKey: String
   friends: Users!	  "granted permission to friends to view portfolio"
   followers: Users!	"permission to view followers' portfolio"
-  lastQuery: Time!
+  lastLogin: Time!
+
 }
 
 # List Types

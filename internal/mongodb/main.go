@@ -26,7 +26,7 @@ func init(){
 }
 
 //ConnectDB will build connection to MongoDB Atlas
-func ConnectDB() MongoDB{
+func ConnectDB() *MongoDB{
 
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(dsn))
 	if err != nil { 
@@ -37,7 +37,7 @@ func ConnectDB() MongoDB{
 	if err != nil {
 		log.Fatal(err)
 	}
-	return MongoDB{
+	return &MongoDB{
 		Session: 		client,
 		Users:			client.Database("ics").Collection("users"),
 		Deleted_users: 	client.Database("ics").Collection("deleted_users"),
@@ -49,7 +49,7 @@ func ConnectDB() MongoDB{
 }
 
 //CloseDB will dissconnect to MongoDB
-func CloseDB(db MongoDB){
+func CloseDB(db *MongoDB){
 	err := db.Session.Disconnect(context.Background())
 	if err != nil {
 		log.Fatal(err)

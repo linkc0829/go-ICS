@@ -9,12 +9,15 @@ import (
 type UserModel struct {
 	ID       	primitive.ObjectID		`bson:"_id" json:"_id,omitempty"`
 	UserId  	string             		`bson:"userid" json:"username,omitempty"`
+	Password  	string             		`bson:"password" json:"password,omitempty"`
 	Email     	string             		`bson:"email" json:"email,omitempty"`
 	NickName  	string  				`bson:"nickname" json:"nickname,omitempty"`
 	CreatedAt 	time.Time          		`bson:"createAt" json:"createAt,omitempty"`
 	Friends   	[]primitive.ObjectID 	`bson:"friends" json:"friends,omitempty"`
-	APIKey     	string             		`bson:"apiKey" json:"apiKey,omitempty"` // graphql only
+	RefreshToken string             	`bson:"refreshToken" json:"refreshToken,omitempty"` // graphql only
 	LastQuery 	time.Time 		 		`bson:"lastQuery" json:"lastQuery, omitempty"`
+	Provider 	string 					`bson:"provider" json:"provider, omitempty"`
+	AvatarURL	string 					`bson:"avatarURL" json:"avatarURL, omitempty"`
 }
 
 type category string

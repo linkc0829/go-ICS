@@ -36,24 +36,31 @@ func (r *queryResolver) MyFollowers(ctx context.Context) (*models.Users, error) 
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input models.UserInput) (*models.User, error) {
 	
-	//check if userId exists
-	result, err := getUserById(ctx, r.DB, *input.UserID)
-	if err == nil{
-		return nil, fmt.Errorf("Create user failed. UserID already exists.")
+	//check if user exists
+	var result models.User
+	q := bson.M{"email": input.Email, "provider": provider, "userId": userId}
+	if err := r.DB.Users.FindOne(ctx, q).Decode(&result); err == nil{
+		return nil, fmt.Errorf("Create user failed. User already exists.")
 	}
 
-	//check if email exists
-	q := bson.M{"email": input.Email}
-	if err := r.DB.Users.FindOne(ctx, q).Decode(&result); err == nil{
-		return nil, fmt.Errorf("Create user failed. User email already exists.")
-	}
+
+	// result, err := getUserById(ctx, r.DB, *input.UserID)
+	// if err == nil{
+	// 	return nil, fmt.Errorf("Create user failed. UserID already exists.")
+	// }
+
+	// //check if email exists
+	// q := bson.M{"email": input.Email}
+	// if err := r.DB.Users.FindOne(ctx, q).Decode(&result); err == nil{
+	// 	return nil, fmt.Errorf("Create user failed. User email already exists.")
+	// }
 
 	//collect current data
 	UserID := *input.UserID
 	Email := *input.Email
 	NickName := *input.NickName
 	CreatedAt := time.Now()
-	LastQuery := time.Now()
+	LastLogin := time.Now()
 
 	newUser := dbModel.UserModel{
 		ID:			primitive.NewObjectID(),
@@ -61,7 +68,9 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.UserInpu
 		Email:		Email,
 		NickName:	NickName,
 		CreatedAt:	CreatedAt,
-		LastQuery:	LastQuery,
+		LastLogin:	LastQuery,
+		Provider:	"ics",
+		Friends:	nil,
 	}
 
 	//insert to db
@@ -71,7 +80,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.UserInpu
 	}
 
 	//retrun graph result to server
-	result, _ = getUserById(ctx, r.DB, UserID)
+	result, _ = getUserById(ctx, r.DB, ID)
 
 	return result, nil
 
@@ -109,7 +118,7 @@ func getUserById(ctx context.Context, DB *mongodb.MongoDB, userID string) (*mode
 		APIKey:		&result.APIKey,
 		//Friends:	
 		//Followers:	
-		LastQuery:	result.LastQuery,
+		LastLogin:	result.LastLogin,
 	}
 	
 	return r, nil
