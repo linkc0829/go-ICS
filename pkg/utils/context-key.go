@@ -3,16 +3,18 @@ package utils
 // ContextKey defines a type for context keys shared in the app
 type ContextKey string
 
-// ContextKeys holds the context keys throught the project
+// ContextKeys holds the context keys throughout the project
 type ContextKeys struct {
-	ProviderCtxKey ContextKey // Provider in Auth
-	UserCtxKey     ContextKey // User db object in Auth
+	GothicProviderCtxKey ContextKey // Provider for Gothic library
+	ProviderCtxKey       ContextKey // Provider in Auth
+	UserCtxKey           ContextKey // User db object in Auth
 }
 
 var (
 	// ProjectContextKeys the project's context keys
 	ProjectContextKeys = ContextKeys{
-		ProviderCtxKey: "provider",
-		UserCtxKey:     "auth-user",
+		GothicProviderCtxKey: "provider",
+		ProviderCtxKey:       "gg-provider",
+		UserCtxKey:           "gg-auth-user",
 	}
 )

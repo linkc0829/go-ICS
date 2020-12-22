@@ -68,12 +68,10 @@ type User struct {
 	UserID    string    `json:"userId"`
 	NickName  *string   `json:"nickName"`
 	CreatedAt time.Time `json:"createdAt"`
-	APIKey    *string   `json:"apiKey"`
-	Friends   *Users    `json:"friends"`
 	// granted permission to friends to view portfolio
+	Friends *Users `json:"friends"`
+	// permission to view followers portfolio
 	Followers *Users `json:"followers"`
-	// permission to view followers' portfolio
-	LastQuery time.Time `json:"lastQuery"`
 }
 
 type UserInput struct {

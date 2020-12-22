@@ -1,6 +1,7 @@
 package handlers
 
 import(
+	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
 
@@ -13,9 +14,9 @@ func LogoutHandler() gin.HandlerFunc{
 	return func(c *gin.Context){
 		provider := c.Param(string(utils.ProjectContextKeys.ProviderCtxKey))
 		if provider == "ics" {
-			c.Header("token_expiry", -1)	
+			c.Header("token_expiry", "-1")	
 		} else {
-			c.Request = auth.addProviderToContext(c, c.Param(string(utils.ProjectContextKeys.ProviderCtxKey)))
+			c.Request = auth.AddProviderToContext(c, c.Param(string(utils.ProjectContextKeys.ProviderCtxKey)))
 		    gothic.Logout(c.Writer, c.Request)
 		}
 		c.Writer.Header().Set("Location", "/")

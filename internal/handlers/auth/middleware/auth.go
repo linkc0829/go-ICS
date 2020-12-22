@@ -1,7 +1,8 @@
 package middleware
 
 import (
-    "net/http"
+	"net/http"
+	"log"
 
     "github.com/linkc0829/go-ics/internal/mongodb"
     "github.com/linkc0829/go-ics/pkg/utils"
@@ -22,11 +23,11 @@ func Middleware(path string, cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.H
 
 		//parse apiKey first
 		if a, err := ParseAPIKey(c, cfg); err == nil {
-			user, err = mongodb.FindUserByAPIKey(a)
+			user, err := db.FindUserByAPIKey(a)
 			if err != nil {
 				authError(c, ErrForbidden)
 			}
-			log.Println("User: " + user)
+			log.Println("User: " + user.UserID)
 			c.Next()
 
 		} else {
@@ -44,7 +45,7 @@ func Middleware(path string, cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.H
                                 issuer := claims["iss"].(string)
                                 userid := claims["jti"].(string)
                                 email := claims["email"].(string)
-                                user, err := mongodb.FindUserByJWT(email, issuer, userid)
+                                user, err := db.FindUserByJWT(email, issuer, userid)
                                 if err != nil {
                                     authError(c, ErrForbidden)
                                 }
@@ -56,18 +57,11 @@ func Middleware(path string, cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.H
                             }
                             
                         } else{
-                            authError(c, err)
-                        }
-                        else{
                             authError(c, ErrInvalidAccessToken)
                         }
-
                     }
-            		
             	}
             }
-
 		}
 	})
-
 }

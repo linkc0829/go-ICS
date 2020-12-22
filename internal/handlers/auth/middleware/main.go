@@ -79,11 +79,11 @@ func jwtFromHeader(c *gin.Context, key string) (string, error) {
 		return "", ErrEmptyAuthHeader
 	}
 
-	splits := string.SplitN(authHeader, " ", 2)
+	splits := strings.SplitN(authHeader, " ", 2)
 	if len(splits) != 2 || splits[0] != TokenHeadName {
 		return "", ErrInvalidAuthHeader
 	}
-	return parts[1], nil
+	return splits[1], nil
 
 }
 
@@ -153,7 +153,7 @@ func ParseToken(c *gin.Context, cfg *utils.ServerConfig) (t *jwt.Token, err erro
     	if jwt.GetSigningMethod(SigningAlgorithm) != t.Method{
     		return nil, ErrInvalidSigningAlgorithm
     	}
-    	return key, nil
+    	return Key, nil
     })
 }
 
@@ -184,6 +184,6 @@ func ParseAPIKey(c *gin.Context, cfg *utils.ServerConfig) (apiKey string, err er
     return apiKey, nil
 }
 
-func addToContext(c *gin.Context, key utils.ContextKey, value interface{}){
+func addToContext(c *gin.Context, key utils.ContextKey, value interface{}) *http.Request{
 	return c.Request.WithContext(context.WithValue(c.Request.Context(), key, value))
 }

@@ -2,7 +2,8 @@ package auth
 
 import(
 	"net/http"
-    "time"
+	"time"
+	"log"
 
     "github.com/linkc0829/go-ics/internal/mongodb"
 
@@ -24,7 +25,7 @@ func Begin() gin.HandlerFunc {
 
 	return func(c *gin.Context){
 
-		c.Request = addProviderToContext(c, c.Param("provider"))
+		c.Request = AddProviderToContext(c, c.Param("provider"))
 		// try to get the user without re-authenticating
         if gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request); err != nil {
             gothic.BeginAuthHandler(c.Writer, c.Request)
@@ -38,7 +39,7 @@ func Begin() gin.HandlerFunc {
 func CallBack(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
 	return func(c *gin.Context){
 		// You have to add value context with provider name to get provider name in GetProviderName method
-        c.Request = addProviderToContext(c, c.Param("provider"))
+        c.Request = AddProviderToContext(c, c.Param("provider"))
         user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
         if err != nil {
             c.AbortWithError(http.StatusInternalServerError, err)
@@ -48,8 +49,8 @@ func CallBack(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
         u, err := db.FindUserByJWT(user.Email, user.Provider, user.UserID)
         // logger.Infof("gothUser: %#v", user)
         if err != nil {
-            if u, err = orm.CreateUserFromGoth(&user); err != nil {
-                log.Println("[Auth.CallBack.UserLoggedIn.UpsertUserProfile.Error]: " + err)
+            if u, err = db.CreateUserFromGoth(&user); err != nil {
+                log.Println("[Auth.CallBack.UserLoggedIn.UpsertUserProfile.Error]: " + err.Error())
                 c.AbortWithError(http.StatusInternalServerError, err)
             }
         }
@@ -59,7 +60,7 @@ func CallBack(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
         jwtToken := jwt.NewWithClaims(jwt.GetSigningMethod(cfg.JWT.Algorithm), Claims{
             Email: user.Email,
             StandardClaims: jwt.StandardClaims{
-                Id:        user.ID,
+                Id:        user.UserID,
                 Issuer:    user.Provider,
                 IssuedAt:  time.Now().UTC().Unix(),
                 NotBefore: time.Now().UTC().Unix(),
@@ -69,7 +70,7 @@ func CallBack(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
 
         token, err := jwtToken.SignedString([]byte(cfg.JWT.Secret))
         if err != nil {
-            log.Println("[Auth.Callback.JWT] error: " + err)
+            log.Println("[Auth.Callback.JWT] error: " + err.Error())
             c.AbortWithError(http.StatusInternalServerError, err)
             return
         }

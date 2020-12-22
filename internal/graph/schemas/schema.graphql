@@ -1,15 +1,16 @@
 scalar Time
 
 # Types
-type User {
+type User{
   id: ID!
   email: String!
   userId: String!
   nickName: String
   createdAt: Time!
-  friends: Users!	  "granted permission to friends to view portfolio"
-  followers: Users!	"permission to view followers' portfolio"
-  lastLogin: Time!
+  "granted permission to friends to view portfolio"
+  friends: Users!	  
+  "permission to view followers portfolio"
+  followers: Users	    
 
 }
 
