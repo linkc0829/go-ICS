@@ -1,25 +1,25 @@
 package server
 
-import(
+import (
 	"log"
+
 	"github.com/gin-gonic/gin"
-	"github.com/linkc0829/go-ics/internal/handlers"
-	"github.com/linkc0829/go-ics/pkg/utils"
 	"github.com/linkc0829/go-ics/internal/mongodb"
 	"github.com/linkc0829/go-ics/pkg/server/routes"
+	"github.com/linkc0829/go-ics/pkg/utils"
 )
 
 var host, port, gqlPath, gqlPgPath string
 var isPgEnabled bool
 
-func RegisterRoutes(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB){
+func RegisterRoutes(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB) {
 	routes.Auth(cfg, r, db)
 	routes.Graph(cfg, r, db)
-	routes.FreeTrial(cdg, r)
-	
+	routes.FreeTrial(cfg, r)
+
 }
 
-func Run(serverconf *utils.ServerConfig, db *mongodb.MongoDB){
+func Run(serverconf *utils.ServerConfig, db *mongodb.MongoDB) {
 
 	r := gin.Default()
 

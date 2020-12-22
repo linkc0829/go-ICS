@@ -15,11 +15,11 @@ func InitalizeAuthProviders(cfg *utils.ServerConfig) error {
 		switch p.Provider {
 		case "google":
 			providers = append(providers, google.New(p.ClientKey, p.Secret,
-				cfg.SchemaVersionedEndpoint("/auth/"+p.Provider+"/callback"),
+				cfg.SchemaVersioningEndpoint("/auth/"+p.Provider+"/callback"),
 				p.Scopes...))
 		case "auth0":
 			providers = append(providers, auth0.New(p.ClientKey, p.Secret,
-				cfg.SchemaVersionedEndpoint("/auth/"+p.Provider+"/callback"),
+				cfg.SchemaVersioningEndpoint("/auth/"+p.Provider+"/callback"),
 				p.Domain, p.Scopes...))
 		}
 	}
