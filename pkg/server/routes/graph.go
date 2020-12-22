@@ -5,11 +5,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/linkc0829/go-ics/internal/handlers"
-	auth "github.com/linkc0829/go-ics/internal/handlers/auth/middleware"
+	//auth "github.com/linkc0829/go-ics/internal/handlers/auth/middleware"
 	"github.com/linkc0829/go-ics/internal/mongodb"
 	"github.com/linkc0829/go-ics/pkg/utils"
 )
 
+//Graph starts the graphql server routes
 func Graph(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB) {
 
 	gqlPath := cfg.VersioningEndpoint(cfg.GraphQL.Path)
@@ -17,11 +18,12 @@ func Graph(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB) {
 	g := r.Group(gqlPath)
 
 	//Graph Handler
-	g.POST("", auth.Middleware(g.BasePath(), cfg, db), handlers.GraphqlHandler(db))
+	//g.POST("", auth.Middleware(g.BasePath(), cfg, db), handlers.GraphqlHandler(db))
+	g.POST("", handlers.GraphqlHandler(db))
 	log.Println("Graphql Server @ " + g.BasePath())
 
 	if cfg.GraphQL.IsPlaygroundEnabled {
 		g.GET(gqlPGPath, handlers.PlaygroundHandler(g.BasePath()))
-		log.Println("GraphQL Playground @ " + g.BasePath() + gqlPath)
+		log.Println("GraphQL Playground @ " + g.BasePath() + gqlPGPath)
 	}
 }

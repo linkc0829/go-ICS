@@ -27,7 +27,7 @@ func Run(serverconf *utils.ServerConfig, db *mongodb.MongoDB) {
 	RegisterRoutes(serverconf, r, db)
 
 	// Inform the user where the server is listening
-	log.Println("Running @ " + serverconf.SchemaVersioningEndpoint(""))
+	log.Println("Running @ " + serverconf.ListenEndpoint())
 
 	// Run the server
 	// Print out and exit(1) to the OS if the server cannot run

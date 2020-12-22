@@ -26,6 +26,8 @@ func Begin() gin.HandlerFunc {
 	return func(c *gin.Context){
 
 		c.Request = AddProviderToContext(c, c.Param("provider"))
+		provider := c.Request.Context().Value("provider").(string)
+		log.Println("Add Provider To Context: " + provider)
 		// try to get the user without re-authenticating
         if gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request); err != nil {
             gothic.BeginAuthHandler(c.Writer, c.Request)
@@ -35,16 +37,19 @@ func Begin() gin.HandlerFunc {
 	}
 }
 
-// Callback callback to complete auth provider flow
+// CallBack callback to complete auth provider flow
 func CallBack(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
 	return func(c *gin.Context){
 		// You have to add value context with provider name to get provider name in GetProviderName method
-        c.Request = AddProviderToContext(c, c.Param("provider"))
+		c.Request = AddProviderToContext(c, c.Param("provider"))
+		log.Println("CallBack adds provider to context")
+
         user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
         if err != nil {
             c.AbortWithError(http.StatusInternalServerError, err)
             return
-        }
+		}
+		log.Println("CallBack CompleteUserAuth")
 
         u, err := db.FindUserByJWT(user.Email, user.Provider, user.UserID)
         // logger.Infof("gothUser: %#v", user)

@@ -52,7 +52,7 @@ func (s *ServerConfig) ListenEndpoint() string{
 
 //VersioningEndpoint retruns the versioning api path, path should have "/" as prefix
 func (s *ServerConfig) VersioningEndpoint(path string) string{
-	return "/api" + s.ApiVer + path
+	return "/api/" + s.ApiVer + "/" + path
 }
 
 //SchemaVersioningEndpoint return the complete URI path
@@ -60,5 +60,5 @@ func (s *ServerConfig) SchemaVersioningEndpoint(path string) string{
 	if s.Port == "80"{
 		return s.URISchema + s.Host + "/" + s.ApiVer + path
 	}
-	return s.URISchema + s.Host + ":" + s.Port + "/api" + s.ApiVer + path
+	return s.URISchema + s.Host + ":" + s.Port + "/api/" + s.ApiVer + path
 }
