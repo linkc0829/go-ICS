@@ -20,7 +20,6 @@ type Cost struct {
 }
 
 type CostInput struct {
-	Owner       *string    `json:"owner"`
 	Amount      *int       `json:"amount"`
 	Date        *time.Time `json:"date"`
 	Category    *Category  `json:"category"`
@@ -43,7 +42,6 @@ type Income struct {
 }
 
 type IncomeInput struct {
-	Owner       *string    `json:"owner"`
 	Amount      *int       `json:"amount"`
 	Date        *time.Time `json:"date"`
 	Category    *Category  `json:"category"`
@@ -81,7 +79,7 @@ type UserInput struct {
 }
 
 type Users struct {
-	Count *int    `json:"count"`
+	Count int     `json:"count"`
 	List  []*User `json:"list"`
 }
 

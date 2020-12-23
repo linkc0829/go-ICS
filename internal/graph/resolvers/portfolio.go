@@ -15,11 +15,11 @@ func (r *queryResolver) MyHistory(ctx context.Context, rangeArg int) (*models.Po
 	panic("not implemented")
 }
 
-func (r *queryResolver) GetPortfolio(ctx context.Context, userID string) (*models.Portfolio, error) {
+func (r *queryResolver) GetUserPortfolio(ctx context.Context, userID string) (*models.Portfolio, error) {
 	panic("not implemented")
 }
 
-func (r *queryResolver) GetHistory(ctx context.Context, userID string, rangeArg int) (*models.Portfolio, error) {
+func (r *queryResolver) GetUserHistory(ctx context.Context, userID string, rangeArg int) (*models.Portfolio, error) {
 	panic("not implemented")
 }
 

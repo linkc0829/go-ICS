@@ -79,7 +79,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.UserInpu
 	return ret, nil
 }
 
-func (r *mutationResolver) UpdateUser(ctx context.Context, input models.UserInput) (*models.User, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input models.UserInput) (*models.User, error) {
 	panic("not implemented")
 }
 
