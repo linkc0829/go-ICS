@@ -48,7 +48,7 @@ type Income{
   occurDate: Time!
   category: Category!
   description: String
-  vote: Users
+  vote: [User]
 }
 
 type Cost{
@@ -58,7 +58,7 @@ type Cost{
   occurDate: Time!
   category: Category!
   description: String
-  vote: Users
+  vote: [User]
 }
 
 # Input Types
@@ -111,8 +111,8 @@ type Query {
   me: User!
   myPortfolio: Portfolio!
   myHistory(range: Int!): Portfolio!
-  myFriends: Users!
-  myFollowers: Users!
+  myFriends: [User]!
+  myFollowers: [User]!
   
   "query followers' portfolio"
   getUser(id: ID!): User!
