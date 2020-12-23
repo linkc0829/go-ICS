@@ -16,7 +16,7 @@ type User{
 
 # List Types
 type Users{
-  count: Int
+  count: Int!
   list: [User]
 }
 
@@ -54,7 +54,7 @@ type Income{
   occurDate: Time!
   category: Category!
   description: String
-  vote: Users!
+  vote: Users
 }
 
 type Cost{
@@ -64,7 +64,7 @@ type Cost{
   occurDate: Time!
   category: Category!
   description: String
-  vote: Users!
+  vote: Users
 }
 
 # Input Types
@@ -75,7 +75,6 @@ input UserInput {
 }
 
 input IncomeInput{
-  owner: ID
   amount: Int
   date: Time
   category: Category
@@ -83,7 +82,6 @@ input IncomeInput{
 }
 
 input CostInput{
-  owner: ID
   amount: Int
   date: Time
   category: Category
@@ -94,7 +92,7 @@ input CostInput{
 type Mutation {
   
   createUser(input: UserInput!): User!
-  updateUser(input: UserInput!): User!
+  updateUser(id: ID!, input: UserInput!): User!
   deleteUser(id: ID!): Boolean!
 
   createIncome(input: IncomeInput!): Income!
@@ -105,7 +103,7 @@ type Mutation {
   updateCost(id: ID!, input: CostInput!): Cost!
   deleteCost(id: ID!): Boolean!
   
-  addFriends(userId: String!): User
+  addFriends(id: ID!): User
   likeCost(id: ID!): Int!
   likeIncome(id: ID!): Int!
 
@@ -122,7 +120,7 @@ type Query {
   
   "query followers' portfolio"
   getUser(id: ID!): User!
-  getPortfolio(id: ID!): Portfolio!
-  getHistory(id: ID!, range: Int!): Portfolio!
+  getUserPortfolio(id: ID!): Portfolio!
+  getUserHistory(id: ID!, range: Int!): Portfolio!
   
 }
