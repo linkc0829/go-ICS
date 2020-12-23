@@ -17,18 +17,8 @@ type User{
 "List current or historical portfolio"
 type Portfolio{
 	total: Int!
-	income: Incomes!
-	cost: Costs!
-}
-
-type Incomes{
-  total: Int!
-  list: [Income]
-}
-
-type Costs{
-  total: Int!
-  list: [Cost]
+	income: [Income]!
+	cost: [Costs]!
 }
 
 enum Category{
