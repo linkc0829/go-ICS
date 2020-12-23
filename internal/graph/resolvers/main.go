@@ -6,7 +6,7 @@ import (
 )
 
 //Resolver contains db element
-type Resolver struct{
+type Resolver struct {
 	DB *mongodb.MongoDB
 }
 

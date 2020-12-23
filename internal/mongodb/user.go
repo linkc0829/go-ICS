@@ -55,7 +55,7 @@ func (db *MongoDB) CreateUserFromGoth(user *goth.User) (*models.UserModel, error
 		ID:        primitive.NewObjectID(),
 		UserID:    user.UserID,
 		Email:     user.Email,
-		NickName:  user.NickName,
+		NickName:  &user.NickName,
 		CreatedAt: time.Now(),
 		LastQuery: time.Now(),
 		Provider:  user.Provider,

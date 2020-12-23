@@ -3,6 +3,7 @@ package resolvers
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/linkc0829/go-ics/internal/graph/models"
@@ -15,24 +16,28 @@ import (
 )
 
 func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
-	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey)
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(dbModel.UserModel)
 
-	panic("not implemented")
+	result, err := getUserByID(ctx, r.DB, me.ID.Hex())
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (r *queryResolver) GetUser(ctx context.Context, userID string) (*models.User, error) {
-	if result, err := getUserByID(ctx, r.DB, userID); err != nil {
+func (r *queryResolver) GetUser(ctx context.Context, ID string) (*models.User, error) {
+	if result, err := getUserByID(ctx, r.DB, ID); err != nil {
 		return nil, err
 	} else {
 		return result, nil
 	}
 }
 
-func (r *queryResolver) MyFriends(ctx context.Context) (*models.Users, error) {
+func (r *queryResolver) MyFriends(ctx context.Context) (*models.User, error) {
 	panic("not implemented")
 }
 
-func (r *queryResolver) MyFollowers(ctx context.Context) (*models.Users, error) {
+func (r *queryResolver) MyFollowers(ctx context.Context) (*models.User, error) {
 	panic("not implemented")
 }
 
@@ -48,7 +53,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.UserInpu
 	//collect current data
 	UserID := *input.UserID
 	Email := *input.Email
-	NickName := *input.NickName
+	NickName := input.NickName
 	CreatedAt := time.Now()
 	LastQuery := time.Now()
 
@@ -73,7 +78,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.UserInpu
 		ID:        newUser.ID.Hex(),
 		UserID:    newUser.UserID,
 		Email:     newUser.Email,
-		NickName:  &newUser.NickName,
+		NickName:  newUser.NickName,
 		Friends:   nil,
 		Followers: nil,
 	}
@@ -102,18 +107,24 @@ func (r *mutationResolver) AddFollower(ctx context.Context, id string) (*models.
 
 func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.User, error) {
 
-	q := bson.M{"_id": ID}
+	hexID, err := primitive.ObjectIDFromHex(ID)
+	if err != nil {
+		//not a valid objectID
+		return nil, err
+	}
+
+	q := bson.M{"_id": hexID}
 	result := dbModel.UserModel{}
 
 	if err := DB.Users.FindOne(ctx, q).Decode(&result); err != nil {
 		return nil, fmt.Errorf("UserID doesn't exist.")
 	}
 
-	friends, err := getUserFriends(ctx, DB, ID)
+	friends, err := getUserFriends(ctx, DB, &result)
 	if err != nil {
 		return nil, err
 	}
-	followers, err := getUserFollowers(ctx, DB, ID)
+	followers, err := getUserFollowers(ctx, DB, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +133,7 @@ func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.U
 		ID:        result.ID.Hex(),
 		Email:     result.Email,
 		UserID:    result.UserID,
-		NickName:  &result.NickName,
+		NickName:  result.NickName,
 		CreatedAt: result.CreatedAt,
 		Friends:   friends,
 		Followers: followers,
@@ -131,10 +142,38 @@ func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.U
 	return r, nil
 }
 
-func getUserFriends(ctx context.Context, DB *mongodb.MongoDB, ID string) ([]models.User, error) {
+func getUserFriends(ctx context.Context, DB *mongodb.MongoDB, user *dbModel.UserModel) (friends []*models.User, err error) {
 
+	for _, f_id := range user.Friends {
+		f, err := getUserByID(ctx, DB, f_id.Hex())
+		if err != nil {
+			return nil, err
+		}
+		friends = append(friends, f)
+	}
+	return
 }
 
-func getUserFollowers(ctx context.Context, DB *mongodb.MongoDB, ID string) ([]models.User, error) {
-
+func getUserFollowers(ctx context.Context, DB *mongodb.MongoDB, me *dbModel.UserModel) (followers []*models.User, err error) {
+	//find users that have me as friend
+	q := bson.M{"friends": me.ID}
+	cursor, err := DB.Users.Find(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	var results []bson.M
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		log.Fatal(err)
+	}
+	for _, result := range results {
+		f := dbModel.UserModel{}
+		bsonBytes, _ := bson.Marshal(result)
+		bson.Unmarshal(bsonBytes, &f)
+		follower, err := getUserByID(ctx, DB, f.ID.Hex())
+		if err != nil {
+			return nil, err
+		}
+		followers = append(followers, follower)
+	}
+	return
 }

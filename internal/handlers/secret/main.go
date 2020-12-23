@@ -53,7 +53,7 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 			UserID:    userID,
 			Password:  password,
 			Email:     email,
-			NickName:  nickname,
+			NickName:  &nickname,
 			CreatedAt: time.Now(),
 			LastQuery: time.Now(),
 			Provider:  provider,
