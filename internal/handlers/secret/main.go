@@ -1,14 +1,14 @@
 package secret
 
-import(
-	"time"
-	"net/http"
-	"errors"
+import (
 	"context"
+	"errors"
 	"log"
+	"net/http"
+	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"github.com/linkc0829/go-ics/internal/mongodb"
 	"github.com/linkc0829/go-ics/internal/mongodb/models"
 	"github.com/linkc0829/go-ics/pkg/utils"
@@ -16,7 +16,6 @@ import(
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	
 )
 
 // Claims JWT claims
@@ -30,9 +29,8 @@ type RefClaims struct {
 	jwt.StandardClaims
 }
 
-
-func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc{
-	return func(c *gin.Context){
+func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		//check if user exists
 		email := c.Request.FormValue("email")
 		userID := c.Request.FormValue("userID")
@@ -40,8 +38,8 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 		provider := "ics"
 		password := c.Request.FormValue("password")
 
-		u, err := db.FindUserByJWT(email, provider, userID)
-		if ; err == nil {
+		_, err := db.FindUserByJWT(email, provider, userID)
+		if err == nil {
 			c.AbortWithError(http.StatusBadRequest, errors.New("ics signup: user exists"))
 		}
 		//encript password
@@ -50,24 +48,25 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 			c.AbortWithError(http.StatusInternalServerError, errors.New("ics signup: password encripted failed, server error."))
 		}
 
+		newUser := &models.UserModel{
+			ID:        primitive.NewObjectID(),
+			UserID:    userID,
+			Password:  password,
+			Email:     email,
+			NickName:  nickname,
+			CreatedAt: time.Now(),
+			LastQuery: time.Now(),
+			Provider:  provider,
+		}
+
 		//create access token and refresh token
-		token, tokenExpiry, refreshToken, err := createTokenPair(cfg, u)
+		token, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, newUser)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 		}
 
 		//add to db
-		newUser := &models.UserModel{
-			ID:				primitive.NewObjectID(),
-			UserID: 		userID,
-			Password:		password,
-			Email:			email,
-			NickName:		nickname,
-			CreatedAt:		time.Now(),
-			LastQuery:		time.Now(),
-			Provider:		provider,
-			RefreshToken:	refreshToken,
-		}
+		newUser.RefreshToken = refreshToken
 
 		//insert to db
 		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
@@ -78,34 +77,36 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 
 		//set token
 		json := gin.H{
-			"type":          	"Bearer",
-			"token":         	token,
-			"token_expiry": 	tokenExpiry,
+			"type":         "Bearer",
+			"token":        token,
+			"token_expiry": tokenExpiry,
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
 		c.JSON(http.StatusOK, json)
 	}
-	
+
 }
 
-func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc{
-	return func(c *gin.Context){
+func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		email := c.Request.FormValue("email")
-		userID := c.Request.FormValue("userId")
+		userID := c.Request.FormValue("userID")
 		provider := "ics"
 		password := c.Request.FormValue("password")
 
 		user, err := db.FindUserByJWT(email, provider, userID)
+
 		if err != nil {
 			c.AbortWithError(http.StatusUnauthorized, err)
 		}
+		log.Println(user)
 
-		if checkPassword(user.Password, password) {
+		if !checkPassword(user.Password, password) {
 			c.AbortWithError(http.StatusUnauthorized, errors.New("password incorrect"))
 		}
 
 		//create access token and refresh token
-		token, tokenExpiry, refreshToken, err := createTokenPair(cfg, user)
+		token, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, user)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 		}
@@ -119,9 +120,9 @@ func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc{
 
 		//set token
 		json := gin.H{
-			"type":          	"Bearer",
-			"token":         	token,
-			"token_expiry": 	tokenExpiry,
+			"type":         "Bearer",
+			"token":        token,
+			"token_expiry": tokenExpiry,
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
 		c.JSON(http.StatusOK, json)
@@ -129,42 +130,40 @@ func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc{
 	}
 }
 
-
-
 //RefreshTokenHandler will verify refresh_token is valid or not, then issue new Tokens if valid
-func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc{
-	return func(c *gin.Context){
+func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		tokenstring, err := c.Cookie("refresh_token")
 		if err != nil {
 			c.AbortWithError(http.StatusUnauthorized, errors.New("cannot find refresh token string in cookie"))
 		}
-		
-    	key := []byte(cfg.JWT.Secret)
-		token, err := jwt.Parse(tokenstring, func(t *jwt.Token) (interface{}, error){
-	    	if jwt.GetSigningMethod(cfg.JWT.Algorithm) != t.Method{
-	    		return nil, errors.New("invalid signing algorithm")
-	    	}
-	    	return key, nil
-	    })
 
-	    if err != nil {
-	    	c.AbortWithError(http.StatusUnauthorized, err)
-	    }
+		key := []byte(cfg.JWT.Secret)
+		token, err := jwt.Parse(tokenstring, func(t *jwt.Token) (interface{}, error) {
+			if jwt.GetSigningMethod(cfg.JWT.Algorithm) != t.Method {
+				return nil, errors.New("invalid signing algorithm")
+			}
+			return key, nil
+		})
 
-	    //check refresh token is expired or not
-	    if token.Valid == false {
-	    	c.AbortWithError(http.StatusUnauthorized, errors.New("token invalid"))
-	    }
-	    claims := token.Claims.(jwt.MapClaims)
+		if err != nil {
+			c.AbortWithError(http.StatusUnauthorized, err)
+		}
+
+		//check refresh token is expired or not
+		if token.Valid == false {
+			c.AbortWithError(http.StatusUnauthorized, errors.New("token invalid"))
+		}
+		claims := token.Claims.(jwt.MapClaims)
 		ID, err := primitive.ObjectIDFromHex(claims["_id"].(string))
 		if err != nil {
 			c.AbortWithError(http.StatusUnauthorized, errors.New("invalid object id"))
 		}
 
-	    //check if user exists
-	    var result models.UserModel
-	    q := bson.M{"_id": ID}
-	    ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+		//check if user exists
+		var result models.UserModel
+		q := bson.M{"_id": ID}
+		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 		if err = db.Users.FindOne(ctx, q).Decode(&result); err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 		}
@@ -175,7 +174,7 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.Handl
 		}
 
 		//generate new token pair
-		accToken, tokenExpiry, refreshToken, err := createTokenPair(cfg, &result)
+		accToken, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, &result)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 		}
@@ -188,62 +187,64 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.Handl
 
 		//set token
 		json := gin.H{
-			"type":          	"Bearer",
-			"token":         	accToken,
-			"token_expiry": 	tokenExpiry,
+			"type":         "Bearer",
+			"token":        accToken,
+			"token_expiry": tokenExpiry,
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
 		c.JSON(http.StatusOK, json)
 
-
 	}
 }
 
-func encriptPassword(pwd string) (string, error){
+func encriptPassword(pwd string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(pwd), 10)
 	return string(bytes), err
 }
 
-func checkPassword(pwdHash string, pwd string) (bool){
+func checkPassword(pwdHash string, pwd string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(pwdHash), []byte(pwd))
-	if err != nil{
+	if err != nil {
 		return false
 	}
 	return true
 }
 
-func createTokenPair(conf *utils.ServerConfig, user *models.UserModel) (string, time.Time, string, error){
-		accExp, _ := time.ParseDuration(conf.JWT.AccessTokenExpire)
-		accExpireAt := time.Now().Add(accExp).UTC()
-		jwtToken := jwt.NewWithClaims(jwt.GetSigningMethod(conf.JWT.Algorithm), Claims{
-			Email: user.Email,
-			StandardClaims: jwt.StandardClaims{
-				Id:        user.UserID,
-				Issuer:    user.Provider,
-				IssuedAt:  time.Now().UTC().Unix(),
-				NotBefore: time.Now().UTC().Unix(),
-				ExpiresAt: accExpireAt.Unix(),
-			},
-		})
-		accToken, err := jwtToken.SignedString([]byte(conf.JWT.Secret))
-		if err != nil {
-			log.Println("ICS Auth error: " + err.Error())
-			return "", time.Now(), "", err
-		}
+func CreateTokenPair(conf *utils.ServerConfig, user *models.UserModel) (string, time.Time, string, error) {
+	accExp, _ := time.ParseDuration(conf.JWT.AccessTokenExpire)
+	accExpireAt := time.Now().Add(accExp).UTC()
 
-		//RefreshToken, https://bit.ly/3r7753B
-		refExp, _ := time.ParseDuration(conf.JWT.RefreshTokenExpire)
-		rToken := jwt.NewWithClaims(jwt.GetSigningMethod(conf.JWT.Algorithm), RefClaims{
-			ID: user.ID.Hex(),
-			StandardClaims: jwt.StandardClaims{
-				ExpiresAt: time.Now().Add(refExp).UTC().Unix(),
-			},
-		})
+	claims := Claims{
+		Email: user.Email,
+		StandardClaims: jwt.StandardClaims{
+			Id:        user.UserID,
+			Issuer:    user.Provider,
+			IssuedAt:  time.Now().UTC().Unix(),
+			NotBefore: time.Now().UTC().Unix(),
+			ExpiresAt: accExpireAt.Unix(),
+		},
+	}
+	jwtToken := jwt.NewWithClaims(jwt.GetSigningMethod(conf.JWT.Algorithm), claims)
 
-		refToken, err := rToken.SignedString([]byte(conf.JWT.Secret))
-		if err != nil {
-			log.Println("ICS Auth error: " + err.Error())
-			return "", time.Now(), "", err
-		}
-		return accToken, accExpireAt, refToken, nil
+	accToken, err := jwtToken.SignedString([]byte(conf.JWT.Secret))
+	if err != nil {
+		log.Println("ICS Auth error: " + err.Error())
+		return "", time.Now(), "", err
+	}
+
+	//RefreshToken, https://bit.ly/3r7753B
+	refExp, _ := time.ParseDuration(conf.JWT.RefreshTokenExpire)
+	rToken := jwt.NewWithClaims(jwt.GetSigningMethod(conf.JWT.Algorithm), RefClaims{
+		ID: user.ID.Hex(),
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(refExp).UTC().Unix(),
+		},
+	})
+
+	refToken, err := rToken.SignedString([]byte(conf.JWT.Secret))
+	if err != nil {
+		log.Println("ICS Auth error: " + err.Error())
+		return "", time.Now(), "", err
+	}
+	return accToken, accExpireAt, refToken, nil
 }

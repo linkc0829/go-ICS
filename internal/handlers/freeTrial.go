@@ -1,15 +1,21 @@
 package handlers
 
-import(
+import (
 	"net/http"
-    "github.com/gin-gonic/gin"
+
+	"github.com/gin-gonic/gin"
 )
 
+func FreeTrialHandler() gin.HandlerFunc {
 
-func FreeTrialHandler() gin.HandlerFunc{
+	return func(c *gin.Context) {
+		data := struct {
+			Title string
+		}{
+			Title: "Free try Income & Cost SFunction here. Signup to share with friends.",
+		}
 
-	return func(c *gin.Context){
-		c.JSON(http.StatusOK, "Free try Income & Cost SFunction here. Signup to share with friends.")
+		c.HTML(http.StatusOK, "layout", data)
 	}
 
 }
