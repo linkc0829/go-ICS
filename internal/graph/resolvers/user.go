@@ -16,7 +16,7 @@ import (
 )
 
 func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
-	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(dbModel.UserModel)
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
 
 	result, err := getUserByID(ctx, r.DB, me.ID.Hex())
 	if err != nil {
@@ -33,11 +33,11 @@ func (r *queryResolver) GetUser(ctx context.Context, ID string) (*models.User, e
 	}
 }
 
-func (r *queryResolver) MyFriends(ctx context.Context) (*models.User, error) {
+func (r *queryResolver) MyFriends(ctx context.Context) ([]*models.User, error) {
 	panic("not implemented")
 }
 
-func (r *queryResolver) MyFollowers(ctx context.Context) (*models.User, error) {
+func (r *queryResolver) MyFollowers(ctx context.Context) ([]*models.User, error) {
 	panic("not implemented")
 }
 
@@ -94,9 +94,39 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 	panic("not implemented")
 }
 
+//AddFriends add id to my Friends
 func (r *mutationResolver) AddFriend(ctx context.Context, id string) (*models.User, error) {
 
-	panic("not implemented")
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
+
+	hexID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		//not a valid objectID
+		return nil, err
+	}
+
+	//add to friend
+	q := bson.M{"_id": me.ID}
+	result := dbModel.UserModel{}
+	if err := r.DB.Users.FindOne(ctx, q).Decode(&result); err != nil {
+		return nil, fmt.Errorf("UserID doesn't exist.")
+	}
+	result.Friends = append(result.Friends, hexID)
+
+	//update DB
+	upd := bson.M{"$set": result}
+	_, err = r.DB.Users.UpdateOne(ctx, q, upd)
+	if err != nil {
+		return nil, err
+	}
+
+	//return user
+	update, err := getUserByID(ctx, r.DB, me.ID.Hex())
+	if err != nil {
+		return nil, err
+	}
+
+	return update, nil
 }
 
 func (r *mutationResolver) AddFollower(ctx context.Context, id string) (*models.User, error) {
