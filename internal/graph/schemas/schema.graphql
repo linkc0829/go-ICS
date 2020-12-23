@@ -18,7 +18,7 @@ type User{
 type Portfolio{
 	total: Int!
 	income: [Income]!
-	cost: [Costs]!
+	cost: [Cost]!
 }
 
 enum Category{
