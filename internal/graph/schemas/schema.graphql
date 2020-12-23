@@ -8,16 +8,10 @@ type User{
   nickName: String
   createdAt: Time!
   "granted permission to friends to view portfolio"
-  friends: Users!	  
+  friends: [User]	  
   "permission to view followers portfolio"
-  followers: Users	    
+  followers: [User]	    
 
-}
-
-# List Types
-type Users{
-  count: Int!
-  list: [User]
 }
 
 "List current or historical portfolio"
@@ -103,7 +97,9 @@ type Mutation {
   updateCost(id: ID!, input: CostInput!): Cost!
   deleteCost(id: ID!): Boolean!
   
-  addFriends(id: ID!): User
+  "For current user to operate"
+  addFriend(id: ID!): User
+  addFollower(id: ID!): User
   likeCost(id: ID!): Int!
   likeIncome(id: ID!): Int!
 
