@@ -134,16 +134,16 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*models.User, error)
-	MyCostHistory(ctx context.Context, rangeArg int) (models.Portfolio, error)
-	MyIncomeHistory(ctx context.Context, rangeArg int) (models.Portfolio, error)
-	MyIncome(ctx context.Context) (models.Portfolio, error)
-	MyCost(ctx context.Context) (models.Portfolio, error)
+	MyCostHistory(ctx context.Context, rangeArg int) ([]models.Portfolio, error)
+	MyIncomeHistory(ctx context.Context, rangeArg int) ([]models.Portfolio, error)
+	MyIncome(ctx context.Context) ([]models.Portfolio, error)
+	MyCost(ctx context.Context) ([]models.Portfolio, error)
 	MyFriends(ctx context.Context) ([]*models.User, error)
 	GetUser(ctx context.Context, id string) (*models.User, error)
-	GetUserIncome(ctx context.Context, id string) (models.Portfolio, error)
-	GetUserCost(ctx context.Context, id string) (models.Portfolio, error)
-	GetUserIncomeHistory(ctx context.Context, id string, rangeArg int) (models.Portfolio, error)
-	GetUserCostHistory(ctx context.Context, id string, rangeArg int) (models.Portfolio, error)
+	GetUserIncome(ctx context.Context, id string) ([]models.Portfolio, error)
+	GetUserCost(ctx context.Context, id string) ([]models.Portfolio, error)
+	GetUserIncomeHistory(ctx context.Context, id string, rangeArg int) ([]models.Portfolio, error)
+	GetUserCostHistory(ctx context.Context, id string, rangeArg int) ([]models.Portfolio, error)
 }
 type UserResolver interface {
 	Friends(ctx context.Context, obj *models.User) ([]*models.User, error)
@@ -751,7 +751,7 @@ type Mutation {
   deleteCost(id: ID!): Boolean!
   
   "For current user to operate"
-  addFriend(id: ID!): User
+  addFriend(id: ID!): User!
   voteCost(id: ID!): Int!
   voteIncome(id: ID!): Int!
 
@@ -761,18 +761,18 @@ type Mutation {
 type Query {
   "query current user portfolio"
   me: User!
-  myCostHistory(range: Int!): Portfolio!
-  myIncomeHistory(range: Int!): Portfolio!
-  myIncome: Portfolio!
-  myCost: Portfolio!
+  myCostHistory(range: Int!): [Portfolio]!
+  myIncomeHistory(range: Int!): [Portfolio]!
+  myIncome: [Portfolio]!
+  myCost: [Portfolio]!
   myFriends: [User]!
   
   "query followers' portfolio"
   getUser(id: ID!): User!
-  getUserIncome(id: ID!): Portfolio!
-  getUserCost(id: ID!): Portfolio!
-  getUserIncomeHistory(id: ID!, range: Int!): Portfolio!
-  getUserCostHistory(id: ID!, range: Int!): Portfolio!
+  getUserIncome(id: ID!): [Portfolio]!
+  getUserCost(id: ID!): [Portfolio]!
+  getUserIncomeHistory(id: ID!, range: Int!): [Portfolio]!
+  getUserCostHistory(id: ID!, range: Int!): [Portfolio]!
   
 }`, BuiltIn: false},
 }
@@ -2029,11 +2029,14 @@ func (ec *executionContext) _Mutation_addFriend(ctx context.Context, field graph
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*models.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_voteCost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2188,9 +2191,9 @@ func (ec *executionContext) _Query_myCostHistory(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.Portfolio)
+	res := resTmp.([]models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2ᚕgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_myIncomeHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2229,9 +2232,9 @@ func (ec *executionContext) _Query_myIncomeHistory(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.Portfolio)
+	res := resTmp.([]models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2ᚕgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_myIncome(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2263,9 +2266,9 @@ func (ec *executionContext) _Query_myIncome(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.Portfolio)
+	res := resTmp.([]models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2ᚕgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_myCost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2297,9 +2300,9 @@ func (ec *executionContext) _Query_myCost(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.Portfolio)
+	res := resTmp.([]models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2ᚕgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_myFriends(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2413,9 +2416,9 @@ func (ec *executionContext) _Query_getUserIncome(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.Portfolio)
+	res := resTmp.([]models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2ᚕgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getUserCost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2454,9 +2457,9 @@ func (ec *executionContext) _Query_getUserCost(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.Portfolio)
+	res := resTmp.([]models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2ᚕgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getUserIncomeHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2495,9 +2498,9 @@ func (ec *executionContext) _Query_getUserIncomeHistory(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.Portfolio)
+	res := resTmp.([]models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2ᚕgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getUserCostHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2536,9 +2539,9 @@ func (ec *executionContext) _Query_getUserCostHistory(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.Portfolio)
+	res := resTmp.([]models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2ᚕgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4373,6 +4376,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "addFriend":
 			out.Values[i] = ec._Mutation_addFriend(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "voteCost":
 			out.Values[i] = ec._Mutation_voteCost(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -4997,14 +5003,41 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx context.Context, sel ast.SelectionSet, v models.Portfolio) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
+func (ec *executionContext) marshalNPortfolio2ᚕgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx context.Context, sel ast.SelectionSet, v []models.Portfolio) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
 	}
-	return ec._Portfolio(ctx, sel, v)
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -5401,6 +5434,13 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return graphql.MarshalInt(*v)
+}
+
+func (ec *executionContext) marshalOPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx context.Context, sel ast.SelectionSet, v models.Portfolio) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Portfolio(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
