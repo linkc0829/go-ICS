@@ -28,7 +28,7 @@ type IncomeModel struct {
 	Amount      int                   `bson:"amount" json:"amount,omitempty"`
 	OccurDate   time.Time             `bson:"occurDate" json:"occurDate,omitempty"`
 	Category    models.IncomeCategory `bson:"category" json:"category,omitempty"`
-	Description string                `bson:"description" json:"description,omitempty"`
+	Description *string               `bson:"description" json:"description,omitempty"`
 	Vote        []primitive.ObjectID  `bson:"vote" json:"vote,omitempty"`
 }
 
@@ -38,6 +38,6 @@ type CostModel struct {
 	Amount      int                  `bson:"amount" json:"amount,omitempty"`
 	OccurDate   time.Time            `bson:"occurDate" json:"occurDate,omitempty"`
 	Category    models.CostCategory  `bson:"category" json:"category,omitempty"`
-	Description string               `bson:"description" json:"description,omitempty"`
+	Description *string              `bson:"description" json:"description,omitempty"`
 	Vote        []primitive.ObjectID `bson:"vote" json:"vote,omitempty"`
 }

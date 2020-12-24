@@ -53,10 +53,10 @@ type Income struct {
 func (Income) IsPortfolio() {}
 
 type UpdateCostInput struct {
-	Amount      *int          `json:"amount"`
-	OccurDate   *time.Time    `json:"occurDate"`
-	Category    *CostCategory `json:"category"`
-	Description *string       `json:"description"`
+	Amount      *int          `bson:"amount" json:"amount,omitempty"`
+	OccurDate   *time.Time    `bson:"occurDate" json:"occurDate,omitempty"`
+	Category    *CostCategory `bson:"category" json:"category,omitempty"`
+	Description *string       `bson:"description" json:"description,omitempty"`
 }
 
 type UpdateIncomeInput struct {

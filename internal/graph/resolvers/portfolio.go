@@ -6,35 +6,35 @@ import (
 	"github.com/linkc0829/go-ics/internal/graph/models"
 )
 
-func (r *queryResolver) MyCostHistory(ctx context.Context, rangeArg int) (models.Portfolio, error) {
+func (r *queryResolver) MyCostHistory(ctx context.Context, rangeArg int) ([]models.Portfolio, error) {
 	panic("not implemented")
 }
 
-func (r *queryResolver) MyIncomeHistory(ctx context.Context, rangeArg int) (models.Portfolio, error) {
+func (r *queryResolver) MyIncomeHistory(ctx context.Context, rangeArg int) ([]models.Portfolio, error) {
 	panic("not implemented")
 }
 
-func (r *queryResolver) MyIncome(ctx context.Context) (models.Portfolio, error) {
+func (r *queryResolver) MyIncome(ctx context.Context) ([]models.Portfolio, error) {
 	panic("not implemented")
 }
 
-func (r *queryResolver) MyCost(ctx context.Context) (models.Portfolio, error) {
+func (r *queryResolver) MyCost(ctx context.Context) ([]models.Portfolio, error) {
 	panic("not implemented")
 }
 
 //GetUserCost returns user id's cost
-func (r *queryResolver) GetUserCost(ctx context.Context, id string) (models.Portfolio, error) {
+func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Portfolio, error) {
 	panic("not implemented")
 }
 
-func (r *queryResolver) GetUserIncome(ctx context.Context, id string) (models.Portfolio, error) {
+func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.Portfolio, error) {
 	panic("not implemented")
 }
 
-func (r *queryResolver) GetUserIncomeHistory(ctx context.Context, id string, rangeArg int) (models.Portfolio, error) {
+func (r *queryResolver) GetUserIncomeHistory(ctx context.Context, id string, rangeArg int) ([]models.Portfolio, error) {
 	panic("not implemented")
 }
 
-func (r *queryResolver) GetUserCostHistory(ctx context.Context, id string, rangeArg int) (models.Portfolio, error) {
+func (r *queryResolver) GetUserCostHistory(ctx context.Context, id string, rangeArg int) ([]models.Portfolio, error) {
 	panic("not implemented")
 }

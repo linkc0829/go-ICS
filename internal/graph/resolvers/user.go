@@ -44,7 +44,10 @@ func (r *queryResolver) MyFollowers(ctx context.Context) ([]*models.User, error)
 	}
 
 	result, err := r.resolveUsers(ctx, followers...)
-	return result, err
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUserInput) (*models.User, error) {
@@ -106,9 +109,16 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 	if input.NickName != nil {
 		user.NickName = input.NickName
 	}
+
+	updatedUser := &dbModel.UserModel{
+		UserID:   user.UserID,
+		Email:    user.Email,
+		NickName: user.NickName,
+	}
+
 	primID, _ := primitive.ObjectIDFromHex(id)
 	q := bson.M{"_id": primID}
-	upd := bson.M{"$set": user}
+	upd := bson.M{"$set": updatedUser}
 	_, err = r.DB.Users.UpdateOne(ctx, q, upd)
 	if err != nil {
 		return nil, err
