@@ -16,7 +16,7 @@ type User{
 
 "List current or historical portfolio"
 interface Portfolio{
-	id: ID!
+  id: ID!
   owner: User!
   amount: Int!
   occurDate: Time!

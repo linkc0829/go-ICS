@@ -84,14 +84,17 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetUser          func(childComplexity int, id string) int
-		GetUserHistory   func(childComplexity int, id string, rangeArg int) int
-		GetUserPortfolio func(childComplexity int, id string) int
-		Me               func(childComplexity int) int
-		MyFollowers      func(childComplexity int) int
-		MyFriends        func(childComplexity int) int
-		MyHistory        func(childComplexity int, rangeArg int) int
-		MyPortfolio      func(childComplexity int) int
+		GetUser              func(childComplexity int, id string) int
+		GetUserCost          func(childComplexity int, id string) int
+		GetUserCostHistory   func(childComplexity int, id string, rangeArg int) int
+		GetUserIncome        func(childComplexity int, id string) int
+		GetUserIncomeHistory func(childComplexity int, id string, rangeArg int) int
+		Me                   func(childComplexity int) int
+		MyCost               func(childComplexity int, rangeArg int) int
+		MyCostHistory        func(childComplexity int) int
+		MyFriends            func(childComplexity int) int
+		MyIncome             func(childComplexity int, rangeArg int) int
+		MyIncomeHistory      func(childComplexity int) int
 	}
 
 	User struct {
@@ -131,13 +134,16 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*models.User, error)
-	MyPortfolio(ctx context.Context) (models.Portfolio, error)
-	MyHistory(ctx context.Context, rangeArg int) (models.Portfolio, error)
+	MyCostHistory(ctx context.Context) (models.Portfolio, error)
+	MyIncomeHistory(ctx context.Context) (models.Portfolio, error)
+	MyIncome(ctx context.Context, rangeArg int) (models.Portfolio, error)
+	MyCost(ctx context.Context, rangeArg int) (models.Portfolio, error)
 	MyFriends(ctx context.Context) ([]*models.User, error)
-	MyFollowers(ctx context.Context) ([]*models.User, error)
 	GetUser(ctx context.Context, id string) (*models.User, error)
-	GetUserPortfolio(ctx context.Context, id string) (models.Portfolio, error)
-	GetUserHistory(ctx context.Context, id string, rangeArg int) (models.Portfolio, error)
+	GetUserIncome(ctx context.Context, id string) (models.Portfolio, error)
+	GetUserCost(ctx context.Context, id string) (models.Portfolio, error)
+	GetUserIncomeHistory(ctx context.Context, id string, rangeArg int) (models.Portfolio, error)
+	GetUserCostHistory(ctx context.Context, id string, rangeArg int) (models.Portfolio, error)
 }
 type UserResolver interface {
 	Friends(ctx context.Context, obj *models.User) ([]*models.User, error)
@@ -413,29 +419,53 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetUser(childComplexity, args["id"].(string)), true
 
-	case "Query.getUserHistory":
-		if e.complexity.Query.GetUserHistory == nil {
+	case "Query.getUserCost":
+		if e.complexity.Query.GetUserCost == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getUserHistory_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_getUserCost_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetUserHistory(childComplexity, args["id"].(string), args["range"].(int)), true
+		return e.complexity.Query.GetUserCost(childComplexity, args["id"].(string)), true
 
-	case "Query.getUserPortfolio":
-		if e.complexity.Query.GetUserPortfolio == nil {
+	case "Query.getUserCostHistory":
+		if e.complexity.Query.GetUserCostHistory == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getUserPortfolio_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_getUserCostHistory_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetUserPortfolio(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.GetUserCostHistory(childComplexity, args["id"].(string), args["range"].(int)), true
+
+	case "Query.getUserIncome":
+		if e.complexity.Query.GetUserIncome == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getUserIncome_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetUserIncome(childComplexity, args["id"].(string)), true
+
+	case "Query.getUserIncomeHistory":
+		if e.complexity.Query.GetUserIncomeHistory == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getUserIncomeHistory_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetUserIncomeHistory(childComplexity, args["id"].(string), args["range"].(int)), true
 
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
@@ -444,12 +474,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Me(childComplexity), true
 
-	case "Query.myFollowers":
-		if e.complexity.Query.MyFollowers == nil {
+	case "Query.myCost":
+		if e.complexity.Query.MyCost == nil {
 			break
 		}
 
-		return e.complexity.Query.MyFollowers(childComplexity), true
+		args, err := ec.field_Query_myCost_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MyCost(childComplexity, args["range"].(int)), true
+
+	case "Query.myCostHistory":
+		if e.complexity.Query.MyCostHistory == nil {
+			break
+		}
+
+		return e.complexity.Query.MyCostHistory(childComplexity), true
 
 	case "Query.myFriends":
 		if e.complexity.Query.MyFriends == nil {
@@ -458,24 +500,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.MyFriends(childComplexity), true
 
-	case "Query.myHistory":
-		if e.complexity.Query.MyHistory == nil {
+	case "Query.myIncome":
+		if e.complexity.Query.MyIncome == nil {
 			break
 		}
 
-		args, err := ec.field_Query_myHistory_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_myIncome_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.MyHistory(childComplexity, args["range"].(int)), true
+		return e.complexity.Query.MyIncome(childComplexity, args["range"].(int)), true
 
-	case "Query.myPortfolio":
-		if e.complexity.Query.MyPortfolio == nil {
+	case "Query.myIncomeHistory":
+		if e.complexity.Query.MyIncomeHistory == nil {
 			break
 		}
 
-		return e.complexity.Query.MyPortfolio(childComplexity), true
+		return e.complexity.Query.MyIncomeHistory(childComplexity), true
 
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
@@ -608,7 +650,7 @@ type User{
 
 "List current or historical portfolio"
 interface Portfolio{
-	id: ID!
+  id: ID!
   owner: User!
   amount: Int!
   occurDate: Time!
@@ -699,15 +741,18 @@ type Mutation {
 type Query {
   "query current user portfolio"
   me: User!
-  myPortfolio: Portfolio!
-  myHistory(range: Int!): Portfolio!
+  myCostHistory: Portfolio!
+  myIncomeHistory: Portfolio!
+  myIncome(range: Int!): Portfolio!
+  myCost(range: Int!): Portfolio!
   myFriends: [User]!
-  myFollowers: [User]!
   
   "query followers' portfolio"
   getUser(id: ID!): User!
-  getUserPortfolio(id: ID!): Portfolio!
-  getUserHistory(id: ID!, range: Int!): Portfolio!
+  getUserIncome(id: ID!): Portfolio!
+  getUserCost(id: ID!): Portfolio!
+  getUserIncomeHistory(id: ID!, range: Int!): Portfolio!
+  getUserCostHistory(id: ID!, range: Int!): Portfolio!
   
 }`, BuiltIn: false},
 }
@@ -939,7 +984,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getUserHistory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_getUserCostHistory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -963,7 +1008,46 @@ func (ec *executionContext) field_Query_getUserHistory_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getUserPortfolio_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_getUserCost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getUserIncomeHistory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["range"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("range"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["range"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getUserIncome_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -993,7 +1077,22 @@ func (ec *executionContext) field_Query_getUser_args(ctx context.Context, rawArg
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_myHistory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_myCost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["range"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("range"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["range"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_myIncome_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
@@ -2033,7 +2132,7 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 	return ec.marshalNUser2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_myPortfolio(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_myCostHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2050,7 +2149,7 @@ func (ec *executionContext) _Query_myPortfolio(ctx context.Context, field graphq
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MyPortfolio(rctx)
+		return ec.resolvers.Query().MyCostHistory(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2067,7 +2166,41 @@ func (ec *executionContext) _Query_myPortfolio(ctx context.Context, field graphq
 	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_myHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_myIncomeHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().MyIncomeHistory(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(models.Portfolio)
+	fc.Result = res
+	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_myIncome(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2083,7 +2216,7 @@ func (ec *executionContext) _Query_myHistory(ctx context.Context, field graphql.
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_myHistory_args(ctx, rawArgs)
+	args, err := ec.field_Query_myIncome_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -2091,7 +2224,48 @@ func (ec *executionContext) _Query_myHistory(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MyHistory(rctx, args["range"].(int))
+		return ec.resolvers.Query().MyIncome(rctx, args["range"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(models.Portfolio)
+	fc.Result = res
+	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_myCost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_myCost_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().MyCost(rctx, args["range"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2126,40 +2300,6 @@ func (ec *executionContext) _Query_myFriends(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().MyFriends(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*models.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_myFollowers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MyFollowers(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2217,7 +2357,7 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 	return ec.marshalNUser2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getUserPortfolio(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getUserIncome(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2233,7 +2373,7 @@ func (ec *executionContext) _Query_getUserPortfolio(ctx context.Context, field g
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getUserPortfolio_args(ctx, rawArgs)
+	args, err := ec.field_Query_getUserIncome_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -2241,7 +2381,7 @@ func (ec *executionContext) _Query_getUserPortfolio(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetUserPortfolio(rctx, args["id"].(string))
+		return ec.resolvers.Query().GetUserIncome(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2258,7 +2398,7 @@ func (ec *executionContext) _Query_getUserPortfolio(ctx context.Context, field g
 	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getUserHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getUserCost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2274,7 +2414,7 @@ func (ec *executionContext) _Query_getUserHistory(ctx context.Context, field gra
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getUserHistory_args(ctx, rawArgs)
+	args, err := ec.field_Query_getUserCost_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -2282,7 +2422,89 @@ func (ec *executionContext) _Query_getUserHistory(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetUserHistory(rctx, args["id"].(string), args["range"].(int))
+		return ec.resolvers.Query().GetUserCost(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(models.Portfolio)
+	fc.Result = res
+	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getUserIncomeHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getUserIncomeHistory_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetUserIncomeHistory(rctx, args["id"].(string), args["range"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(models.Portfolio)
+	fc.Result = res
+	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getUserCostHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getUserCostHistory_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetUserCostHistory(rctx, args["id"].(string), args["range"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4057,7 +4279,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "myPortfolio":
+		case "myCostHistory":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -4065,13 +4287,13 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_myPortfolio(ctx, field)
+				res = ec._Query_myCostHistory(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
-		case "myHistory":
+		case "myIncomeHistory":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -4079,7 +4301,35 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_myHistory(ctx, field)
+				res = ec._Query_myIncomeHistory(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "myIncome":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_myIncome(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "myCost":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_myCost(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -4099,20 +4349,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "myFollowers":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_myFollowers(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "getUser":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -4127,7 +4363,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "getUserPortfolio":
+		case "getUserIncome":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -4135,13 +4371,13 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getUserPortfolio(ctx, field)
+				res = ec._Query_getUserIncome(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
-		case "getUserHistory":
+		case "getUserCost":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -4149,7 +4385,35 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getUserHistory(ctx, field)
+				res = ec._Query_getUserCost(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getUserIncomeHistory":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUserIncomeHistory(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getUserCostHistory":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUserCostHistory(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
