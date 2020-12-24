@@ -90,11 +90,11 @@ type ComplexityRoot struct {
 		GetUserIncome        func(childComplexity int, id string) int
 		GetUserIncomeHistory func(childComplexity int, id string, rangeArg int) int
 		Me                   func(childComplexity int) int
-		MyCost               func(childComplexity int, rangeArg int) int
-		MyCostHistory        func(childComplexity int) int
+		MyCost               func(childComplexity int) int
+		MyCostHistory        func(childComplexity int, rangeArg int) int
 		MyFriends            func(childComplexity int) int
-		MyIncome             func(childComplexity int, rangeArg int) int
-		MyIncomeHistory      func(childComplexity int) int
+		MyIncome             func(childComplexity int) int
+		MyIncomeHistory      func(childComplexity int, rangeArg int) int
 	}
 
 	User struct {
@@ -134,10 +134,10 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*models.User, error)
-	MyCostHistory(ctx context.Context) (models.Portfolio, error)
-	MyIncomeHistory(ctx context.Context) (models.Portfolio, error)
-	MyIncome(ctx context.Context, rangeArg int) (models.Portfolio, error)
-	MyCost(ctx context.Context, rangeArg int) (models.Portfolio, error)
+	MyCostHistory(ctx context.Context, rangeArg int) (models.Portfolio, error)
+	MyIncomeHistory(ctx context.Context, rangeArg int) (models.Portfolio, error)
+	MyIncome(ctx context.Context) (models.Portfolio, error)
+	MyCost(ctx context.Context) (models.Portfolio, error)
 	MyFriends(ctx context.Context) ([]*models.User, error)
 	GetUser(ctx context.Context, id string) (*models.User, error)
 	GetUserIncome(ctx context.Context, id string) (models.Portfolio, error)
@@ -479,19 +479,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_myCost_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.MyCost(childComplexity, args["range"].(int)), true
+		return e.complexity.Query.MyCost(childComplexity), true
 
 	case "Query.myCostHistory":
 		if e.complexity.Query.MyCostHistory == nil {
 			break
 		}
 
-		return e.complexity.Query.MyCostHistory(childComplexity), true
+		args, err := ec.field_Query_myCostHistory_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MyCostHistory(childComplexity, args["range"].(int)), true
 
 	case "Query.myFriends":
 		if e.complexity.Query.MyFriends == nil {
@@ -505,19 +505,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_myIncome_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.MyIncome(childComplexity, args["range"].(int)), true
+		return e.complexity.Query.MyIncome(childComplexity), true
 
 	case "Query.myIncomeHistory":
 		if e.complexity.Query.MyIncomeHistory == nil {
 			break
 		}
 
-		return e.complexity.Query.MyIncomeHistory(childComplexity), true
+		args, err := ec.field_Query_myIncomeHistory_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MyIncomeHistory(childComplexity, args["range"].(int)), true
 
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
@@ -741,10 +741,10 @@ type Mutation {
 type Query {
   "query current user portfolio"
   me: User!
-  myCostHistory: Portfolio!
-  myIncomeHistory: Portfolio!
-  myIncome(range: Int!): Portfolio!
-  myCost(range: Int!): Portfolio!
+  myCostHistory(range: Int!): Portfolio!
+  myIncomeHistory(range: Int!): Portfolio!
+  myIncome: Portfolio!
+  myCost: Portfolio!
   myFriends: [User]!
   
   "query followers' portfolio"
@@ -1077,7 +1077,7 @@ func (ec *executionContext) field_Query_getUser_args(ctx context.Context, rawArg
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_myCost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_myCostHistory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
@@ -1092,7 +1092,7 @@ func (ec *executionContext) field_Query_myCost_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_myIncome_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_myIncomeHistory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
@@ -2147,9 +2147,16 @@ func (ec *executionContext) _Query_myCostHistory(ctx context.Context, field grap
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_myCostHistory_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MyCostHistory(rctx)
+		return ec.resolvers.Query().MyCostHistory(rctx, args["range"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2181,9 +2188,16 @@ func (ec *executionContext) _Query_myIncomeHistory(ctx context.Context, field gr
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_myIncomeHistory_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MyIncomeHistory(rctx)
+		return ec.resolvers.Query().MyIncomeHistory(rctx, args["range"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2215,16 +2229,9 @@ func (ec *executionContext) _Query_myIncome(ctx context.Context, field graphql.C
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_myIncome_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MyIncome(rctx, args["range"].(int))
+		return ec.resolvers.Query().MyIncome(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2256,16 +2263,9 @@ func (ec *executionContext) _Query_myCost(ctx context.Context, field graphql.Col
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_myCost_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MyCost(rctx, args["range"].(int))
+		return ec.resolvers.Query().MyCost(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)

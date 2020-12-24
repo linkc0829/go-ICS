@@ -107,9 +107,9 @@ type Mutation {
 type Query {
   "query current user portfolio"
   me: User!
-  myCostHistory: Portfolio!
+  myCostHistory(range: Int!): Portfolio!
   myIncomeHistory(range: Int!): Portfolio!
-  myIncome(range: Int!): Portfolio!
+  myIncome: Portfolio!
   myCost: Portfolio!
   myFriends: [User]!
   
