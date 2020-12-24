@@ -15,38 +15,47 @@ type User{
 }
 
 "List current or historical portfolio"
-type Portfolio{
-	total: Int!
-	income: [Income]!
-	cost: [Cost]!
-}
-
-enum Category{
-  INVESTMENT
-  SALORY
-  OTHERS
-  DAILY
-  LEARNING
-  CHARITY
-}
-
-
-type Income{
-  id: ID!
+interface Portfolio{
+	id: ID!
   owner: User!
   amount: Int!
   occurDate: Time!
-  category: Category!
   description: String
   vote: [User]
 }
 
-type Cost{
+enum IncomeCategory{
+  INVESTMENT
+  PARTTIME
+  SALORY
+  OTHERS
+}
+
+enum CostCategory{
+  INVESTMENT
+  DAILY
+  LEARNING
+  CHARITY
+  OTHERS
+}
+
+
+type Income implements Portfolio{
   id: ID!
   owner: User!
   amount: Int!
   occurDate: Time!
-  category: Category!
+  category: IncomeCategory!
+  description: String
+  vote: [User]
+}
+
+type Cost implements Portfolio{
+  id: ID!
+  owner: User!
+  amount: Int!
+  occurDate: Time!
+  category: CostCategory!
   description: String
   vote: [User]
 }
@@ -60,15 +69,15 @@ input UserInput {
 
 input IncomeInput{
   amount: Int
-  date: Time
-  category: Category
+  occurDate: Time
+  category: IncomeCategory
   description: String
 }
 
 input CostInput{
   amount: Int
-  date: Time
-  category: Category
+  occurDate: Time
+  category: CostCategory
   description: String
 }
 
@@ -89,9 +98,8 @@ type Mutation {
   
   "For current user to operate"
   addFriend(id: ID!): User
-  addFollower(id: ID!): User
-  likeCost(id: ID!): Int!
-  likeIncome(id: ID!): Int!
+  voteCost(id: ID!): Int!
+  voteIncome(id: ID!): Int!
 
 }
 

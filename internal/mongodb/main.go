@@ -14,9 +14,11 @@ var dbUser, pwd, dbName, dsn string
 type MongoDB struct {
 	Session       *mongo.Client
 	Users         *mongo.Collection
-	Deleted_users *mongo.Collection
+	DeletedUsers  *mongo.Collection
 	Income        *mongo.Collection
+	DeletedIncome *mongo.Collection
 	Cost          *mongo.Collection
+	DeletedCost   *mongo.Collection
 	IncomeHistory *mongo.Collection
 	CostHistory   *mongo.Collection
 }
@@ -36,9 +38,11 @@ func ConnectDB(cfg *utils.ServerConfig) *MongoDB {
 	return &MongoDB{
 		Session:       client,
 		Users:         client.Database("ics").Collection("users"),
-		Deleted_users: client.Database("ics").Collection("deleted_users"),
+		DeletedUsers:  client.Database("ics").Collection("deletedUser"),
 		Income:        client.Database("ics").Collection("income"),
+		DeletedIncome: client.Database("ics").Collection("deletedIncome"),
 		Cost:          client.Database("ics").Collection("cost"),
+		DeletedCost:   client.Database("ics").Collection("deletedCost"),
 		IncomeHistory: client.Database("ics").Collection("incomeHistory"),
 		CostHistory:   client.Database("ics").Collection("costHistory"),
 	}

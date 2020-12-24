@@ -25,6 +25,9 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// Portfolio returns generated.PortfolioResolver implementation.
+func (r *Resolver) Portfolio() generated.PortfolioResolver { return &portfolioResolver{r} }
+
 func (r *Resolver) resolveUsers(ctx context.Context, ids ...string) ([]*models.User, error) {
 	result := make([]*models.User, len(ids))
 	for i, id := range ids {
