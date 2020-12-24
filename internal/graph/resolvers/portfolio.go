@@ -6,7 +6,6 @@ import (
 	"github.com/linkc0829/go-ics/internal/graph/models"
 )
 
-
 func (r *queryResolver) MyCostHistory(ctx context.Context, rangeArg int) (models.Portfolio, error) {
 	panic("not implemented")
 }
@@ -23,6 +22,7 @@ func (r *queryResolver) MyCost(ctx context.Context) (models.Portfolio, error) {
 	panic("not implemented")
 }
 
+//GetUserCost returns user id's cost
 func (r *queryResolver) GetUserCost(ctx context.Context, id string) (models.Portfolio, error) {
 	panic("not implemented")
 }

@@ -4,9 +4,21 @@ import (
 	"context"
 
 	"github.com/linkc0829/go-ics/internal/graph/models"
+	dbModel "github.com/linkc0829/go-ics/internal/mongodb/models"
+	"github.com/linkc0829/go-ics/pkg/utils"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (r *mutationResolver) CreateCost(ctx context.Context, input models.CostInput) (*models.Cost, error) {
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
+
+	newCost := &dbModel.CostModel{
+		ID:     primitive.NewObjectID(),
+		Owner:  me.ID,
+		Amount: *input.Amount,
+	}
+
 	panic("not implemented")
 }
 

@@ -117,7 +117,7 @@ type Mutation {
   deleteCost(id: ID!): Boolean!
   
   "For current user to operate"
-  addFriend(id: ID!): User
+  addFriend(id: ID!): User!
   voteCost(id: ID!): Int!
   voteIncome(id: ID!): Int!
 
@@ -127,17 +127,17 @@ type Mutation {
 type Query {
   "query current user portfolio"
   me: User!
-  myCostHistory(range: Int!): Portfolio!
-  myIncomeHistory(range: Int!): Portfolio!
-  myIncome: Portfolio!
-  myCost: Portfolio!
+  myCostHistory(range: Int!): [Portfolio]!
+  myIncomeHistory(range: Int!): [Portfolio]!
+  myIncome: [Portfolio]!
+  myCost: [Portfolio]!
   myFriends: [User]!
   
   "query followers' portfolio"
   getUser(id: ID!): User!
-  getUserIncome(id: ID!): Portfolio!
-  getUserCost(id: ID!): Portfolio!
-  getUserIncomeHistory(id: ID!, range: Int!): Portfolio!
-  getUserCostHistory(id: ID!, range: Int!): Portfolio!
+  getUserIncome(id: ID!): [Portfolio]!
+  getUserCost(id: ID!): [Portfolio]!
+  getUserIncomeHistory(id: ID!, range: Int!): [Portfolio]!
+  getUserCostHistory(id: ID!, range: Int!): [Portfolio]!
   
 }

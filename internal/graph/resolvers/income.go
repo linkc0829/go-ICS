@@ -6,11 +6,11 @@ import (
 	"github.com/linkc0829/go-ics/internal/graph/models"
 )
 
-func (r *mutationResolver) CreateIncome(ctx context.Context, input models.IncomeInput) (*models.Income, error) {
+func (r *mutationResolver) CreateIncome(ctx context.Context, input models.CreateIncomeInput) (*models.Income, error) {
 	panic("not implemented")
 }
 
-func (r *mutationResolver) UpdateIncome(ctx context.Context, id string, input models.IncomeInput) (*models.Income, error) {
+func (r *mutationResolver) UpdateIncome(ctx context.Context, id string, input models.UpdateIncomeInput) (*models.Income, error) {
 	panic("not implemented")
 }
 

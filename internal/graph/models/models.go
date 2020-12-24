@@ -20,11 +20,24 @@ type Cost struct {
 
 func (Cost) IsPortfolio() {}
 
-type CostInput struct {
-	Amount      *int          `json:"amount"`
-	OccurDate   time.Time     `json:"occurDate"`
-	Category    *CostCategory `json:"category"`
-	Description *string       `json:"description"`
+type CreateCostInput struct {
+	Amount      int          `json:"amount"`
+	OccurDate   time.Time    `json:"occurDate"`
+	Category    CostCategory `json:"category"`
+	Description *string      `json:"description"`
+}
+
+type CreateIncomeInput struct {
+	Amount      int            `json:"amount"`
+	OccurDate   time.Time      `json:"occurDate"`
+	Category    IncomeCategory `json:"category"`
+	Description *string        `json:"description"`
+}
+
+type CreateUserInput struct {
+	Email    string  `json:"email"`
+	UserID   string  `json:"userId"`
+	NickName *string `json:"nickName"`
 }
 
 type Income struct {
@@ -39,11 +52,24 @@ type Income struct {
 
 func (Income) IsPortfolio() {}
 
-type IncomeInput struct {
+type UpdateCostInput struct {
+	Amount      *int          `json:"amount"`
+	OccurDate   *time.Time    `json:"occurDate"`
+	Category    *CostCategory `json:"category"`
+	Description *string       `json:"description"`
+}
+
+type UpdateIncomeInput struct {
 	Amount      *int            `json:"amount"`
-	OccurDate   time.Time       `json:"occurDate"`
+	OccurDate   *time.Time      `json:"occurDate"`
 	Category    *IncomeCategory `json:"category"`
 	Description *string         `json:"description"`
+}
+
+type UpdateUserInput struct {
+	Email    *string `json:"email"`
+	UserID   *string `json:"userId"`
+	NickName *string `json:"nickName"`
 }
 
 type User struct {

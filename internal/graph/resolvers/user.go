@@ -47,7 +47,7 @@ func (r *queryResolver) MyFollowers(ctx context.Context) ([]*models.User, error)
 	return result, err
 }
 
-func (r *mutationResolver) CreateUser(ctx context.Context, input models.UserInput) (*models.User, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUserInput) (*models.User, error) {
 
 	//check if user exists
 	var result dbModel.UserModel
@@ -57,8 +57,8 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.UserInpu
 	}
 
 	//collect current data
-	UserID := *input.UserID
-	Email := *input.Email
+	UserID := input.UserID
+	Email := input.Email
 	NickName := input.NickName
 	CreatedAt := time.Now()
 	LastQuery := time.Now()
@@ -92,7 +92,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.UserInpu
 	return ret, nil
 }
 
-func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input models.UserInput) (*models.User, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input models.UpdateUserInput) (*models.User, error) {
 	user, err := getUserByID(ctx, r.DB, id)
 	if err != nil {
 		return nil, err
