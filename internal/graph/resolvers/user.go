@@ -150,7 +150,7 @@ func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.U
 		return nil, fmt.Errorf("UserID doesn't exist.")
 	}
 
-	friends, err := getUserFriends(ctx, DB, &result)
+	friends := getUserFriends(&result)
 	if err != nil {
 		return nil, err
 	}
@@ -172,19 +172,16 @@ func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.U
 	return r, nil
 }
 
-func getUserFriends(ctx context.Context, DB *mongodb.MongoDB, user *dbModel.UserModel) (friends []*models.User, err error) {
+func getUserFriends(user *dbModel.UserModel) (friends []*string) {
 
 	for _, f_id := range user.Friends {
-		f, err := getUserByID(ctx, DB, f_id.Hex())
-		if err != nil {
-			return nil, err
-		}
-		friends = append(friends, f)
+		f := f_id.Hex()
+		friends = append(friends, &f)
 	}
 	return
 }
 
-func getUserFollowers(ctx context.Context, DB *mongodb.MongoDB, me *dbModel.UserModel) (followers []*models.User, err error) {
+func getUserFollowers(ctx context.Context, DB *mongodb.MongoDB, me *dbModel.UserModel) (followers []*string, err error) {
 	//find users that have me as friend
 	q := bson.M{"friends": me.ID}
 	cursor, err := DB.Users.Find(ctx, q)
@@ -199,11 +196,11 @@ func getUserFollowers(ctx context.Context, DB *mongodb.MongoDB, me *dbModel.User
 		f := dbModel.UserModel{}
 		bsonBytes, _ := bson.Marshal(result)
 		bson.Unmarshal(bsonBytes, &f)
-		follower, err := getUserByID(ctx, DB, f.ID.Hex())
+		follower := f.ID.Hex()
 		if err != nil {
 			return nil, err
 		}
-		followers = append(followers, follower)
+		followers = append(followers, &follower)
 	}
 	return
 }
