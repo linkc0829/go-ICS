@@ -61,39 +61,59 @@ type Cost implements Portfolio{
 }
 
 # Input Types
-input UserInput {
+input UpdateUserInput {
   email: String
   userId: String
   nickName: String
 }
 
-input IncomeInput{
+input CreateUserInput {
+  email: String!
+  userId: String!
+  nickName: String
+}
+
+input UpdateIncomeInput{
   amount: Int
   occurDate: Time
   category: IncomeCategory
   description: String
 }
 
-input CostInput{
+input CreateIncomeInput{
+  amount: Int!
+  occurDate: Time!
+  category: IncomeCategory!
+  description: String
+}
+
+input UpdateCostInput{
   amount: Int
   occurDate: Time
   category: CostCategory
   description: String
 }
 
+input CreateCostInput{
+  amount: Int!
+  occurDate: Time!
+  category: CostCategory!
+  description: String
+}
+
 # Define mutations here
 type Mutation {
   
-  createUser(input: UserInput!): User!
-  updateUser(id: ID!, input: UserInput!): User!
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
   deleteUser(id: ID!): Boolean!
 
-  createIncome(input: IncomeInput!): Income!
-  updateIncome(id: ID!, input: IncomeInput!): Income!
+  createIncome(input: CreateIncomeInput!): Income!
+  updateIncome(id: ID!, input: UpdateIncomeInput!): Income!
   deleteIncome(id: ID!): Boolean!
 
-  createCost(input: CostInput!): Cost!
-  updateCost(id: ID!, input: CostInput!): Cost!
+  createCost(input: CreateCostInput!): Cost!
+  updateCost(id: ID!, input: UpdateCostInput!): Cost!
   deleteCost(id: ID!): Boolean!
   
   "For current user to operate"

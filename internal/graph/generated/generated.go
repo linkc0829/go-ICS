@@ -70,15 +70,15 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		AddFriend    func(childComplexity int, id string) int
-		CreateCost   func(childComplexity int, input models.CostInput) int
-		CreateIncome func(childComplexity int, input models.IncomeInput) int
-		CreateUser   func(childComplexity int, input models.UserInput) int
+		CreateCost   func(childComplexity int, input models.CreateCostInput) int
+		CreateIncome func(childComplexity int, input models.CreateIncomeInput) int
+		CreateUser   func(childComplexity int, input models.CreateUserInput) int
 		DeleteCost   func(childComplexity int, id string) int
 		DeleteIncome func(childComplexity int, id string) int
 		DeleteUser   func(childComplexity int, id string) int
-		UpdateCost   func(childComplexity int, id string, input models.CostInput) int
-		UpdateIncome func(childComplexity int, id string, input models.IncomeInput) int
-		UpdateUser   func(childComplexity int, id string, input models.UserInput) int
+		UpdateCost   func(childComplexity int, id string, input models.UpdateCostInput) int
+		UpdateIncome func(childComplexity int, id string, input models.UpdateIncomeInput) int
+		UpdateUser   func(childComplexity int, id string, input models.UpdateUserInput) int
 		VoteCost     func(childComplexity int, id string) int
 		VoteIncome   func(childComplexity int, id string) int
 	}
@@ -119,14 +119,14 @@ type IncomeResolver interface {
 	Vote(ctx context.Context, obj *models.Income) ([]*models.User, error)
 }
 type MutationResolver interface {
-	CreateUser(ctx context.Context, input models.UserInput) (*models.User, error)
-	UpdateUser(ctx context.Context, id string, input models.UserInput) (*models.User, error)
+	CreateUser(ctx context.Context, input models.CreateUserInput) (*models.User, error)
+	UpdateUser(ctx context.Context, id string, input models.UpdateUserInput) (*models.User, error)
 	DeleteUser(ctx context.Context, id string) (bool, error)
-	CreateIncome(ctx context.Context, input models.IncomeInput) (*models.Income, error)
-	UpdateIncome(ctx context.Context, id string, input models.IncomeInput) (*models.Income, error)
+	CreateIncome(ctx context.Context, input models.CreateIncomeInput) (*models.Income, error)
+	UpdateIncome(ctx context.Context, id string, input models.UpdateIncomeInput) (*models.Income, error)
 	DeleteIncome(ctx context.Context, id string) (bool, error)
-	CreateCost(ctx context.Context, input models.CostInput) (*models.Cost, error)
-	UpdateCost(ctx context.Context, id string, input models.CostInput) (*models.Cost, error)
+	CreateCost(ctx context.Context, input models.CreateCostInput) (*models.Cost, error)
+	UpdateCost(ctx context.Context, id string, input models.UpdateCostInput) (*models.Cost, error)
 	DeleteCost(ctx context.Context, id string) (bool, error)
 	AddFriend(ctx context.Context, id string) (*models.User, error)
 	VoteCost(ctx context.Context, id string) (int, error)
@@ -285,7 +285,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateCost(childComplexity, args["input"].(models.CostInput)), true
+		return e.complexity.Mutation.CreateCost(childComplexity, args["input"].(models.CreateCostInput)), true
 
 	case "Mutation.createIncome":
 		if e.complexity.Mutation.CreateIncome == nil {
@@ -297,7 +297,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateIncome(childComplexity, args["input"].(models.IncomeInput)), true
+		return e.complexity.Mutation.CreateIncome(childComplexity, args["input"].(models.CreateIncomeInput)), true
 
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -309,7 +309,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(models.UserInput)), true
+		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(models.CreateUserInput)), true
 
 	case "Mutation.deleteCost":
 		if e.complexity.Mutation.DeleteCost == nil {
@@ -357,7 +357,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateCost(childComplexity, args["id"].(string), args["input"].(models.CostInput)), true
+		return e.complexity.Mutation.UpdateCost(childComplexity, args["id"].(string), args["input"].(models.UpdateCostInput)), true
 
 	case "Mutation.updateIncome":
 		if e.complexity.Mutation.UpdateIncome == nil {
@@ -369,7 +369,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateIncome(childComplexity, args["id"].(string), args["input"].(models.IncomeInput)), true
+		return e.complexity.Mutation.UpdateIncome(childComplexity, args["id"].(string), args["input"].(models.UpdateIncomeInput)), true
 
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -381,7 +381,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUser(childComplexity, args["id"].(string), args["input"].(models.UserInput)), true
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["id"].(string), args["input"].(models.UpdateUserInput)), true
 
 	case "Mutation.voteCost":
 		if e.complexity.Mutation.VoteCost == nil {
@@ -695,39 +695,59 @@ type Cost implements Portfolio{
 }
 
 # Input Types
-input UserInput {
+input UpdateUserInput {
   email: String
   userId: String
   nickName: String
 }
 
-input IncomeInput{
+input CreateUserInput {
+  email: String!
+  userId: String!
+  nickName: String
+}
+
+input UpdateIncomeInput{
   amount: Int
   occurDate: Time
   category: IncomeCategory
   description: String
 }
 
-input CostInput{
+input CreateIncomeInput{
+  amount: Int!
+  occurDate: Time!
+  category: IncomeCategory!
+  description: String
+}
+
+input UpdateCostInput{
   amount: Int
   occurDate: Time
   category: CostCategory
   description: String
 }
 
+input CreateCostInput{
+  amount: Int!
+  occurDate: Time!
+  category: CostCategory!
+  description: String
+}
+
 # Define mutations here
 type Mutation {
   
-  createUser(input: UserInput!): User!
-  updateUser(id: ID!, input: UserInput!): User!
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
   deleteUser(id: ID!): Boolean!
 
-  createIncome(input: IncomeInput!): Income!
-  updateIncome(id: ID!, input: IncomeInput!): Income!
+  createIncome(input: CreateIncomeInput!): Income!
+  updateIncome(id: ID!, input: UpdateIncomeInput!): Income!
   deleteIncome(id: ID!): Boolean!
 
-  createCost(input: CostInput!): Cost!
-  updateCost(id: ID!, input: CostInput!): Cost!
+  createCost(input: CreateCostInput!): Cost!
+  updateCost(id: ID!, input: UpdateCostInput!): Cost!
   deleteCost(id: ID!): Boolean!
   
   "For current user to operate"
@@ -780,10 +800,10 @@ func (ec *executionContext) field_Mutation_addFriend_args(ctx context.Context, r
 func (ec *executionContext) field_Mutation_createCost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 models.CostInput
+	var arg0 models.CreateCostInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
-		arg0, err = ec.unmarshalNCostInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateCostInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCreateCostInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -795,10 +815,10 @@ func (ec *executionContext) field_Mutation_createCost_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_createIncome_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 models.IncomeInput
+	var arg0 models.CreateIncomeInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
-		arg0, err = ec.unmarshalNIncomeInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateIncomeInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCreateIncomeInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -810,10 +830,10 @@ func (ec *executionContext) field_Mutation_createIncome_args(ctx context.Context
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 models.UserInput
+	var arg0 models.CreateUserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
-		arg0, err = ec.unmarshalNUserInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateUserInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCreateUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -879,10 +899,10 @@ func (ec *executionContext) field_Mutation_updateCost_args(ctx context.Context, 
 		}
 	}
 	args["id"] = arg0
-	var arg1 models.CostInput
+	var arg1 models.UpdateCostInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
-		arg1, err = ec.unmarshalNCostInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostInput(ctx, tmp)
+		arg1, err = ec.unmarshalNUpdateCostInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUpdateCostInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -903,10 +923,10 @@ func (ec *executionContext) field_Mutation_updateIncome_args(ctx context.Context
 		}
 	}
 	args["id"] = arg0
-	var arg1 models.IncomeInput
+	var arg1 models.UpdateIncomeInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
-		arg1, err = ec.unmarshalNIncomeInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeInput(ctx, tmp)
+		arg1, err = ec.unmarshalNUpdateIncomeInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUpdateIncomeInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -927,10 +947,10 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 		}
 	}
 	args["id"] = arg0
-	var arg1 models.UserInput
+	var arg1 models.UpdateUserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
-		arg1, err = ec.unmarshalNUserInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUserInput(ctx, tmp)
+		arg1, err = ec.unmarshalNUpdateUserInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUpdateUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1633,7 +1653,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateUser(rctx, args["input"].(models.UserInput))
+		return ec.resolvers.Mutation().CreateUser(rctx, args["input"].(models.CreateUserInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1674,7 +1694,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, args["id"].(string), args["input"].(models.UserInput))
+		return ec.resolvers.Mutation().UpdateUser(rctx, args["id"].(string), args["input"].(models.UpdateUserInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1756,7 +1776,7 @@ func (ec *executionContext) _Mutation_createIncome(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateIncome(rctx, args["input"].(models.IncomeInput))
+		return ec.resolvers.Mutation().CreateIncome(rctx, args["input"].(models.CreateIncomeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1797,7 +1817,7 @@ func (ec *executionContext) _Mutation_updateIncome(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateIncome(rctx, args["id"].(string), args["input"].(models.IncomeInput))
+		return ec.resolvers.Mutation().UpdateIncome(rctx, args["id"].(string), args["input"].(models.UpdateIncomeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1879,7 +1899,7 @@ func (ec *executionContext) _Mutation_createCost(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateCost(rctx, args["input"].(models.CostInput))
+		return ec.resolvers.Mutation().CreateCost(rctx, args["input"].(models.CreateCostInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1920,7 +1940,7 @@ func (ec *executionContext) _Mutation_updateCost(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateCost(rctx, args["id"].(string), args["input"].(models.CostInput))
+		return ec.resolvers.Mutation().UpdateCost(rctx, args["id"].(string), args["input"].(models.UpdateCostInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3874,8 +3894,132 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputCostInput(ctx context.Context, obj interface{}) (models.CostInput, error) {
-	var it models.CostInput
+func (ec *executionContext) unmarshalInputCreateCostInput(ctx context.Context, obj interface{}) (models.CreateCostInput, error) {
+	var it models.CreateCostInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "amount":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("amount"))
+			it.Amount, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "occurDate":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("occurDate"))
+			it.OccurDate, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "category":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("category"))
+			it.Category, err = ec.unmarshalNCostCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostCategory(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateIncomeInput(ctx context.Context, obj interface{}) (models.CreateIncomeInput, error) {
+	var it models.CreateIncomeInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "amount":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("amount"))
+			it.Amount, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "occurDate":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("occurDate"))
+			it.OccurDate, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "category":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("category"))
+			it.Category, err = ec.unmarshalNIncomeCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeCategory(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, obj interface{}) (models.CreateUserInput, error) {
+	var it models.CreateUserInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "userId":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("userId"))
+			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nickName":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("nickName"))
+			it.NickName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateCostInput(ctx context.Context, obj interface{}) (models.UpdateCostInput, error) {
+	var it models.UpdateCostInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -3892,7 +4036,7 @@ func (ec *executionContext) unmarshalInputCostInput(ctx context.Context, obj int
 			var err error
 
 			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("occurDate"))
-			it.OccurDate, err = ec.unmarshalOTime2timeᚐTime(ctx, v)
+			it.OccurDate, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3918,8 +4062,8 @@ func (ec *executionContext) unmarshalInputCostInput(ctx context.Context, obj int
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputIncomeInput(ctx context.Context, obj interface{}) (models.IncomeInput, error) {
-	var it models.IncomeInput
+func (ec *executionContext) unmarshalInputUpdateIncomeInput(ctx context.Context, obj interface{}) (models.UpdateIncomeInput, error) {
+	var it models.UpdateIncomeInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -3936,7 +4080,7 @@ func (ec *executionContext) unmarshalInputIncomeInput(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("occurDate"))
-			it.OccurDate, err = ec.unmarshalOTime2timeᚐTime(ctx, v)
+			it.OccurDate, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3962,8 +4106,8 @@ func (ec *executionContext) unmarshalInputIncomeInput(ctx context.Context, obj i
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj interface{}) (models.UserInput, error) {
-	var it models.UserInput
+func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, obj interface{}) (models.UpdateUserInput, error) {
+	var it models.UpdateUserInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -4784,8 +4928,18 @@ func (ec *executionContext) marshalNCostCategory2githubᚗcomᚋlinkc0829ᚋgo�
 	return v
 }
 
-func (ec *executionContext) unmarshalNCostInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostInput(ctx context.Context, v interface{}) (models.CostInput, error) {
-	res, err := ec.unmarshalInputCostInput(ctx, v)
+func (ec *executionContext) unmarshalNCreateCostInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCreateCostInput(ctx context.Context, v interface{}) (models.CreateCostInput, error) {
+	res, err := ec.unmarshalInputCreateCostInput(ctx, v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCreateIncomeInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCreateIncomeInput(ctx context.Context, v interface{}) (models.CreateIncomeInput, error) {
+	res, err := ec.unmarshalInputCreateIncomeInput(ctx, v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCreateUserInput(ctx context.Context, v interface{}) (models.CreateUserInput, error) {
+	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
 	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
@@ -4826,11 +4980,6 @@ func (ec *executionContext) unmarshalNIncomeCategory2githubᚗcomᚋlinkc0829ᚋ
 
 func (ec *executionContext) marshalNIncomeCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeCategory(ctx context.Context, sel ast.SelectionSet, v models.IncomeCategory) graphql.Marshaler {
 	return v
-}
-
-func (ec *executionContext) unmarshalNIncomeInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeInput(ctx context.Context, v interface{}) (models.IncomeInput, error) {
-	res, err := ec.unmarshalInputIncomeInput(ctx, v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
@@ -4888,6 +5037,21 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	return res
 }
 
+func (ec *executionContext) unmarshalNUpdateCostInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUpdateCostInput(ctx context.Context, v interface{}) (models.UpdateCostInput, error) {
+	res, err := ec.unmarshalInputUpdateCostInput(ctx, v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateIncomeInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUpdateIncomeInput(ctx context.Context, v interface{}) (models.UpdateIncomeInput, error) {
+	res, err := ec.unmarshalInputUpdateIncomeInput(ctx, v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateUserInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUpdateUserInput(ctx context.Context, v interface{}) (models.UpdateUserInput, error) {
+	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNUser2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
@@ -4937,11 +5101,6 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑics�
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNUserInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUserInput(ctx context.Context, v interface{}) (models.UserInput, error) {
-	res, err := ec.unmarshalInputUserInput(ctx, v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -5268,13 +5427,19 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return graphql.MarshalString(*v)
 }
 
-func (ec *executionContext) unmarshalOTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
+	if v == nil {
+		return nil, nil
+	}
 	res, err := graphql.UnmarshalTime(v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
+	return &res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
-	return graphql.MarshalTime(v)
+func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalTime(*v)
 }
 
 func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
