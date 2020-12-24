@@ -133,6 +133,17 @@ func (r *mutationResolver) AddFollower(ctx context.Context, id string) (*models.
 	panic("not implemented")
 }
 
+type userResolver struct{ *Resolver }
+
+
+func (r *userResolver) Friends(ctx context.Context, obj *models.User) ([]*models.User, error) {
+	panic("not implemented")
+}
+
+func (r *userResolver) Followers(ctx context.Context, obj *models.User) ([]*models.User, error) {
+	panic("not implemented")
+}
+
 //helper functions
 
 func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.User, error) {

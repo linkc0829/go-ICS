@@ -8,6 +8,8 @@ import (
 	"strconv"
 )
 
+
+
 func (e Category) IsValid() bool {
 	switch e {
 	case CategoryInvestment, CategorySalory, CategoryOthers, CategoryDaily, CategoryLearning, CategoryCharity:

@@ -22,3 +22,9 @@ func (r *mutationResolver) DeleteIncome(ctx context.Context, id string) (bool, e
 func (r *mutationResolver) LikeIncome(ctx context.Context, id string) (int, error) {
 	panic("not implemented")
 }
+
+type incomeResolver struct{ *Resolver }
+
+func (r *incomeResolver) Vote(ctx context.Context, obj *models.Income) ([]*models.User, error) {
+	panic("not implemented")
+}

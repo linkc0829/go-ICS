@@ -21,3 +21,9 @@ func (r *mutationResolver) DeleteCost(ctx context.Context, id string) (bool, err
 func (r *mutationResolver) LikeCost(ctx context.Context, id string) (int, error) {
 	panic("not implemented")
 }
+
+type costResolver struct{ *Resolver }
+
+func (r *costResolver) Vote(ctx context.Context, obj *models.Cost) ([]*models.User, error) {
+	panic("not implemented")
+}
