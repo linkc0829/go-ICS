@@ -6,12 +6,12 @@ import (
 
 type Cost struct {
 	ID          string    `json:"id"`
-	Owner       *User     `json:"owner"`
+	Owner       string    `json:"owner"`
 	Amount      int       `json:"amount"`
 	OccurDate   time.Time `json:"occurDate"`
 	Category    Category  `json:"category"`
 	Description *string   `json:"description"`
-	Vote        []*string `json:"vote"`
+	Vote        []string `json:"vote"`
 }
 
 type CostInput struct {
@@ -23,12 +23,12 @@ type CostInput struct {
 
 type Income struct {
 	ID          string    `json:"id"`
-	Owner       *User     `json:"owner"`
+	Owner       string    `json:"owner"`
 	Amount      int       `json:"amount"`
 	OccurDate   time.Time `json:"occurDate"`
 	Category    Category  `json:"category"`
 	Description *string   `json:"description"`
-	Vote        []*string `json:"vote"`
+	Vote        []string `json:"vote"`
 }
 
 type IncomeInput struct {
@@ -41,8 +41,8 @@ type IncomeInput struct {
 // List current or historical portfolio
 type Portfolio struct {
 	Total  int       `json:"total"`
-	Income []*Income `json:"income"`
-	Cost   []*Cost   `json:"cost"`
+	Income []string  `json:"income"`
+	Cost   []string  `json:"cost"`
 }
 
 type User struct {
@@ -52,9 +52,9 @@ type User struct {
 	NickName  *string   `json:"nickName"`
 	CreatedAt time.Time `json:"createdAt"`
 	// granted permission to friends to view portfolio
-	Friends []*string `json:"friends"`
+	Friends   []string  `json:"friends"`
 	// permission to view followers portfolio
-	Followers []*string `json:"followers"`
+	Followers []string  `json:"followers"`
 }
 
 type UserInput struct {

@@ -28,3 +28,7 @@ type incomeResolver struct{ *Resolver }
 func (r *incomeResolver) Vote(ctx context.Context, obj *models.Income) ([]*models.User, error) {
 	panic("not implemented")
 }
+
+func (r *incomeResolver) Owner(ctx context.Context, obj *models.Income) (*models.User, error) {
+	panic("not implemented")
+}

@@ -27,3 +27,7 @@ type costResolver struct{ *Resolver }
 func (r *costResolver) Vote(ctx context.Context, obj *models.Cost) ([]*models.User, error) {
 	panic("not implemented")
 }
+
+func (r *costResolver) Owner(ctx context.Context, obj *models.Cost) (*models.User, error) {
+	panic("not implemented")
+}

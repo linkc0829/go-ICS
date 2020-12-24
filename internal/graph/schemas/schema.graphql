@@ -8,9 +8,9 @@ type User{
   nickName: String
   createdAt: Time!
   "granted permission to friends to view portfolio"
-  friends: [User]	  
+  friends: [User!]	  
   "permission to view followers portfolio"
-  followers: [User]	    
+  followers: [User!]	  
 
 }
 
