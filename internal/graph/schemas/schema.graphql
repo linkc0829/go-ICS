@@ -108,9 +108,9 @@ type Query {
   "query current user portfolio"
   me: User!
   myCostHistory: Portfolio!
-  myIncomeHistory: Portfolio!
+  myIncomeHistory(range: Int!): Portfolio!
   myIncome(range: Int!): Portfolio!
-  myCost(range: Int!): Portfolio!
+  myCost: Portfolio!
   myFriends: [User]!
   
   "query followers' portfolio"

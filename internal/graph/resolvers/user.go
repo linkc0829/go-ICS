@@ -178,11 +178,6 @@ func (r *mutationResolver) AddFriend(ctx context.Context, id string) (*models.Us
 	return update, nil
 }
 
-//AddFollower will not use
-func (r *mutationResolver) AddFollower(ctx context.Context, id string) (*models.User, error) {
-	panic("not implemented")
-}
-
 type userResolver struct{ *Resolver }
 
 func (r *userResolver) Friends(ctx context.Context, obj *models.User) ([]*models.User, error) {

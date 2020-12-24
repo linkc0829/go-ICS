@@ -6,7 +6,6 @@ import (
 	"github.com/linkc0829/go-ics/internal/graph/models"
 )
 
-
 func (r *mutationResolver) CreateIncome(ctx context.Context, input models.IncomeInput) (*models.Income, error) {
 	panic("not implemented")
 }
