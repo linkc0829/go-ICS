@@ -18,7 +18,7 @@ func (r *mutationResolver) DeleteCost(ctx context.Context, id string) (bool, err
 	panic("not implemented")
 }
 
-func (r *mutationResolver) LikeCost(ctx context.Context, id string) (int, error) {
+func (r *mutationResolver) VoteCost(ctx context.Context, id string) (int, error) {
 	panic("not implemented")
 }
 

@@ -4,21 +4,28 @@ import (
 	"time"
 )
 
+type Portfolio interface {
+	IsPortfolio()
+}
+
 type Cost struct {
 	ID          string    `json:"id"`
 	Owner       string    `json:"owner"`
 	Amount      int       `json:"amount"`
 	OccurDate   time.Time `json:"occurDate"`
-	Category    Category  `json:"category"`
 	Description *string   `json:"description"`
-	Vote        []string `json:"vote"`
+	Vote        []string  `json:"vote"`
+	Category    CostCategory  `json:"category"`
+
 }
 
+func (Cost) IsPortfolio() {}
+
 type CostInput struct {
-	Amount      *int       `json:"amount"`
-	Date        *time.Time `json:"date"`
-	Category    *Category  `json:"category"`
-	Description *string    `json:"description"`
+	Amount      *int       		`json:"amount"`
+	OccurDate   time.Time 		`json:"occurDate"`
+	Category    *CostCategory   `json:"category"`
+	Description *string    		`json:"description"`
 }
 
 type Income struct {
@@ -26,24 +33,20 @@ type Income struct {
 	Owner       string    `json:"owner"`
 	Amount      int       `json:"amount"`
 	OccurDate   time.Time `json:"occurDate"`
-	Category    Category  `json:"category"`
 	Description *string   `json:"description"`
-	Vote        []string `json:"vote"`
+	Vote        []string  `json:"vote"`
+	Category    IncomeCategory  `json:"category"`
 }
+
+func (Income) IsPortfolio() {}
 
 type IncomeInput struct {
-	Amount      *int       `json:"amount"`
-	Date        *time.Time `json:"date"`
-	Category    *Category  `json:"category"`
-	Description *string    `json:"description"`
+	Amount      *int       		`json:"amount"`
+	OccurDate   time.Time 		`json:"occurDate"`
+	Category    *IncomeCategory `json:"category"`
+	Description *string    		`json:"description"`
 }
 
-// List current or historical portfolio
-type Portfolio struct {
-	Total  int       `json:"total"`
-	Income []string  `json:"income"`
-	Cost   []string  `json:"cost"`
-}
 
 type User struct {
 	ID        string    `json:"id"`
@@ -61,24 +64,4 @@ type UserInput struct {
 	Email    *string `json:"email"`
 	UserID   *string `json:"userId"`
 	NickName *string `json:"nickName"`
-}
-
-type Category string
-
-const (
-	CategoryInvestment Category = "INVESTMENT"
-	CategorySalory     Category = "SALORY"
-	CategoryOthers     Category = "OTHERS"
-	CategoryDaily      Category = "DAILY"
-	CategoryLearning   Category = "LEARNING"
-	CategoryCharity    Category = "CHARITY"
-)
-
-var AllCategory = []Category{
-	CategoryInvestment,
-	CategorySalory,
-	CategoryOthers,
-	CategoryDaily,
-	CategoryLearning,
-	CategoryCharity,
 }

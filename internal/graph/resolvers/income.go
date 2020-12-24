@@ -19,7 +19,7 @@ func (r *mutationResolver) DeleteIncome(ctx context.Context, id string) (bool, e
 	panic("not implemented")
 }
 
-func (r *mutationResolver) LikeIncome(ctx context.Context, id string) (int, error) {
+func (r *mutationResolver) VoteIncome(ctx context.Context, id string) (int, error) {
 	panic("not implemented")
 }
 

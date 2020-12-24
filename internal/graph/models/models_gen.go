@@ -8,31 +8,95 @@ import (
 	"strconv"
 )
 
-func (e Category) IsValid() bool {
+
+type CostCategory string
+
+const (
+	CostCategoryInvestment CostCategory = "INVESTMENT"
+	CostCategoryDaily      CostCategory = "DAILY"
+	CostCategoryLearning   CostCategory = "LEARNING"
+	CostCategoryCharity    CostCategory = "CHARITY"
+	CostCategoryOthers     CostCategory = "OTHERS"
+)
+
+var AllCostCategory = []CostCategory{
+	CostCategoryInvestment,
+	CostCategoryDaily,
+	CostCategoryLearning,
+	CostCategoryCharity,
+	CostCategoryOthers,
+}
+
+func (e CostCategory) IsValid() bool {
 	switch e {
-	case CategoryInvestment, CategorySalory, CategoryOthers, CategoryDaily, CategoryLearning, CategoryCharity:
+	case CostCategoryInvestment, CostCategoryDaily, CostCategoryLearning, CostCategoryCharity, CostCategoryOthers:
 		return true
 	}
 	return false
 }
 
-func (e Category) String() string {
+func (e CostCategory) String() string {
 	return string(e)
 }
 
-func (e *Category) UnmarshalGQL(v interface{}) error {
+func (e *CostCategory) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = Category(str)
+	*e = CostCategory(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Category", str)
+		return fmt.Errorf("%s is not a valid CostCategory", str)
 	}
 	return nil
 }
 
-func (e Category) MarshalGQL(w io.Writer) {
+func (e CostCategory) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type IncomeCategory string
+
+const (
+	IncomeCategoryInvestment IncomeCategory = "INVESTMENT"
+	IncomeCategoryParttime   IncomeCategory = "PARTTIME"
+	IncomeCategorySalory     IncomeCategory = "SALORY"
+	IncomeCategoryOthers     IncomeCategory = "OTHERS"
+)
+
+var AllIncomeCategory = []IncomeCategory{
+	IncomeCategoryInvestment,
+	IncomeCategoryParttime,
+	IncomeCategorySalory,
+	IncomeCategoryOthers,
+}
+
+func (e IncomeCategory) IsValid() bool {
+	switch e {
+	case IncomeCategoryInvestment, IncomeCategoryParttime, IncomeCategorySalory, IncomeCategoryOthers:
+		return true
+	}
+	return false
+}
+
+func (e IncomeCategory) String() string {
+	return string(e)
+}
+
+func (e *IncomeCategory) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IncomeCategory(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IncomeCategory", str)
+	}
+	return nil
+}
+
+func (e IncomeCategory) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

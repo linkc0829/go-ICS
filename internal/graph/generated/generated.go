@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -39,7 +40,6 @@ type ResolverRoot interface {
 	Cost() CostResolver
 	Income() IncomeResolver
 	Mutation() MutationResolver
-	Portfolio() PortfolioResolver
 	Query() QueryResolver
 	User() UserResolver
 }
@@ -69,7 +69,6 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddFollower  func(childComplexity int, id string) int
 		AddFriend    func(childComplexity int, id string) int
 		CreateCost   func(childComplexity int, input models.CostInput) int
 		CreateIncome func(childComplexity int, input models.IncomeInput) int
@@ -77,17 +76,11 @@ type ComplexityRoot struct {
 		DeleteCost   func(childComplexity int, id string) int
 		DeleteIncome func(childComplexity int, id string) int
 		DeleteUser   func(childComplexity int, id string) int
-		LikeCost     func(childComplexity int, id string) int
-		LikeIncome   func(childComplexity int, id string) int
 		UpdateCost   func(childComplexity int, id string, input models.CostInput) int
 		UpdateIncome func(childComplexity int, id string, input models.IncomeInput) int
 		UpdateUser   func(childComplexity int, id string, input models.UserInput) int
-	}
-
-	Portfolio struct {
-		Cost   func(childComplexity int) int
-		Income func(childComplexity int) int
-		Total  func(childComplexity int) int
+		VoteCost     func(childComplexity int, id string) int
+		VoteIncome   func(childComplexity int, id string) int
 	}
 
 	Query struct {
@@ -133,23 +126,18 @@ type MutationResolver interface {
 	UpdateCost(ctx context.Context, id string, input models.CostInput) (*models.Cost, error)
 	DeleteCost(ctx context.Context, id string) (bool, error)
 	AddFriend(ctx context.Context, id string) (*models.User, error)
-	AddFollower(ctx context.Context, id string) (*models.User, error)
-	LikeCost(ctx context.Context, id string) (int, error)
-	LikeIncome(ctx context.Context, id string) (int, error)
-}
-type PortfolioResolver interface {
-	Income(ctx context.Context, obj *models.Portfolio) ([]*models.Income, error)
-	Cost(ctx context.Context, obj *models.Portfolio) ([]*models.Cost, error)
+	VoteCost(ctx context.Context, id string) (int, error)
+	VoteIncome(ctx context.Context, id string) (int, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*models.User, error)
-	MyPortfolio(ctx context.Context) (*models.Portfolio, error)
-	MyHistory(ctx context.Context, rangeArg int) (*models.Portfolio, error)
+	MyPortfolio(ctx context.Context) (models.Portfolio, error)
+	MyHistory(ctx context.Context, rangeArg int) (models.Portfolio, error)
 	MyFriends(ctx context.Context) ([]*models.User, error)
 	MyFollowers(ctx context.Context) ([]*models.User, error)
 	GetUser(ctx context.Context, id string) (*models.User, error)
-	GetUserPortfolio(ctx context.Context, id string) (*models.Portfolio, error)
-	GetUserHistory(ctx context.Context, id string, rangeArg int) (*models.Portfolio, error)
+	GetUserPortfolio(ctx context.Context, id string) (models.Portfolio, error)
+	GetUserHistory(ctx context.Context, id string, rangeArg int) (models.Portfolio, error)
 }
 type UserResolver interface {
 	Friends(ctx context.Context, obj *models.User) ([]*models.User, error)
@@ -269,18 +257,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Income.Vote(childComplexity), true
 
-	case "Mutation.addFollower":
-		if e.complexity.Mutation.AddFollower == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_addFollower_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.AddFollower(childComplexity, args["id"].(string)), true
-
 	case "Mutation.addFriend":
 		if e.complexity.Mutation.AddFriend == nil {
 			break
@@ -365,30 +341,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteUser(childComplexity, args["id"].(string)), true
 
-	case "Mutation.likeCost":
-		if e.complexity.Mutation.LikeCost == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_likeCost_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.LikeCost(childComplexity, args["id"].(string)), true
-
-	case "Mutation.likeIncome":
-		if e.complexity.Mutation.LikeIncome == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_likeIncome_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.LikeIncome(childComplexity, args["id"].(string)), true
-
 	case "Mutation.updateCost":
 		if e.complexity.Mutation.UpdateCost == nil {
 			break
@@ -425,26 +377,29 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateUser(childComplexity, args["id"].(string), args["input"].(models.UserInput)), true
 
-	case "Portfolio.cost":
-		if e.complexity.Portfolio.Cost == nil {
+	case "Mutation.voteCost":
+		if e.complexity.Mutation.VoteCost == nil {
 			break
 		}
 
-		return e.complexity.Portfolio.Cost(childComplexity), true
+		args, err := ec.field_Mutation_voteCost_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
 
-	case "Portfolio.income":
-		if e.complexity.Portfolio.Income == nil {
+		return e.complexity.Mutation.VoteCost(childComplexity, args["id"].(string)), true
+
+	case "Mutation.voteIncome":
+		if e.complexity.Mutation.VoteIncome == nil {
 			break
 		}
 
-		return e.complexity.Portfolio.Income(childComplexity), true
-
-	case "Portfolio.total":
-		if e.complexity.Portfolio.Total == nil {
-			break
+		args, err := ec.field_Mutation_voteIncome_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
 		}
 
-		return e.complexity.Portfolio.Total(childComplexity), true
+		return e.complexity.Mutation.VoteIncome(childComplexity, args["id"].(string)), true
 
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
@@ -652,38 +607,47 @@ type User{
 }
 
 "List current or historical portfolio"
-type Portfolio{
-	total: Int!
-	income: [Income]!
-	cost: [Cost]!
-}
-
-enum Category{
-  INVESTMENT
-  SALORY
-  OTHERS
-  DAILY
-  LEARNING
-  CHARITY
-}
-
-
-type Income{
-  id: ID!
+interface Portfolio{
+	id: ID!
   owner: User!
   amount: Int!
   occurDate: Time!
-  category: Category!
   description: String
   vote: [User]
 }
 
-type Cost{
+enum IncomeCategory{
+  INVESTMENT
+  PARTTIME
+  SALORY
+  OTHERS
+}
+
+enum CostCategory{
+  INVESTMENT
+  DAILY
+  LEARNING
+  CHARITY
+  OTHERS
+}
+
+
+type Income implements Portfolio{
   id: ID!
   owner: User!
   amount: Int!
   occurDate: Time!
-  category: Category!
+  category: IncomeCategory!
+  description: String
+  vote: [User]
+}
+
+type Cost implements Portfolio{
+  id: ID!
+  owner: User!
+  amount: Int!
+  occurDate: Time!
+  category: CostCategory!
   description: String
   vote: [User]
 }
@@ -697,15 +661,15 @@ input UserInput {
 
 input IncomeInput{
   amount: Int
-  date: Time
-  category: Category
+  occurDate: Time
+  category: IncomeCategory
   description: String
 }
 
 input CostInput{
   amount: Int
-  date: Time
-  category: Category
+  occurDate: Time
+  category: CostCategory
   description: String
 }
 
@@ -726,9 +690,8 @@ type Mutation {
   
   "For current user to operate"
   addFriend(id: ID!): User
-  addFollower(id: ID!): User
-  likeCost(id: ID!): Int!
-  likeIncome(id: ID!): Int!
+  voteCost(id: ID!): Int!
+  voteIncome(id: ID!): Int!
 
 }
 
@@ -753,21 +716,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) field_Mutation_addFollower_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
 
 func (ec *executionContext) field_Mutation_addFriend_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -874,36 +822,6 @@ func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_likeCost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_likeIncome_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_updateCost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -973,6 +891,36 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 		}
 	}
 	args["input"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_voteCost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_voteIncome_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -1263,9 +1211,9 @@ func (ec *executionContext) _Cost_category(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.Category)
+	res := resTmp.(models.CostCategory)
 	fc.Result = res
-	return ec.marshalNCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCategory(ctx, field.Selections, res)
+	return ec.marshalNCostCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostCategory(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Cost_description(ctx context.Context, field graphql.CollectedField, obj *models.Cost) (ret graphql.Marshaler) {
@@ -1495,9 +1443,9 @@ func (ec *executionContext) _Income_category(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.Category)
+	res := resTmp.(models.IncomeCategory)
 	fc.Result = res
-	return ec.marshalNCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCategory(ctx, field.Selections, res)
+	return ec.marshalNIncomeCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeCategory(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Income_description(ctx context.Context, field graphql.CollectedField, obj *models.Income) (ret graphql.Marshaler) {
@@ -1969,7 +1917,7 @@ func (ec *executionContext) _Mutation_addFriend(ctx context.Context, field graph
 	return ec.marshalOUser2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_addFollower(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_voteCost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1985,7 +1933,7 @@ func (ec *executionContext) _Mutation_addFollower(ctx context.Context, field gra
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_addFollower_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_voteCost_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1993,45 +1941,7 @@ func (ec *executionContext) _Mutation_addFollower(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddFollower(rctx, args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*models.User)
-	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_likeCost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_likeCost_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().LikeCost(rctx, args["id"].(string))
+		return ec.resolvers.Mutation().VoteCost(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2048,7 +1958,7 @@ func (ec *executionContext) _Mutation_likeCost(ctx context.Context, field graphq
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_likeIncome(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_voteIncome(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2064,7 +1974,7 @@ func (ec *executionContext) _Mutation_likeIncome(ctx context.Context, field grap
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_likeIncome_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_voteIncome_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -2072,7 +1982,7 @@ func (ec *executionContext) _Mutation_likeIncome(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().LikeIncome(rctx, args["id"].(string))
+		return ec.resolvers.Mutation().VoteIncome(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2087,108 +1997,6 @@ func (ec *executionContext) _Mutation_likeIncome(ctx context.Context, field grap
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Portfolio_total(ctx context.Context, field graphql.CollectedField, obj *models.Portfolio) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Portfolio",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Total, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Portfolio_income(ctx context.Context, field graphql.CollectedField, obj *models.Portfolio) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Portfolio",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Portfolio().Income(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*models.Income)
-	fc.Result = res
-	return ec.marshalNIncome2ᚕᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncome(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Portfolio_cost(ctx context.Context, field graphql.CollectedField, obj *models.Portfolio) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Portfolio",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Portfolio().Cost(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*models.Cost)
-	fc.Result = res
-	return ec.marshalNCost2ᚕᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCost(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2254,9 +2062,9 @@ func (ec *executionContext) _Query_myPortfolio(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Portfolio)
+	res := resTmp.(models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_myHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2295,9 +2103,9 @@ func (ec *executionContext) _Query_myHistory(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Portfolio)
+	res := resTmp.(models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_myFriends(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2445,9 +2253,9 @@ func (ec *executionContext) _Query_getUserPortfolio(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Portfolio)
+	res := resTmp.(models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getUserHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2486,9 +2294,9 @@ func (ec *executionContext) _Query_getUserHistory(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Portfolio)
+	res := resTmp.(models.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3858,11 +3666,11 @@ func (ec *executionContext) unmarshalInputCostInput(ctx context.Context, obj int
 			if err != nil {
 				return it, err
 			}
-		case "date":
+		case "occurDate":
 			var err error
 
-			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("date"))
-			it.Date, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("occurDate"))
+			it.OccurDate, err = ec.unmarshalOTime2timeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3870,7 +3678,7 @@ func (ec *executionContext) unmarshalInputCostInput(ctx context.Context, obj int
 			var err error
 
 			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("category"))
-			it.Category, err = ec.unmarshalOCategory2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCategory(ctx, v)
+			it.Category, err = ec.unmarshalOCostCategory2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostCategory(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3902,11 +3710,11 @@ func (ec *executionContext) unmarshalInputIncomeInput(ctx context.Context, obj i
 			if err != nil {
 				return it, err
 			}
-		case "date":
+		case "occurDate":
 			var err error
 
-			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("date"))
-			it.Date, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("occurDate"))
+			it.OccurDate, err = ec.unmarshalOTime2timeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3914,7 +3722,7 @@ func (ec *executionContext) unmarshalInputIncomeInput(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("category"))
-			it.Category, err = ec.unmarshalOCategory2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCategory(ctx, v)
+			it.Category, err = ec.unmarshalOIncomeCategory2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeCategory(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3972,11 +3780,34 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Portfolio(ctx context.Context, sel ast.SelectionSet, obj models.Portfolio) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case models.Income:
+		return ec._Income(ctx, sel, &obj)
+	case *models.Income:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Income(ctx, sel, obj)
+	case models.Cost:
+		return ec._Cost(ctx, sel, &obj)
+	case *models.Cost:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Cost(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
 
-var costImplementors = []string{"Cost"}
+var costImplementors = []string{"Cost", "Portfolio"}
 
 func (ec *executionContext) _Cost(ctx context.Context, sel ast.SelectionSet, obj *models.Cost) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, costImplementors)
@@ -4045,7 +3876,7 @@ func (ec *executionContext) _Cost(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
-var incomeImplementors = []string{"Income"}
+var incomeImplementors = []string{"Income", "Portfolio"}
 
 func (ec *executionContext) _Income(ctx context.Context, sel ast.SelectionSet, obj *models.Income) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, incomeImplementors)
@@ -4176,73 +4007,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "addFriend":
 			out.Values[i] = ec._Mutation_addFriend(ctx, field)
-		case "addFollower":
-			out.Values[i] = ec._Mutation_addFollower(ctx, field)
-		case "likeCost":
-			out.Values[i] = ec._Mutation_likeCost(ctx, field)
+		case "voteCost":
+			out.Values[i] = ec._Mutation_voteCost(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "likeIncome":
-			out.Values[i] = ec._Mutation_likeIncome(ctx, field)
+		case "voteIncome":
+			out.Values[i] = ec._Mutation_voteIncome(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var portfolioImplementors = []string{"Portfolio"}
-
-func (ec *executionContext) _Portfolio(ctx context.Context, sel ast.SelectionSet, obj *models.Portfolio) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, portfolioImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Portfolio")
-		case "total":
-			out.Values[i] = ec._Portfolio_total(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "income":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Portfolio_income(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "cost":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Portfolio_cost(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4722,55 +4496,8 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCategory(ctx context.Context, v interface{}) (models.Category, error) {
-	var res models.Category
-	err := res.UnmarshalGQL(v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCategory(ctx context.Context, sel ast.SelectionSet, v models.Category) graphql.Marshaler {
-	return v
-}
-
 func (ec *executionContext) marshalNCost2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCost(ctx context.Context, sel ast.SelectionSet, v models.Cost) graphql.Marshaler {
 	return ec._Cost(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNCost2ᚕᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCost(ctx context.Context, sel ast.SelectionSet, v []*models.Cost) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOCost2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCost(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalNCost2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCost(ctx context.Context, sel ast.SelectionSet, v *models.Cost) graphql.Marshaler {
@@ -4781,6 +4508,16 @@ func (ec *executionContext) marshalNCost2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑics�
 		return graphql.Null
 	}
 	return ec._Cost(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNCostCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostCategory(ctx context.Context, v interface{}) (models.CostCategory, error) {
+	var res models.CostCategory
+	err := res.UnmarshalGQL(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCostCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostCategory(ctx context.Context, sel ast.SelectionSet, v models.CostCategory) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNCostInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostInput(ctx context.Context, v interface{}) (models.CostInput, error) {
@@ -4807,43 +4544,6 @@ func (ec *executionContext) marshalNIncome2githubᚗcomᚋlinkc0829ᚋgoᚑics�
 	return ec._Income(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNIncome2ᚕᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncome(ctx context.Context, sel ast.SelectionSet, v []*models.Income) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOIncome2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncome(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
 func (ec *executionContext) marshalNIncome2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncome(ctx context.Context, sel ast.SelectionSet, v *models.Income) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4852,6 +4552,16 @@ func (ec *executionContext) marshalNIncome2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑic
 		return graphql.Null
 	}
 	return ec._Income(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNIncomeCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeCategory(ctx context.Context, v interface{}) (models.IncomeCategory, error) {
+	var res models.IncomeCategory
+	err := res.UnmarshalGQL(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNIncomeCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeCategory(ctx context.Context, sel ast.SelectionSet, v models.IncomeCategory) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNIncomeInput2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeInput(ctx context.Context, v interface{}) (models.IncomeInput, error) {
@@ -4875,10 +4585,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 }
 
 func (ec *executionContext) marshalNPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx context.Context, sel ast.SelectionSet, v models.Portfolio) graphql.Marshaler {
-	return ec._Portfolio(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNPortfolio2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolio(ctx context.Context, sel ast.SelectionSet, v *models.Portfolio) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -5227,34 +4933,36 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) unmarshalOCategory2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCategory(ctx context.Context, v interface{}) (*models.Category, error) {
+func (ec *executionContext) unmarshalOCostCategory2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostCategory(ctx context.Context, v interface{}) (*models.CostCategory, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var res = new(models.Category)
+	var res = new(models.CostCategory)
 	err := res.UnmarshalGQL(v)
 	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOCategory2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCategory(ctx context.Context, sel ast.SelectionSet, v *models.Category) graphql.Marshaler {
+func (ec *executionContext) marshalOCostCategory2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostCategory(ctx context.Context, sel ast.SelectionSet, v *models.CostCategory) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) marshalOCost2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCost(ctx context.Context, sel ast.SelectionSet, v *models.Cost) graphql.Marshaler {
+func (ec *executionContext) unmarshalOIncomeCategory2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeCategory(ctx context.Context, v interface{}) (*models.IncomeCategory, error) {
 	if v == nil {
-		return graphql.Null
+		return nil, nil
 	}
-	return ec._Cost(ctx, sel, v)
+	var res = new(models.IncomeCategory)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOIncome2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncome(ctx context.Context, sel ast.SelectionSet, v *models.Income) graphql.Marshaler {
+func (ec *executionContext) marshalOIncomeCategory2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeCategory(ctx context.Context, sel ast.SelectionSet, v *models.IncomeCategory) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._Income(ctx, sel, v)
+	return v
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
@@ -5296,19 +5004,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return graphql.MarshalString(*v)
 }
 
-func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
-	if v == nil {
-		return nil, nil
-	}
+func (ec *executionContext) unmarshalOTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
 	res, err := graphql.UnmarshalTime(v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalTime(*v)
+func (ec *executionContext) marshalOTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	return graphql.MarshalTime(v)
 }
 
 func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
