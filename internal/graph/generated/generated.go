@@ -111,10 +111,14 @@ type ComplexityRoot struct {
 type CostResolver interface {
 	Owner(ctx context.Context, obj *models.Cost) (*models.User, error)
 
+	Category(ctx context.Context, obj *models.Cost) (models.PortfolioCategory, error)
+
 	Vote(ctx context.Context, obj *models.Cost) ([]*models.User, error)
 }
 type IncomeResolver interface {
 	Owner(ctx context.Context, obj *models.Income) (*models.User, error)
+
+	Category(ctx context.Context, obj *models.Income) (models.PortfolioCategory, error)
 
 	Vote(ctx context.Context, obj *models.Income) ([]*models.User, error)
 }
@@ -648,7 +652,6 @@ type User{
 
 }
 
-"List current or historical portfolio"
 interface Portfolio{
   id: ID!
   owner: User!
@@ -656,6 +659,17 @@ interface Portfolio{
   occurDate: Time!
   description: String
   vote: [User]
+  category: PortfolioCategory!
+}
+
+enum PortfolioCategory{
+  INVESTMENT
+  PARTTIME
+  SALARY
+  DAILY
+  LEARNING
+  CHARITY
+  OTHERS
 }
 
 enum IncomeCategory{
@@ -673,13 +687,12 @@ enum CostCategory{
   OTHERS
 }
 
-
 type Income implements Portfolio{
   id: ID!
   owner: User!
   amount: Int!
   occurDate: Time!
-  category: IncomeCategory!
+  category: PortfolioCategory!
   description: String
   vote: [User]
 }
@@ -689,7 +702,7 @@ type Cost implements Portfolio{
   owner: User!
   amount: Int!
   occurDate: Time!
-  category: CostCategory!
+  category: PortfolioCategory!
   description: String
   vote: [User]
 }
@@ -707,6 +720,7 @@ input CreateUserInput {
   nickName: String
 }
 
+"""occurDate format: 2020-12-26T12:14:36.986+00:00"""
 input UpdateIncomeInput{
   amount: Int
   occurDate: Time
@@ -1312,13 +1326,13 @@ func (ec *executionContext) _Cost_category(ctx context.Context, field graphql.Co
 		Object:   "Cost",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Category, nil
+		return ec.resolvers.Cost().Category(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1330,9 +1344,9 @@ func (ec *executionContext) _Cost_category(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.CostCategory)
+	res := resTmp.(models.PortfolioCategory)
 	fc.Result = res
-	return ec.marshalNCostCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐCostCategory(ctx, field.Selections, res)
+	return ec.marshalNPortfolioCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolioCategory(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Cost_description(ctx context.Context, field graphql.CollectedField, obj *models.Cost) (ret graphql.Marshaler) {
@@ -1544,13 +1558,13 @@ func (ec *executionContext) _Income_category(ctx context.Context, field graphql.
 		Object:   "Income",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Category, nil
+		return ec.resolvers.Income().Category(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1562,9 +1576,9 @@ func (ec *executionContext) _Income_category(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.IncomeCategory)
+	res := resTmp.(models.PortfolioCategory)
 	fc.Result = res
-	return ec.marshalNIncomeCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐIncomeCategory(ctx, field.Selections, res)
+	return ec.marshalNPortfolioCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolioCategory(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Income_description(ctx context.Context, field graphql.CollectedField, obj *models.Income) (ret graphql.Marshaler) {
@@ -4217,10 +4231,19 @@ func (ec *executionContext) _Cost(ctx context.Context, sel ast.SelectionSet, obj
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "category":
-			out.Values[i] = ec._Cost_category(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Cost_category(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "description":
 			out.Values[i] = ec._Cost_description(ctx, field, obj)
 		case "vote":
@@ -4286,10 +4309,19 @@ func (ec *executionContext) _Income(ctx context.Context, sel ast.SelectionSet, o
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "category":
-			out.Values[i] = ec._Income_category(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Income_category(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "description":
 			out.Values[i] = ec._Income_description(ctx, field, obj)
 		case "vote":
@@ -5038,6 +5070,16 @@ func (ec *executionContext) marshalNPortfolio2ᚕgithubᚗcomᚋlinkc0829ᚋgo�
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) unmarshalNPortfolioCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolioCategory(ctx context.Context, v interface{}) (models.PortfolioCategory, error) {
+	var res models.PortfolioCategory
+	err := res.UnmarshalGQL(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPortfolioCategory2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPortfolioCategory(ctx context.Context, sel ast.SelectionSet, v models.PortfolioCategory) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

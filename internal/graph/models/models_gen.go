@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 type CostCategory string
@@ -97,5 +98,56 @@ func (e *IncomeCategory) UnmarshalGQL(v interface{}) error {
 }
 
 func (e IncomeCategory) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type PortfolioCategory string
+
+const (
+	PortfolioCategoryInvestment PortfolioCategory = "INVESTMENT"
+	PortfolioCategoryParttime   PortfolioCategory = "PARTTIME"
+	PortfolioCategorySalary     PortfolioCategory = "SALARY"
+	PortfolioCategoryDaily      PortfolioCategory = "DAILY"
+	PortfolioCategoryLearning   PortfolioCategory = "LEARNING"
+	PortfolioCategoryCharity    PortfolioCategory = "CHARITY"
+	PortfolioCategoryOthers     PortfolioCategory = "OTHERS"
+)
+
+var AllPortfolioCategory = []PortfolioCategory{
+	PortfolioCategoryInvestment,
+	PortfolioCategoryParttime,
+	PortfolioCategorySalary,
+	PortfolioCategoryDaily,
+	PortfolioCategoryLearning,
+	PortfolioCategoryCharity,
+	PortfolioCategoryOthers,
+}
+
+func (e PortfolioCategory) IsValid() bool {
+	switch e {
+	case PortfolioCategoryInvestment, PortfolioCategoryParttime, PortfolioCategorySalary, PortfolioCategoryDaily, PortfolioCategoryLearning, PortfolioCategoryCharity, PortfolioCategoryOthers:
+		return true
+	}
+	return false
+}
+
+func (e PortfolioCategory) String() string {
+	return string(e)
+}
+
+func (e *PortfolioCategory) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PortfolioCategory(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PortfolioCategory", str)
+	}
+	return nil
+}
+
+func (e PortfolioCategory) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

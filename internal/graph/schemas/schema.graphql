@@ -54,7 +54,7 @@ type Income implements Portfolio{
   owner: User!
   amount: Int!
   occurDate: Time!
-  category: IncomeCategory!
+  category: PortfolioCategory!
   description: String
   vote: [User]
 }
@@ -64,7 +64,7 @@ type Cost implements Portfolio{
   owner: User!
   amount: Int!
   occurDate: Time!
-  category: CostCategory!
+  category: PortfolioCategory!
   description: String
   vote: [User]
 }
