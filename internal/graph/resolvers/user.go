@@ -200,6 +200,20 @@ func (r *userResolver) Followers(ctx context.Context, obj *models.User) ([]*mode
 
 //helper functions
 
+func getDBUserByID(ctx context.Context, DB *mongodb.MongoDB, id string) (*dbModel.UserModel, error) {
+	userID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	qUser := bson.M{"_id": userID}
+	user := dbModel.UserModel{}
+	if err := DB.Users.FindOne(ctx, qUser).Decode(&user); err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.User, error) {
 
 	hexID, err := primitive.ObjectIDFromHex(ID)
@@ -254,7 +268,7 @@ func getUserFollowers(ctx context.Context, DB *mongodb.MongoDB, me *dbModel.User
 		return nil, err
 	}
 	var results []bson.M
-	if err = cursor.All(context.TODO(), &results); err != nil {
+	if err = cursor.All(ctx, &results); err != nil {
 		log.Fatal(err)
 	}
 	for _, result := range results {

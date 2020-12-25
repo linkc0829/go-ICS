@@ -9,12 +9,14 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	tf "github.com/linkc0829/go-ics/internal/graph/resolvers/transformer"
 )
 
 func (r *mutationResolver) CreateCost(ctx context.Context, input models.CreateCostInput) (*models.Cost, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
 
-	newCost := &dbModel.CostModel{
+	newCost := dbModel.CostModel{
 		ID:          primitive.NewObjectID(),
 		Owner:       me.ID,
 		Amount:      input.Amount,
@@ -28,18 +30,9 @@ func (r *mutationResolver) CreateCost(ctx context.Context, input models.CreateCo
 	if err != nil {
 		return nil, err
 	}
+	result := tf.DBPortfolioToGQLPortfolio(newCost).(models.Cost)
 
-	result := &models.Cost{
-		ID:          newCost.ID.Hex(),
-		Owner:       me.ID.Hex(),
-		Amount:      input.Amount,
-		OccurDate:   input.OccurDate,
-		Description: input.Description,
-		Vote:        nil,
-		Category:    input.Category,
-	}
-
-	return result, nil
+	return &result, nil
 }
 
 func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input models.UpdateCostInput) (*models.Cost, error) {
@@ -73,22 +66,9 @@ func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input mode
 		return nil, err
 	}
 
-	vote := []string{}
-	for _, v := range result.Vote {
-		vote = append(vote, v.Hex())
-	}
+	ret := tf.DBPortfolioToGQLPortfolio(result).(models.Cost)
 
-	ret := &models.Cost{
-		ID:          result.ID.Hex(),
-		Owner:       result.ID.Hex(),
-		Amount:      result.Amount,
-		OccurDate:   result.OccurDate,
-		Description: result.Description,
-		Vote:        vote,
-		Category:    result.Category,
-	}
-
-	return ret, nil
+	return &ret, nil
 }
 
 func (r *mutationResolver) DeleteCost(ctx context.Context, id string) (bool, error) {

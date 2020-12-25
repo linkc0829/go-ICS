@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/linkc0829/go-ics/internal/graph/models"
+	tf "github.com/linkc0829/go-ics/internal/graph/resolvers/transformer"
 	dbModel "github.com/linkc0829/go-ics/internal/mongodb/models"
 	"github.com/linkc0829/go-ics/pkg/utils"
 
@@ -14,7 +15,7 @@ import (
 func (r *mutationResolver) CreateIncome(ctx context.Context, input models.CreateIncomeInput) (*models.Income, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
 
-	newIncome := &dbModel.IncomeModel{
+	newIncome := dbModel.IncomeModel{
 		ID:          primitive.NewObjectID(),
 		Owner:       me.ID,
 		Amount:      input.Amount,
@@ -29,17 +30,9 @@ func (r *mutationResolver) CreateIncome(ctx context.Context, input models.Create
 		return nil, err
 	}
 
-	result := &models.Income{
-		ID:          newIncome.ID.Hex(),
-		Owner:       me.ID.Hex(),
-		Amount:      input.Amount,
-		OccurDate:   input.OccurDate,
-		Description: input.Description,
-		Vote:        nil,
-		Category:    input.Category,
-	}
+	result := tf.DBPortfolioToGQLPortfolio(newIncome).(models.Income)
 
-	return result, nil
+	return &result, nil
 }
 
 func (r *mutationResolver) UpdateIncome(ctx context.Context, id string, input models.UpdateIncomeInput) (*models.Income, error) {
@@ -73,22 +66,9 @@ func (r *mutationResolver) UpdateIncome(ctx context.Context, id string, input mo
 		return nil, err
 	}
 
-	vote := []string{}
-	for _, v := range result.Vote {
-		vote = append(vote, v.Hex())
-	}
+	ret := tf.DBPortfolioToGQLPortfolio(result).(models.Income)
 
-	ret := &models.Income{
-		ID:          result.ID.Hex(),
-		Owner:       result.ID.Hex(),
-		Amount:      result.Amount,
-		OccurDate:   result.OccurDate,
-		Description: result.Description,
-		Vote:        vote,
-		Category:    result.Category,
-	}
-
-	return ret, nil
+	return &ret, nil
 }
 
 func (r *mutationResolver) DeleteIncome(ctx context.Context, id string) (bool, error) {

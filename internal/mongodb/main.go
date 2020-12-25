@@ -38,7 +38,7 @@ func ConnectDB(cfg *utils.ServerConfig) *MongoDB {
 	return &MongoDB{
 		Session:       client,
 		Users:         client.Database("ics").Collection("users"),
-		DeletedUsers:  client.Database("ics").Collection("deletedUser"),
+		DeletedUsers:  client.Database("ics").Collection("deletedUsers"),
 		Income:        client.Database("ics").Collection("income"),
 		DeletedIncome: client.Database("ics").Collection("deletedIncome"),
 		Cost:          client.Database("ics").Collection("cost"),
