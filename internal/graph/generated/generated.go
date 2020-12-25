@@ -111,14 +111,10 @@ type ComplexityRoot struct {
 type CostResolver interface {
 	Owner(ctx context.Context, obj *models.Cost) (*models.User, error)
 
-	Category(ctx context.Context, obj *models.Cost) (models.PortfolioCategory, error)
-
 	Vote(ctx context.Context, obj *models.Cost) ([]*models.User, error)
 }
 type IncomeResolver interface {
 	Owner(ctx context.Context, obj *models.Income) (*models.User, error)
-
-	Category(ctx context.Context, obj *models.Income) (models.PortfolioCategory, error)
 
 	Vote(ctx context.Context, obj *models.Income) ([]*models.User, error)
 }
@@ -1326,13 +1322,13 @@ func (ec *executionContext) _Cost_category(ctx context.Context, field graphql.Co
 		Object:   "Cost",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Cost().Category(rctx, obj)
+		return obj.Category, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1558,13 +1554,13 @@ func (ec *executionContext) _Income_category(ctx context.Context, field graphql.
 		Object:   "Income",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Income().Category(rctx, obj)
+		return obj.Category, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4231,19 +4227,10 @@ func (ec *executionContext) _Cost(ctx context.Context, sel ast.SelectionSet, obj
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "category":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Cost_category(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._Cost_category(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "description":
 			out.Values[i] = ec._Cost_description(ctx, field, obj)
 		case "vote":
@@ -4309,19 +4296,10 @@ func (ec *executionContext) _Income(ctx context.Context, sel ast.SelectionSet, o
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "category":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Income_category(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._Income_category(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "description":
 			out.Values[i] = ec._Income_description(ctx, field, obj)
 		case "vote":

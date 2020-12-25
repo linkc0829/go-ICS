@@ -15,7 +15,7 @@ type Cost struct {
 	OccurDate   time.Time    `json:"occurDate"`
 	Description *string      `json:"description"`
 	Vote        []string     `json:"vote"`
-	Category    CostCategory `json:"category"`
+	Category    PortfolioCategory `json:"category"`
 }
 
 func (Cost) IsPortfolio() {}
@@ -47,7 +47,7 @@ type Income struct {
 	OccurDate   time.Time      `json:"occurDate"`
 	Description *string        `json:"description"`
 	Vote        []string       `json:"vote"`
-	Category    IncomeCategory `json:"category"`
+	Category    PortfolioCategory `json:"category"`
 }
 
 func (Income) IsPortfolio() {}
