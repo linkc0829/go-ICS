@@ -21,6 +21,17 @@ interface Portfolio{
   occurDate: Time!
   description: String
   vote: [User]
+  category: PortfolioCategory!
+}
+
+enum PortfolioCategory{
+  INVESTMENT
+  PARTTIME
+  SALARY
+  DAILY
+  LEARNING
+  CHARITY
+  OTHERS
 }
 
 enum IncomeCategory{
@@ -37,7 +48,6 @@ enum CostCategory{
   CHARITY
   OTHERS
 }
-
 
 type Income implements Portfolio{
   id: ID!
@@ -72,6 +82,7 @@ input CreateUserInput {
   nickName: String
 }
 
+"""occurDate format: 2020-12-26T12:14:36.986+00:00"""
 input UpdateIncomeInput{
   amount: Int
   occurDate: Time

@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"context"
+	"errors"
 	"log"
 	"strconv"
 	"time"
@@ -13,6 +14,7 @@ import (
 
 	tf "github.com/linkc0829/go-ics/internal/graph/resolvers/transformer"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (r *queryResolver) MyCostHistory(ctx context.Context, rangeArg int) ([]models.Portfolio, error) {
@@ -43,7 +45,8 @@ func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Po
 	}
 
 	q := bson.M{"owner": user.ID}
-	cursor, err := r.DB.Cost.Find(ctx, q)
+	findopt := options.Find().SetSort(bson.M{"occurDate": -1})
+	cursor, err := r.DB.Cost.Find(ctx, q, findopt)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +54,40 @@ func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Po
 	if err = cursor.All(ctx, &results); err != nil {
 		log.Fatal(err)
 	}
-	return decodeFindResult(results), nil
+	qy, qm, qd := user.LastQuery.Date()
+	yy, mm, dd := time.Now().Date()
+	//if today has quired, return
+	if (qy == yy) || (qm == mm) || (qd == dd) {
+		return decodeFindResult(results), nil
+	}
+
+	//move expired cost to history if user hasn't queried today
+	today := time.Date(yy, mm, dd, 0, 0, 0, 0, time.Local)
+	rets := []models.Portfolio{}
+	for _, result := range results {
+		c := dbModel.CostModel{}
+		//encode mongodb result to JSON format, then decode
+		bsonBytes, _ := bson.Marshal(result)
+		bson.Unmarshal(bsonBytes, &c)
+		if c.OccurDate.Before(today) {
+			//insert to history
+			_, err := r.DB.CostHistory.InsertOne(ctx, c)
+			if err != nil {
+				return nil, err
+			}
+			//delete old entry
+			result, err := r.DB.Cost.DeleteOne(ctx, bson.M{"_id": c.ID})
+			if err != nil {
+				return nil, err
+			}
+			if result.DeletedCount != 1 {
+				return nil, errors.New("delete failed when move old cost entry")
+			}
+		} else {
+			rets = append(rets, tf.DBPortfolioToGQLPortfolio(c))
+		}
+	}
+	return rets, nil
 }
 
 func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.Portfolio, error) {
@@ -61,7 +97,8 @@ func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.
 	}
 
 	q := bson.M{"owner": user.ID}
-	cursor, err := r.DB.Income.Find(ctx, q)
+	findopt := options.Find().SetSort(bson.M{"occurDate": -1})
+	cursor, err := r.DB.Income.Find(ctx, q, findopt)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +106,40 @@ func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.
 	if err = cursor.All(ctx, &results); err != nil {
 		log.Fatal(err)
 	}
-	return decodeFindResult(results), nil
+	qy, qm, qd := user.LastQuery.Date()
+	yy, mm, dd := time.Now().Date()
+	//if today has quired, return
+	if (qy == yy) || (qm == mm) || (qd == dd) {
+		return decodeFindResult(results), nil
+	}
+
+	//move expired cost to history if user hasn't queried today
+	today := time.Date(yy, mm, dd, 0, 0, 0, 0, time.Local)
+	rets := []models.Portfolio{}
+	for _, result := range results {
+		c := dbModel.CostModel{}
+		//encode mongodb result to JSON format, then decode
+		bsonBytes, _ := bson.Marshal(result)
+		bson.Unmarshal(bsonBytes, &c)
+		if c.OccurDate.Before(today) {
+			//insert to history
+			_, err := r.DB.IncomeHistory.InsertOne(ctx, c)
+			if err != nil {
+				return nil, err
+			}
+			//delete old entry
+			result, err := r.DB.Income.DeleteOne(ctx, bson.M{"_id": c.ID})
+			if err != nil {
+				return nil, err
+			}
+			if result.DeletedCount != 1 {
+				return nil, errors.New("delete failed when move old cost entry")
+			}
+		} else {
+			rets = append(rets, tf.DBPortfolioToGQLPortfolio(c))
+		}
+	}
+	return rets, nil
 }
 
 func (r *queryResolver) GetUserIncomeHistory(ctx context.Context, id string, rangeArg int) ([]models.Portfolio, error) {
@@ -84,7 +154,8 @@ func (r *queryResolver) GetUserIncomeHistory(ctx context.Context, id string, ran
 		"$gte": fromDate,
 		"$lte": toDate,
 	}}
-	cursor, err := r.DB.IncomeHistory.Find(ctx, q)
+	findopt := options.Find().SetSort(bson.M{"occurDate": -1})
+	cursor, err := r.DB.IncomeHistory.Find(ctx, q, findopt)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +177,8 @@ func (r *queryResolver) GetUserCostHistory(ctx context.Context, id string, range
 		"$gte": fromDate,
 		"$lte": toDate,
 	}}
-	cursor, err := r.DB.CostHistory.Find(ctx, q)
+	findopt := options.Find().SetSort(bson.M{"occurDate": -1})
+	cursor, err := r.DB.CostHistory.Find(ctx, q, findopt)
 	if err != nil {
 		return nil, err
 	}
