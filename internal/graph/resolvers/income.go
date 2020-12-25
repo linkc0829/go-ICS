@@ -15,6 +15,7 @@ import (
 func (r *mutationResolver) CreateIncome(ctx context.Context, input models.CreateIncomeInput) (*models.Income, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
 
+	cat := (models.PortfolioCategory)(input.Category)
 	newIncome := dbModel.IncomeModel{
 		ID:          primitive.NewObjectID(),
 		Owner:       me.ID,
@@ -22,7 +23,7 @@ func (r *mutationResolver) CreateIncome(ctx context.Context, input models.Create
 		OccurDate:   input.OccurDate,
 		Description: input.Description,
 		Vote:        nil,
-		Category:    input.Category,
+		Category:    cat,
 	}
 	//insert to db
 	_, err := r.DB.Income.InsertOne(ctx, newIncome)
@@ -51,7 +52,8 @@ func (r *mutationResolver) UpdateIncome(ctx context.Context, id string, input mo
 		result.Amount = *input.Amount
 	}
 	if input.Category != nil {
-		result.Category = *input.Category
+		cat := (*models.PortfolioCategory)(input.Category)
+		result.Category = *cat
 	}
 	if input.Description != nil {
 		result.Description = input.Description
@@ -139,4 +141,8 @@ func (r *incomeResolver) Owner(ctx context.Context, obj *models.Income) (*models
 		return nil, err
 	}
 	return owner[0], nil
+}
+
+func (r *incomeResolver) Category(ctx context.Context, obj *models.Income) (models.PortfolioCategory, error) {
+	panic("not implemented")
 }

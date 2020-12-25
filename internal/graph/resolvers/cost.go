@@ -16,6 +16,7 @@ import (
 func (r *mutationResolver) CreateCost(ctx context.Context, input models.CreateCostInput) (*models.Cost, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
 
+	cat := (models.PortfolioCategory)(input.Category)
 	newCost := dbModel.CostModel{
 		ID:          primitive.NewObjectID(),
 		Owner:       me.ID,
@@ -23,7 +24,7 @@ func (r *mutationResolver) CreateCost(ctx context.Context, input models.CreateCo
 		OccurDate:   input.OccurDate,
 		Description: input.Description,
 		Vote:        nil,
-		Category:    input.Category,
+		Category:    cat,
 	}
 	//insert to db
 	_, err := r.DB.Cost.InsertOne(ctx, newCost)
@@ -51,7 +52,8 @@ func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input mode
 		result.Amount = *input.Amount
 	}
 	if input.Category != nil {
-		result.Category = *input.Category
+		cat := (*models.PortfolioCategory)(input.Category)
+		result.Category = *cat
 	}
 	if input.Description != nil {
 		result.Description = input.Description
@@ -139,4 +141,8 @@ func (r *costResolver) Owner(ctx context.Context, obj *models.Cost) (*models.Use
 		return nil, err
 	}
 	return owner[0], nil
+}
+
+func (r *costResolver) Category(ctx context.Context, obj *models.Cost) (models.PortfolioCategory, error) {
+	panic("not implemented")
 }

@@ -27,25 +27,25 @@ type PortfolioModel interface {
 }
 
 type IncomeModel struct {
-	ID          primitive.ObjectID    `bson:"_id" json:"_id,omitempty"`
-	Owner       primitive.ObjectID    `bson:"owner" json:"owner,omitempty"`
-	Amount      int                   `bson:"amount" json:"amount,omitempty"`
-	OccurDate   time.Time             `bson:"occurDate" json:"occurDate,omitempty"`
-	Category    models.IncomeCategory `bson:"category" json:"category,omitempty"`
-	Description *string               `bson:"description" json:"description,omitempty"`
-	Vote        []primitive.ObjectID  `bson:"vote" json:"vote,omitempty"`
+	ID          primitive.ObjectID       `bson:"_id" json:"_id,omitempty"`
+	Owner       primitive.ObjectID       `bson:"owner" json:"owner,omitempty"`
+	Amount      int                      `bson:"amount" json:"amount,omitempty"`
+	OccurDate   time.Time                `bson:"occurDate" json:"occurDate,omitempty"`
+	Category    models.PortfolioCategory `bson:"category" json:"category,omitempty"`
+	Description *string                  `bson:"description" json:"description,omitempty"`
+	Vote        []primitive.ObjectID     `bson:"vote" json:"vote,omitempty"`
 }
 
 func (IncomeModel) IsPortfolio() {}
 
 type CostModel struct {
-	ID          primitive.ObjectID   `bson:"_id" json:"_id,omitempty"`
-	Owner       primitive.ObjectID   `bson:"owner" json:"owner,omitempty"`
-	Amount      int                  `bson:"amount" json:"amount,omitempty"`
-	OccurDate   time.Time            `bson:"occurDate" json:"occurDate,omitempty"`
-	Category    models.CostCategory  `bson:"category" json:"category,omitempty"`
-	Description *string              `bson:"description" json:"description,omitempty"`
-	Vote        []primitive.ObjectID `bson:"vote" json:"vote,omitempty"`
+	ID          primitive.ObjectID       `bson:"_id" json:"_id,omitempty"`
+	Owner       primitive.ObjectID       `bson:"owner" json:"owner,omitempty"`
+	Amount      int                      `bson:"amount" json:"amount,omitempty"`
+	OccurDate   time.Time                `bson:"occurDate" json:"occurDate,omitempty"`
+	Category    models.PortfolioCategory `bson:"category" json:"category,omitempty"`
+	Description *string                  `bson:"description" json:"description,omitempty"`
+	Vote        []primitive.ObjectID     `bson:"vote" json:"vote,omitempty"`
 }
 
 func (CostModel) IsPortfolio() {}
