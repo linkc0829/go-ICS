@@ -661,7 +661,7 @@ interface Portfolio{
 enum IncomeCategory{
   INVESTMENT
   PARTTIME
-  SALORY
+  SALARY
   OTHERS
 }
 

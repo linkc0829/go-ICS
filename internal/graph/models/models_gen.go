@@ -60,20 +60,20 @@ type IncomeCategory string
 const (
 	IncomeCategoryInvestment IncomeCategory = "INVESTMENT"
 	IncomeCategoryParttime   IncomeCategory = "PARTTIME"
-	IncomeCategorySalory     IncomeCategory = "SALORY"
+	IncomeCategorySalary     IncomeCategory = "SALARY"
 	IncomeCategoryOthers     IncomeCategory = "OTHERS"
 )
 
 var AllIncomeCategory = []IncomeCategory{
 	IncomeCategoryInvestment,
 	IncomeCategoryParttime,
-	IncomeCategorySalory,
+	IncomeCategorySalary,
 	IncomeCategoryOthers,
 }
 
 func (e IncomeCategory) IsValid() bool {
 	switch e {
-	case IncomeCategoryInvestment, IncomeCategoryParttime, IncomeCategorySalory, IncomeCategoryOthers:
+	case IncomeCategoryInvestment, IncomeCategoryParttime, IncomeCategorySalary, IncomeCategoryOthers:
 		return true
 	}
 	return false
