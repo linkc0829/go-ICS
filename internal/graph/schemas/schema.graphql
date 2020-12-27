@@ -83,6 +83,7 @@ input CreateUserInput {
 }
 
 """occurDate format: 2020-12-26T12:14:36.986+00:00"""
+"""occurDate should not before today"""
 input UpdateIncomeInput{
   amount: Int
   occurDate: Time

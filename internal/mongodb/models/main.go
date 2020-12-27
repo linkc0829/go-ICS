@@ -9,17 +9,18 @@ import (
 
 // UserModel struct
 type UserModel struct {
-	ID           primitive.ObjectID   `bson:"_id" json:"_id,omitempty"`
-	UserID       string               `bson:"userid" json:"userid,omitempty"`
-	Password     string               `bson:"password" json:"password,omitempty"`
-	Email        string               `bson:"email" json:"email,omitempty"`
-	NickName     *string              `bson:"nickname" json:"nickname,omitempty"`
-	CreatedAt    time.Time            `bson:"createAt" json:"createAt,omitempty"`
-	Friends      []primitive.ObjectID `bson:"friends" json:"friends,omitempty"`
-	RefreshToken string               `bson:"refreshToken" json:"refreshToken,omitempty"` // graphql only
-	LastQuery    time.Time            `bson:"lastQuery" json:"lastQuery,omitempty"`
-	Provider     string               `bson:"provider" json:"provider,omitempty"`
-	AvatarURL    string               `bson:"avatarURL" json:"avatarURL,omitempty"`
+	ID              primitive.ObjectID   `bson:"_id" json:"_id,omitempty"`
+	UserID          string               `bson:"userid" json:"userid,omitempty"`
+	Password        string               `bson:"password" json:"password,omitempty"`
+	Email           string               `bson:"email" json:"email,omitempty"`
+	NickName        *string              `bson:"nickname" json:"nickname,omitempty"`
+	CreatedAt       time.Time            `bson:"createAt" json:"createAt,omitempty"`
+	Friends         []primitive.ObjectID `bson:"friends" json:"friends,omitempty"`
+	RefreshToken    string               `bson:"refreshToken" json:"refreshToken,omitempty"` // graphql only
+	LastIncomeQuery time.Time            `bson:"lastIncomeQuery" json:"lastIncomeQuery,omitempty"`
+	LastCostQuery   time.Time            `bson:"lastCostQuery" json:"lastCostQuery,omitempty"`
+	Provider        string               `bson:"provider" json:"provider,omitempty"`
+	AvatarURL       string               `bson:"avatarURL" json:"avatarURL,omitempty"`
 }
 
 type PortfolioModel interface {

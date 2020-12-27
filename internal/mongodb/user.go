@@ -52,14 +52,15 @@ func (db *MongoDB) CreateUserFromGoth(user *goth.User) (*models.UserModel, error
 	}
 
 	newUser := &models.UserModel{
-		ID:        primitive.NewObjectID(),
-		UserID:    user.UserID,
-		Email:     user.Email,
-		NickName:  &user.NickName,
-		CreatedAt: time.Now(),
-		LastQuery: time.Now(),
-		Provider:  user.Provider,
-		AvatarURL: user.AvatarURL,
+		ID:              primitive.NewObjectID(),
+		UserID:          user.UserID,
+		Email:           user.Email,
+		NickName:        &user.NickName,
+		CreatedAt:       time.Now(),
+		LastIncomeQuery: time.Now(),
+		LastCostQuery:   time.Now(),
+		Provider:        user.Provider,
+		AvatarURL:       user.AvatarURL,
 	}
 
 	//insert to db

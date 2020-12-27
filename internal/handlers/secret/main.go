@@ -49,14 +49,15 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 		}
 
 		newUser := &models.UserModel{
-			ID:        primitive.NewObjectID(),
-			UserID:    userID,
-			Password:  password,
-			Email:     email,
-			NickName:  &nickname,
-			CreatedAt: time.Now(),
-			LastQuery: time.Now(),
-			Provider:  provider,
+			ID:              primitive.NewObjectID(),
+			UserID:          userID,
+			Password:        password,
+			Email:           email,
+			NickName:        &nickname,
+			CreatedAt:       time.Now(),
+			LastIncomeQuery: time.Now(),
+			LastCostQuery:   time.Now(),
+			Provider:        provider,
 		}
 
 		//create access token and refresh token

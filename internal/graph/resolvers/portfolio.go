@@ -54,10 +54,10 @@ func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Po
 	if err = cursor.All(ctx, &results); err != nil {
 		log.Fatal(err)
 	}
-	qy, qm, qd := user.LastQuery.Date()
+	qy, qm, qd := user.LastCostQuery.Date()
 	yy, mm, dd := time.Now().Date()
 	//if today has quired, return
-	if (qy == yy) || (qm == mm) || (qd == dd) {
+	if (qy == yy) && (qm == mm) && (qd == dd) {
 		return decodeFindResult(results), nil
 	}
 
@@ -87,6 +87,13 @@ func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Po
 			rets = append(rets, tf.DBPortfolioToGQLPortfolio(c))
 		}
 	}
+	//update user LastCostQuery
+	q = bson.M{"_id": user.ID}
+	upd := bson.M{"$set": bson.M{"lastCostQuery": time.Now()}}
+	_, err = r.DB.Users.UpdateOne(ctx, q, upd)
+	if err != nil {
+		return nil, err
+	}
 	return rets, nil
 }
 
@@ -106,10 +113,11 @@ func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.
 	if err = cursor.All(ctx, &results); err != nil {
 		log.Fatal(err)
 	}
-	qy, qm, qd := user.LastQuery.Date()
+	qy, qm, qd := user.LastIncomeQuery.Date()
 	yy, mm, dd := time.Now().Date()
+
 	//if today has quired, return
-	if (qy == yy) || (qm == mm) || (qd == dd) {
+	if (qy == yy) && (qm == mm) && (qd == dd) {
 		return decodeFindResult(results), nil
 	}
 
@@ -139,6 +147,14 @@ func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.
 			rets = append(rets, tf.DBPortfolioToGQLPortfolio(c))
 		}
 	}
+	//update user LastIncomeQuery
+	q = bson.M{"_id": user.ID}
+	upd := bson.M{"$set": bson.M{"lastIncomeQuery": time.Now()}}
+	_, err = r.DB.Users.UpdateOne(ctx, q, upd)
+	if err != nil {
+		return nil, err
+	}
+
 	return rets, nil
 }
 

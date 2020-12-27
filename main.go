@@ -16,6 +16,7 @@ func main() {
 		URISchema:     utils.MustGet("SERVER_URI_SCHEMA"),
 		ApiVer:        utils.MustGet("SERVER_PATH_VERSION"),
 		SessionSecret: utils.MustGet("SESSION_SECRET"),
+		StaticPath:    utils.MustGet("SERVER_STATICPATH"),
 		JWT: utils.JWTConfig{
 			Secret:             utils.MustGet("AUTH_JWT_SECRET"),
 			Algorithm:          utils.MustGet("AUTH_JWT_SIGNING_ALGORITHM"),
@@ -50,4 +51,3 @@ func main() {
 	defer mongodb.CloseDB(db)
 	server.Run(serverconf, db)
 }
-

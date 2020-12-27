@@ -16,9 +16,11 @@ func RegisterRoutes(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB)
 	routes.Auth(cfg, r, db)
 	routes.Graph(cfg, r, db)
 	routes.FreeTrial(cfg, r)
+	routes.RestAPI(cfg, r)
 
 }
 
+//Run will steup the routes and start the server
 func Run(serverconf *utils.ServerConfig, db *mongodb.MongoDB) {
 
 	r := gin.Default()
@@ -28,6 +30,7 @@ func Run(serverconf *utils.ServerConfig, db *mongodb.MongoDB) {
 
 	// Inform the user where the server is listening
 	r.LoadHTMLGlob("views/*")
+	r.Static(serverconf.StaticPath, "./public")
 
 	log.Println("Running @ " + serverconf.ListenEndpoint())
 

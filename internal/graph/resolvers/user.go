@@ -64,17 +64,19 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUs
 	Email := input.Email
 	NickName := input.NickName
 	CreatedAt := time.Now()
-	LastQuery := time.Now()
+	LastIncomeQuery := time.Now()
+	LastCostQuery := time.Now()
 
 	newUser := &dbModel.UserModel{
-		ID:        primitive.NewObjectID(),
-		UserID:    UserID,
-		Email:     Email,
-		NickName:  NickName,
-		CreatedAt: CreatedAt,
-		LastQuery: LastQuery,
-		Provider:  "ics",
-		Friends:   nil,
+		ID:              primitive.NewObjectID(),
+		UserID:          UserID,
+		Email:           Email,
+		NickName:        NickName,
+		CreatedAt:       CreatedAt,
+		LastIncomeQuery: LastIncomeQuery,
+		LastCostQuery:   LastCostQuery,
+		Provider:        "ics",
+		Friends:         nil,
 	}
 
 	//insert to db
