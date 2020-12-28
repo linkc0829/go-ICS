@@ -137,6 +137,7 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.Handl
 		tokenstring, err := c.Cookie("refresh_token")
 		if err != nil {
 			c.AbortWithError(http.StatusUnauthorized, errors.New("cannot find refresh token string in cookie"))
+			return
 		}
 
 		key := []byte(cfg.JWT.Secret)
@@ -149,16 +150,19 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.Handl
 
 		if err != nil {
 			c.AbortWithError(http.StatusUnauthorized, err)
+			return
 		}
 
 		//check refresh token is expired or not
 		if token.Valid == false {
 			c.AbortWithError(http.StatusUnauthorized, errors.New("token invalid"))
+			return
 		}
 		claims := token.Claims.(jwt.MapClaims)
 		ID, err := primitive.ObjectIDFromHex(claims["_id"].(string))
 		if err != nil {
 			c.AbortWithError(http.StatusUnauthorized, errors.New("invalid object id"))
+			return
 		}
 
 		//check if user exists
@@ -167,17 +171,20 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.Handl
 		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 		if err = db.Users.FindOne(ctx, q).Decode(&result); err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
 
 		//check token match or not
 		if result.RefreshToken != tokenstring {
 			c.AbortWithError(http.StatusInternalServerError, errors.New("tokens doesn't match"))
+			return
 		}
 
 		//generate new token pair
 		accToken, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, &result)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
 
 		//update DB

@@ -13,6 +13,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
@@ -54,9 +55,14 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUs
 
 	//check if user exists
 	var result dbModel.UserModel
-	q := bson.M{"email": input.Email, "provider": "ics", "userId": input.UserID}
+	q := bson.M{"email": input.Email, "provider": "ics", "userid": input.UserID}
+
 	if err := r.DB.Users.FindOne(ctx, q).Decode(&result); err == nil {
-		return nil, fmt.Errorf("Create user failed. User already exists.")
+		if err != mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("Create user failed. User already exists.")
+		} else {
+			return nil, err
+		}
 	}
 
 	//collect current data
@@ -76,13 +82,13 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUs
 		LastIncomeQuery: LastIncomeQuery,
 		LastCostQuery:   LastCostQuery,
 		Provider:        "ics",
-		Friends:         nil,
+		Friends:         []primitive.ObjectID{},
 	}
 
 	//insert to db
 	_, err := r.DB.Users.InsertOne(ctx, newUser)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
 	ret := &models.User{
@@ -90,9 +96,11 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUs
 		UserID:    newUser.UserID,
 		Email:     newUser.Email,
 		NickName:  newUser.NickName,
-		Friends:   nil,
-		Followers: nil,
+		CreatedAt: newUser.CreatedAt,
+		Friends:   []string{},
+		Followers: []string{},
 	}
+	log.Println(ret)
 
 	return ret, nil
 }
@@ -112,17 +120,24 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 		user.NickName = input.NickName
 	}
 
-	updatedUser := &dbModel.UserModel{
-		UserID:   user.UserID,
-		Email:    user.Email,
-		NickName: user.NickName,
+	//check if user exists
+	var result dbModel.UserModel
+	q := bson.M{"email": input.Email, "provider": "ics", "userid": input.UserID}
+
+	if err := r.DB.Users.FindOne(ctx, q).Decode(&result); err == nil {
+		if err != mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("Update user failed. There's one user has the same info.")
+		} else {
+			return nil, err
+		}
 	}
 
 	primID, _ := primitive.ObjectIDFromHex(id)
-	q := bson.M{"_id": primID}
-	upd := bson.M{"$set": updatedUser}
+	q = bson.M{"_id": primID}
+	upd := bson.M{"$set": input}
 	_, err = r.DB.Users.UpdateOne(ctx, q, upd)
 	if err != nil {
+		log.Println(err.Error())
 		return nil, err
 	}
 	return user, nil
@@ -175,7 +190,7 @@ func (r *mutationResolver) AddFriend(ctx context.Context, id string) (*models.Us
 
 	//update DB
 	q := bson.M{"_id": me.ID}
-	upd := bson.M{"$set": me}
+	upd := bson.M{"$set": bson.M{"friends": me.Friends}}
 	_, err = r.DB.Users.UpdateOne(ctx, q, upd)
 	if err != nil {
 		return nil, err

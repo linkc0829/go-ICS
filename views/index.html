@@ -153,15 +153,19 @@ span.psw {
     </div>
   </div>
 </div>
-<div class="container"></div>
-  <form action='/todo/' method='POST'>
+<div class="container">
+  <div class='row'>
+    <button class='btn btn-primary' style="width: auto;">Add </button>
+  </div>
+</div>
+  <form action='/api/v1/user' method='POST' id="add">
     <div class='row'>
         <div class='offset-lg-1 col-lg-8 offset-md-1 col-md-7' style='margin-bottom: 5pt;'>
-
-            <input type='text' class='form-control' name='todo' placeholder='Something to do.'>
-            <input type='text' class='form-control' name='todo' placeholder='Something to do.'>
-            <input type='text' class='form-control' name='todo' placeholder='Something to do.'>
-            <input type='text' class='form-control' name='todo' placeholder='Something to do.'>
+            
+            <input type='text' class='form-control' name='id' placeholder='id' id='id'>
+            <input type='text' class='form-control' name='userID' placeholder='UserId' id='userID'>
+            <input type='text' class='form-control' name='email' placeholder='Email' id='email'>
+            <input type='text' class='form-control' name='nickName' placeholder='nickName' id='nickName'>
         </div>
 
         <div class='col-lg-3 col-md-4'>
@@ -262,7 +266,7 @@ window.onclick = function(event) {
 <!-- Optional JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/2.0.15/bootstrap-native-v4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/4.1.0/superagent.min.js" integrity="sha256-XwGIb0dW2d+hM8XPl9RcTbaNJoTfQ/xKV1n5EBYH0n4=" crossorigin="anonymous"></script>
-<script src='/js/app.js'></script>
+<script src='/public/js/app.js'></script>
 
 </body>
 </html>
