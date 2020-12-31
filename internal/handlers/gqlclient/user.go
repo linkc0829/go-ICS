@@ -2,6 +2,7 @@ package gqlclient
 
 import (
 	//"encoding/json"
+
 	"log"
 	"net/http"
 
@@ -81,13 +82,14 @@ func CreateUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 				}
 			} `graphql:"createUser(input: $createUserInput)"`
 		}
-		nickName := c.PostForm("nickName")
+		createUserInput := models.CreateUserInput{}
+		err := c.ShouldBind(&createUserInput)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 		variables := map[string]interface{}{
-			"createUserInput": models.CreateUserInput{
-				UserID:   c.PostForm("userID"),
-				Email:    c.PostForm("email"),
-				NickName: &nickName,
-			},
+			"createUserInput": createUserInput,
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
@@ -102,7 +104,6 @@ func CreateUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 func UpdateUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		client := newClient(c, cfg)
-
 		/*
 			mutation ($id: ID!, $updateUserInput: UpdateUserInput!){
 				updateUser(id: $id, input: $updateUserInput){
@@ -136,16 +137,16 @@ func UpdateUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 			} `graphql:"updateUser(id: $id, input: $updateUserInput)"`
 		}
 		id := c.Param("id")
-		nickName := c.PostForm("nickName")
-		userId := c.PostForm("userID")
-		email := c.PostForm("email")
+		updateUserInput := models.UpdateUserInput{}
+		err := c.ShouldBind(&updateUserInput)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
 		variables := map[string]interface{}{
-			"id": id,
-			"updateUserInput": models.UpdateUserInput{
-				UserID:   &userId,
-				Email:    &email,
-				NickName: &nickName,
-			},
+			"id":              id,
+			"updateUserInput": updateUserInput,
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
@@ -153,20 +154,84 @@ func UpdateUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
+		return
 	}
 }
 
 //DeleteUser handle request DELETE /user/:id
 func DeleteUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.String(http.StatusServiceUnavailable, "Not implement yet.")
+		client := newClient(c, cfg)
+		/*
+			mutation ($id: ID!){
+				deleteUser(id: $id)
+			}
+		*/
+		var mutation struct {
+			DeleteUser graphql.Boolean `graphql:"deleteUser(id: $id)"`
+		}
+
+		id := c.Param("id")
+		variables := map[string]interface{}{
+			"id": id,
+		}
+
+		if err := client.Mutate(c, &mutation, variables); err != nil {
+			c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+		c.JSON(http.StatusOK, mutation)
+		return
 	}
 }
 
 //GetUser handle request PUT /user/addfriend/:id
 func AddFriend(cfg *utils.ServerConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.String(http.StatusServiceUnavailable, "Not implement yet.")
+		client := newClient(c, cfg)
+		/*
+			mutation ($id: ID!){
+				AddFriend(id: $id){
+					id
+					userId
+					email
+					nickName
+					createdAt
+					friends{
+						id
+					}
+					followers{
+						id
+					}
+				}
+			}
+		*/
+		var mutation struct {
+			AddFriend struct {
+				Id        graphql.ID
+				UserId    graphql.String
+				Email     graphql.String
+				NickName  graphql.String
+				CreatedAt graphql.String
+				Friends   []struct {
+					Id graphql.ID
+				}
+				Followers []struct {
+					Id graphql.ID
+				}
+			} `graphql:"addFriend(id: $id)"`
+		}
+		id := c.Param("id")
+		variables := map[string]interface{}{
+			"id": id,
+		}
+
+		if err := client.Mutate(c, &mutation, variables); err != nil {
+			c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+		c.JSON(http.StatusOK, mutation)
+		return
 	}
 }
 
@@ -199,7 +264,6 @@ func GetUserIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 			c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
-		log.Println(query)
 		c.JSON(http.StatusOK, query)
 
 	}
@@ -208,6 +272,32 @@ func GetUserIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 //GetUserCost handle request GET /user/:id/cost
 func GetUserCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.String(http.StatusServiceUnavailable, "Not implement yet.")
+		client := newClient(c, cfg)
+		ID := c.Param("id")
+		var query struct {
+			GetUserCost []struct {
+				Id    graphql.ID
+				Owner struct {
+					Id graphql.ID
+				}
+				Amount      graphql.Int
+				Category    graphql.String
+				OccurDate   graphql.String
+				Description graphql.String
+				Vote        []struct {
+					Id graphql.ID
+				}
+			} `graphql:"getUserCost(id: $ID)"`
+		}
+		variables := map[string]interface{}{
+			"ID": graphql.ID(ID),
+		}
+		err := client.Query(c, &query, variables)
+		if err != nil {
+			c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+		log.Println(query)
+		c.JSON(http.StatusOK, query)
 	}
 }

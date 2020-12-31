@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -110,6 +111,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 	if err != nil {
 		return nil, err
 	}
+	//update user profile
 	if input.Email != nil {
 		user.Email = *input.Email
 	}
@@ -122,16 +124,13 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 
 	//check if user exists
 	var result dbModel.UserModel
-	q := bson.M{"email": input.Email, "provider": "ics", "userid": input.UserID}
-
-	if err := r.DB.Users.FindOne(ctx, q).Decode(&result); err == nil {
-		if err != mongo.ErrNoDocuments {
-			return nil, fmt.Errorf("Update user failed. There's one user has the same info.")
-		} else {
-			return nil, err
-		}
+	q := bson.M{"email": user.Email, "provider": "ics", "userid": user.UserID}
+	err = r.DB.Users.FindOne(ctx, q).Decode(&result)
+	if err != mongo.ErrNoDocuments {
+		return nil, fmt.Errorf("Update user failed. There's one user has the same info.")
 	}
 
+	//update db
 	primID, _ := primitive.ObjectIDFromHex(id)
 	q = bson.M{"_id": primID}
 	upd := bson.M{"$set": input}
@@ -168,6 +167,9 @@ func (r *mutationResolver) AddFriend(ctx context.Context, id string) (*models.Us
 	if err != nil {
 		//not a valid objectID
 		return nil, err
+	}
+	if fID == me.ID {
+		return nil, errors.New("Cannot add yourself to friend")
 	}
 
 	//if already friend, remove fID

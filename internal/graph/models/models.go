@@ -9,67 +9,67 @@ type Portfolio interface {
 }
 
 type Cost struct {
-	ID          string       `json:"id"`
-	Owner       string       `json:"owner"`
-	Amount      int          `json:"amount"`
-	OccurDate   time.Time    `json:"occurDate"`
-	Description *string      `json:"description"`
-	Vote        []string     `json:"vote"`
+	ID          string            `json:"id"`
+	Owner       string            `json:"owner"`
+	Amount      int               `json:"amount,string"`
+	OccurDate   time.Time         `json:"occurDate"`
+	Description *string           `json:"description"`
+	Vote        []string          `json:"vote"`
 	Category    PortfolioCategory `json:"category"`
 }
 
 func (Cost) IsPortfolio() {}
 
 type CreateCostInput struct {
-	Amount      int          `json:"amount"`
-	OccurDate   time.Time    `json:"occurDate"`
-	Category    CostCategory `json:"category"`
-	Description *string      `json:"description"`
+	Amount      int          `bson:"amount,omitempty" json:"amount,string,omitempty"`
+	OccurDate   time.Time    `bson:"occurDate,omitempty" json:"occurDate,omitempty"`
+	Category    CostCategory `bson:"category,omitempty" json:"category,omitempty"`
+	Description *string      `bson:"description,omitempty" json:"description,omitempty"`
 }
 
 type CreateIncomeInput struct {
-	Amount      int            `json:"amount"`
-	OccurDate   time.Time      `json:"occurDate"`
-	Category    IncomeCategory `json:"category"`
-	Description *string        `json:"description"`
+	Amount      int            `bson:"amount,omitempty" json:"amount,string,omitempty"`
+	OccurDate   time.Time      `bson:"occurDate,omitempty" json:"occurDate,omitempty"`
+	Category    IncomeCategory `bson:"category,omitempty" json:"category,omitempty"`
+	Description *string        `bson:"description,omitempty" json:"description,omitempty"`
 }
 
 type CreateUserInput struct {
-	Email    string  `json:"email"`
-	UserID   string  `json:"userId"`
-	NickName *string `json:"nickName"`
+	Email    string  `bson:"email,omitempty" json:"email,omitempty"`
+	UserID   string  `bson:"userID,omitempty" json:"userId,omitempty"`
+	NickName *string `bson:"nickName,omitempty" json:"nickName,omitempty"`
 }
 
 type Income struct {
-	ID          string         `json:"id"`
-	Owner       string         `json:"owner"`
-	Amount      int            `json:"amount"`
-	OccurDate   time.Time      `json:"occurDate"`
-	Description *string        `json:"description"`
-	Vote        []string       `json:"vote"`
+	ID          string            `json:"id"`
+	Owner       string            `json:"owner"`
+	Amount      int               `json:"amount,string"`
+	OccurDate   time.Time         `json:"occurDate"`
+	Description *string           `json:"description"`
+	Vote        []string          `json:"vote"`
 	Category    PortfolioCategory `json:"category"`
 }
 
 func (Income) IsPortfolio() {}
 
 type UpdateCostInput struct {
-	Amount      *int          `bson:"amount" json:"amount,omitempty"`
-	OccurDate   *time.Time    `bson:"occurDate" json:"occurDate,omitempty"`
-	Category    *CostCategory `bson:"category" json:"category,omitempty"`
-	Description *string       `bson:"description" json:"description,omitempty"`
+	Amount      *int          `bson:"amount,omitempty" json:"amount,string,omitempty"`
+	OccurDate   *time.Time    `bson:"occurDate,omitempty" json:"occurDate,omitempty"`
+	Category    *CostCategory `bson:"category,omitempty" json:"category,omitempty"`
+	Description *string       `bson:"description,omitempty" json:"description,omitempty"`
 }
 
 type UpdateIncomeInput struct {
-	Amount      *int            `json:"amount"`
-	OccurDate   *time.Time      `json:"occurDate"`
-	Category    *IncomeCategory `json:"category"`
-	Description *string         `json:"description"`
+	Amount      *int            `bson:"amount,omitempty" json:"amount,string,omitempty"`
+	OccurDate   *time.Time      `bson:"occurDate,omitempty" json:"occurDate,omitempty"`
+	Category    *IncomeCategory `bson:"category,omitempty" json:"category,omitempty"`
+	Description *string         `bson:"description,omitempty" json:"description,omitempty"`
 }
 
 type UpdateUserInput struct {
-	Email    *string `json:"email"`
-	UserID   *string `json:"userId"`
-	NickName *string `json:"nickName"`
+	Email    *string `bson:"email,omitempty" json:"email,omitempty"`
+	UserID   *string `bson:"userID,omitempty" json:"userId,omitempty"`
+	NickName *string `bson:"nickName,omitempty" json:"nickName,omitempty"`
 }
 
 type User struct {

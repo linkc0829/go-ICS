@@ -45,7 +45,7 @@ func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Po
 	}
 
 	q := bson.M{"owner": user.ID}
-	findopt := options.Find().SetSort(bson.M{"occurDate": -1})
+	findopt := options.Find().SetSort(bson.M{"occurDate": 1})
 	cursor, err := r.DB.Cost.Find(ctx, q, findopt)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.
 	}
 
 	q := bson.M{"owner": user.ID}
-	findopt := options.Find().SetSort(bson.M{"occurDate": -1})
+	findopt := options.Find().SetSort(bson.M{"occurDate": 1})
 	cursor, err := r.DB.Income.Find(ctx, q, findopt)
 	if err != nil {
 		return nil, err
@@ -170,7 +170,7 @@ func (r *queryResolver) GetUserIncomeHistory(ctx context.Context, id string, ran
 		"$gte": fromDate,
 		"$lte": toDate,
 	}}
-	findopt := options.Find().SetSort(bson.M{"occurDate": -1})
+	findopt := options.Find().SetSort(bson.M{"occurDate": 1})
 	cursor, err := r.DB.IncomeHistory.Find(ctx, q, findopt)
 	if err != nil {
 		return nil, err
@@ -193,7 +193,7 @@ func (r *queryResolver) GetUserCostHistory(ctx context.Context, id string, range
 		"$gte": fromDate,
 		"$lte": toDate,
 	}}
-	findopt := options.Find().SetSort(bson.M{"occurDate": -1})
+	findopt := options.Find().SetSort(bson.M{"occurDate": 1})
 	cursor, err := r.DB.CostHistory.Find(ctx, q, findopt)
 	if err != nil {
 		return nil, err

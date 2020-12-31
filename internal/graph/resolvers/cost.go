@@ -52,8 +52,8 @@ func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input mode
 		result.Amount = *input.Amount
 	}
 	if input.Category != nil {
-		cat := (*models.PortfolioCategory)(input.Category)
-		result.Category = *cat
+		cat := (models.PortfolioCategory)(*input.Category)
+		result.Category = cat
 	}
 	if input.Description != nil {
 		result.Description = input.Description
@@ -69,7 +69,6 @@ func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input mode
 	}
 
 	ret := tf.DBPortfolioToGQLPortfolio(result).(models.Cost)
-
 	return &ret, nil
 }
 

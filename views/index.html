@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="title" content="{{ .Title }}">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
 
 
 <style>
@@ -112,6 +112,15 @@ span.psw {
   animation: animatezoom 0.6s
 }
 
+.col-md  label{
+  padding-left: 10px;
+  padding-top: 13px;
+}
+
+.form-row{
+  padding-top: 10px;
+}
+
 @-webkit-keyframes animatezoom {
   from {-webkit-transform: scale(0)} 
   to {-webkit-transform: scale(1)}
@@ -141,7 +150,7 @@ span.psw {
 
 <div class="container">
   <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-8">
       <h2>{{ .Title }}</h2>
     </div>
     
@@ -153,28 +162,161 @@ span.psw {
     </div>
   </div>
 </div>
-<div class="container">
-  <div class='row'>
-    <button class='btn btn-primary' style="width: auto;">Add </button>
-  </div>
-</div>
-  <form action='/api/v1/user' method='POST' id="add">
-    <div class='row'>
-        <div class='offset-lg-1 col-lg-8 offset-md-1 col-md-7' style='margin-bottom: 5pt;'>
-            
-            <input type='text' class='form-control' name='id' placeholder='id' id='id'>
-            <input type='text' class='form-control' name='userID' placeholder='UserId' id='userID'>
-            <input type='text' class='form-control' name='email' placeholder='Email' id='email'>
-            <input type='text' class='form-control' name='nickName' placeholder='nickName' id='nickName'>
+<div class="container" style="margin-left: 25%;">
+  <form action='/api/v1/cost' method='POST' id='add'>
+    <div class='form-row'>
+      <div class="col-md-4">
+        <label for='description'>Description:</label>
+        <input type='text' class='form-control' name='description' placeholder='Describe your portfolio here' id='description' required>
+      </div>
+      <div class="col-md-2">
+        <label for='amount'>Amount:</label>
+        <input type='text' class='form-control' name='amount' placeholder='how much' id='amount' required>
+        <div class="valid-feedback">Please enter a number.</div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-check" style="padding-top: 25px;">
+          <p>Type:</p>
+          <input type="radio" id="income" name="portfolio" value="income" checked style="padding-top: 30px;">
+          <label for="income">Income</label>
         </div>
-
-        <div class='col-lg-3 col-md-4'>
-            <button class='btn btn-primary' style="width: auto;">Add</button>
+      </div>
+    </div>
+    <div class='form-row'>
+      <div class="col-md-4">
+        <label for='category'>Catepory:</label>
+        <select name='category' id='incomeCat' class="custom-select">
+          <option selected>Choose a category</option>
+          <option value='INVESTMENT'>INVESTMENT</option>
+          <option value='SALARY'>SALARY</option>
+          <option value='PARTTIME'>PART TIME</option>
+          <option value='OTHERS'>OTHERS</option>
+        </select>
+        <select name='category' id='costCat' style="display: none;" class="custom-select">
+          <option selected>Choose a category</option>
+          <option value='INVESTMENT'>INVESTMENT</option>
+          <option value='DAILY'>DAILY</option>
+          <option value='LEARNING'>LEARNING</option>
+          <option value='CHARITY'>CHARITY</option>
+          <option value='OTHERS'>OTHERS</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for='occueDate'>OccueDate:</label>
+        <input type='date' class='form-control' name='occurDate' placeholder='occurDate' id='occurDate' min='' required>
+      </div>
+      <div class="col-md-2">
+        <div class="form-check">
+          <input type="radio" id="cost" name="portfolio" value="cost">
+          <label for="cost">Cost</label>
         </div>
+      </div>
+    </div>
+    <div class='form-row' style="margin-left: 20%;">
+      <div class="col-md">
+        <button class='btn btn-primary' style="width: 25%;" id='create'>Create</button>
+      </div>
     </div>
   </form>
+</div>
+  
 
-  <div id='todos'></div>
+  <div style="margin-left: 20%; margin-right: 20%;">
+    <p id='response'></p>
+  </div>
+
+<div class="container-fluid" style="width: 80%;">
+  <div class="row">
+    <div class="col-md" id='income-list' style="background: beige;">
+      <form id='0000'>
+        <div class='form-row'>
+          <div class="col-md-7 border">
+            <label for='description' id='description_label'>Income Description</label>
+            <input type='text' class='form-control' name='description' placeholder='Income Description' id='description_input' style="display: none;">
+          </div>
+          <div class="col-md-3 border">
+            <label for='amount' id='amount_label'>Amount: $888</label>
+            <input type='text' class='form-control' name='amount' placeholder='888' id='amount_input' style="display: none;">
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-secondary' id='update'>Update</button>
+          </div>
+        </div>
+        <div class='form-row'>
+          <div class="col-md-3 border">
+            <label for='category' id='category_label'>INVESTMENT</label>
+            <select name='category' id='category_input' class="custom-select" style="display: none;">
+              <option selected>Choose a category</option>
+              <option value='INVESTMENT'>INVESTMENT</option>
+              <option value='SALARY'>SALARY</option>
+              <option value='PARTTIME'>PART TIME</option>
+              <option value='OTHERS'>OTHERS</option>
+            </select>
+          </div>
+          <div class="col-md-3 border">
+            <label for='occueDate' id='occueDate_label'>@ 2021-01-01</label>
+            <input type='date' class='form-control' name='occurDate' placeholder='occurDate' min='' value='2021-01-01' style="display: none;" id='occurDate_input'>
+          </div>
+          <div class="col-md-2 border">
+            <label id='vote_label'>Vote: 555</label>
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-primary' id='vote'>Vote</button>
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-danger' id='delete'>Delete</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="col-md" id='cost-list' style="background: #e9ecef;">
+      <form id='_id'>
+        <div class='form-row'>
+          <div class="col-md-7 border">
+            <label for='description' id='description_label'>Cost Description</label>
+            <input type='text' class='form-control' name='description' placeholder='Income Description' id='description_input' style="display: none;">
+          </div>
+          <div class="col-md-3 border">
+            <label for='amount' id='amount_label'>Amount: $888</label>
+            <input type='text' class='form-control' name='amount' placeholder='888' id='amount_input' style="display: none;">
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-secondary' id='update'>Update</button>
+          </div>
+        </div>
+        <div class='form-row'>
+          <div class="col-md-3 border">
+            <label for='category' id='category_label'>LEARNING</label>
+            <select name='category' id='costCat' style="display: none;" class="custom-select">
+              <option selected>Choose a category</option>
+              <option value='INVESTMENT'>INVESTMENT</option>
+              <option value='DAILY'>DAILY</option>
+              <option value='LEARNING'>LEARNING</option>
+              <option value='CHARITY'>CHARITY</option>
+              <option value='OTHERS'>OTHERS</option>
+            </select>
+          </div>
+          <div class="col-md-3 border">
+            <label for='occueDate' id='occueDate_label'>@ 2021-01-01</label>
+            <input type='date' class='form-control' name='occurDate' placeholder='occurDate' id='occurDate_input' min='' value='2021-01-01' style="display: none;">
+          </div>
+          <div class="col-md-2 border">
+            <label>Vote: 555</label>
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-primary' id='vote'>Vote</button>
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-danger' id='delete'>Delete</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
 
   <div class='row'>
       <div class='offset-lg-2 col-lg-8 offset-md-1 col-md-10 col-sm-12'>
@@ -249,8 +391,6 @@ span.psw {
 </div>
 
 
-
-
 <script>
 // Get the modal
 var modal = document.getElementById('id01');
@@ -261,12 +401,33 @@ window.onclick = function(event) {
         modal.style.display = "none";
     }
 }
+
+//switch category selector
+let costChecked = document.querySelector('#cost');
+let incomeChecked = document.querySelector('#income');
+let selCost = document.querySelector('#costCat')
+let selIncome = document.querySelector('#incomeCat')
+
+costChecked.addEventListener('click', (e)=>{
+  selIncome.style.display = 'none';
+  selCost.style.display = 'block';
+})
+
+incomeChecked.addEventListener('click', (e)=>{
+  selIncome.style.display = 'block';
+  selCost.style.display = 'none';
+})
+
 </script>
 
 <!-- Optional JavaScript -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/2.0.15/bootstrap-native-v4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/4.1.0/superagent.min.js" integrity="sha256-XwGIb0dW2d+hM8XPl9RcTbaNJoTfQ/xKV1n5EBYH0n4=" crossorigin="anonymous"></script>
-<script src='/public/js/app.js'></script>
+<script src='/public/js/portfolio.js'></script>
+
 
 </body>
 </html>

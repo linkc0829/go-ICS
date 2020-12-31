@@ -41,5 +41,5 @@ func DBPortfolioToGQLPortfolio(db dbModel.PortfolioModel) gqlModel.Portfolio {
 		}
 		return gql
 	}
-	return gql
+	return nil
 }

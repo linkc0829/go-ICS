@@ -1,8 +1,6 @@
 package gqlclient
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 	"github.com/linkc0829/go-ics/pkg/utils"
 	"github.com/shurcooL/graphql"
@@ -11,7 +9,7 @@ import (
 
 func newClient(c *gin.Context, cfg *utils.ServerConfig) *graphql.Client {
 	accessToken := c.GetHeader("Authorization")
-	log.Println("accessToken: " + accessToken)
+	//log.Println("accessToken: " + accessToken)
 
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: accessToken},
