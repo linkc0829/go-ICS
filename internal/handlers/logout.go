@@ -20,7 +20,9 @@ func LogoutHandler() gin.HandlerFunc {
 			c.Request = auth.AddProviderToContext(c, c.Param(string(utils.ProjectContextKeys.ProviderCtxKey)))
 			gothic.Logout(c.Writer, c.Request)
 		}
-		c.Writer.Header().Set("Location", "/")
-		c.Writer.WriteHeader(http.StatusTemporaryRedirect)
+		c.SetCookie("refresh_token", "invalid", 0, "/", "localhost", false, true)
+		//c.Writer.Header().Set("Location", "/")
+		//c.Writer.WriteHeader(http.StatusTemporaryRedirect)
+		c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
 	}
 }

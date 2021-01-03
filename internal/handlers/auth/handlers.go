@@ -85,7 +85,8 @@ func CallBack(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
 			"token_expiry": tokenExpiry,
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
-		c.JSON(http.StatusOK, json)
+		c.Writer.Header().Set("Location", "/"+u.ID.Hex())
+		c.JSON(http.StatusPermanentRedirect, json)
 
 	}
 }

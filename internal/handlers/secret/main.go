@@ -83,7 +83,8 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 			"token_expiry": tokenExpiry,
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
-		c.JSON(http.StatusOK, json)
+		c.Writer.Header().Set("Location", "/profile/"+newUser.ID.Hex())
+		c.JSON(http.StatusPermanentRedirect, json)
 	}
 
 }
@@ -126,7 +127,8 @@ func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc 
 			"token_expiry": tokenExpiry,
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
-		c.JSON(http.StatusOK, json)
+		c.Writer.Header().Set("Location", "/profile/"+user.ID.Hex())
+		c.JSON(http.StatusPermanentRedirect, json)
 
 	}
 }
@@ -197,7 +199,7 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.Handl
 		json := gin.H{
 			"type":         "Bearer",
 			"token":        accToken,
-			"token_expiry": tokenExpiry,
+			"token_expiry": tokenExpiry.Local(),
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
 		c.JSON(http.StatusOK, json)

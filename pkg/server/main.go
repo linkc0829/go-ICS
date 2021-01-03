@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/linkc0829/go-ics/internal/handlers"
 	"github.com/linkc0829/go-ics/internal/mongodb"
 	"github.com/linkc0829/go-ics/pkg/server/routes"
 	"github.com/linkc0829/go-ics/pkg/utils"
@@ -17,6 +18,8 @@ func RegisterRoutes(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB)
 	routes.Graph(cfg, r, db)
 	routes.FreeTrial(cfg, r)
 	routes.RestAPI(cfg, r)
+	r.POST("/profile/:id", handlers.UserProfileHandler(cfg))
+	r.GET("/profile/:id", handlers.UserProfileHandler(cfg))
 
 }
 
