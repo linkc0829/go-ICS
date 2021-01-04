@@ -51,7 +51,7 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 		newUser := &models.UserModel{
 			ID:              primitive.NewObjectID(),
 			UserID:          userID,
-			Password:        password,
+			Password:        &password,
 			Email:           email,
 			NickName:        &nickname,
 			CreatedAt:       time.Now(),
@@ -84,7 +84,7 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
 		c.Writer.Header().Set("Location", "/profile/"+newUser.ID.Hex())
-		c.JSON(http.StatusPermanentRedirect, json)
+		c.JSON(http.StatusOK, json)
 	}
 
 }
@@ -99,18 +99,24 @@ func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc 
 		user, err := db.FindUserByJWT(email, provider, userID)
 
 		if err != nil {
+			c.Writer.Header().Set("Location", "/")
+			c.Error(err)
 			c.AbortWithError(http.StatusUnauthorized, err)
+			return
 		}
-		log.Println(user)
 
-		if !checkPassword(user.Password, password) {
+		if !checkPassword(*user.Password, password) {
+			c.Writer.Header().Set("Location", "/")
 			c.AbortWithError(http.StatusUnauthorized, errors.New("password incorrect"))
+			return
 		}
 
 		//create access token and refresh token
 		token, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, user)
 		if err != nil {
+			c.Writer.Header().Set("Location", "/")
 			c.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
 
 		//update DB
@@ -128,7 +134,7 @@ func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc 
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
 		c.Writer.Header().Set("Location", "/profile/"+user.ID.Hex())
-		c.JSON(http.StatusPermanentRedirect, json)
+		c.JSON(http.StatusOK, json)
 
 	}
 }

@@ -48,15 +48,18 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
   
  })();
 
- async function checkMyFriend(){
-  checkToken(jwt);
+ async function checkFriend(){
+  
   let tokenString = Session.get('token_type') + ' ' + Session.get('token');
   let url = window.location.href.split('/');
   let id = url[url.length-1];
 
   query = '{\
-      myFriends{\
+      me{\
         id\
+        friends{\
+          id\
+        }\
       }\
     }';
 
@@ -67,12 +70,18 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
   .send({'Query': query,})
   .then(function (res) {
       clearMessage()
-      let out = res.body.data.MyFriends;
+      let out = res.body.data.me.friends;
+      console.log(out);
       for(let i = 0; i < out.length; i++){
-        if(out[i].Id == id){
-          document.querySelector('#addFriend').display = 'none';
-          document.querySelector('#unfriend').display = 'block';
+        if(out[i].id == id){
+          document.querySelector('#addFriend').style.display = 'none';
+          document.querySelector('#unfriend').style.display = 'block';
         }
+      }
+      //watching my won profile, hide friend sector
+      if(res.body.data.me.id == id){
+        document.querySelector('#addFriend').style.display = 'none';
+        document.querySelector('#unfriend').style.display = 'none';
       }
       input.value = '';
   })
@@ -85,7 +94,7 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
 
 //get UserId through gql API
 async function getUserProfile(currentUser){
-  checkToken(jwt);
+  if(!checkToken(jwt)){return;}
   let tokenString = Session.get('token_type') + ' ' + Session.get('token');
   let url = window.location.href.split('/');
   let id = url[url.length-1];
@@ -104,7 +113,6 @@ async function getUserProfile(currentUser){
         }\
       }\
     }';
-  console.log(query);
 
   await superagent
   .post('/api/v1/graph')
@@ -123,7 +131,6 @@ async function getUserProfile(currentUser){
 
       let resp = document.getElementById('response');
       resp.innerHTML = JSON.stringify(res.body);
-      console.log(res.body);
 
       input.value = '';
   })
@@ -147,40 +154,47 @@ await superagent
       jwt.token = res.body.token;
       jwt.token_expiry = res.body.token_expiry;
       jwt.token_type = res.body.type;
+      document.querySelector('#login').style.display = 'none';
+      document.querySelector('#signup').style.display = 'none';
+      document.querySelector('#logout').style.display = 'block';
       input.value = '';
   })
   .catch(function (err) {
-    
     if (err.response) {
-      console.log(err);
-      alert(err.response.message);
-      logout();
+      let url = window.location.href.split('/');
+      if(url.length > 4){
+        console.log(err);
+        alert(err.response.message);
+        logout();
+      }
     }
-    
   });
 }
 
-function checkToken(jwt){
+async function checkToken(jwt){
   jwt.token = Session.get('token');
   jwt.token_expiry = new Date(Session.get('token_expiry'));
   jwt.token_type = Session.get('token_type');
   var now = new Date()
-  
   if (typeof(jwt.token) == 'undefined' || jwt.token_expiry < now){
-    getAccessToken(jwt);
+      await getAccessToken(jwt);
   }
   if(jwt.token_expiry > now){
     document.querySelector('#login').style.display = 'none';
     document.querySelector('#signup').style.display = 'none';
     document.querySelector('#logout').style.display = 'block';
+    return true;
   }
-  
+  document.querySelector('#login').style.display = 'block';
+  document.querySelector('#signup').style.display = 'block';
+  document.querySelector('#logout').style.display = 'none';
+  return false;
 }
 
 function logout(){
-  console.log('logout')
-  Session.set('token_expiry', Date());
-  jwt.token_expiry = Date();
+  Session.set('token_expiry', '-1');
+  jwt.token_expiry = '-1';
+  currentUser.login = false;
 
   //ask server to set refresh token invalid
   var request = new XMLHttpRequest(); 
@@ -188,19 +202,19 @@ function logout(){
   request.send();
   request.onerror = showMessage();
 
-  document.querySelector('#login').style.display = 'block';
-  document.querySelector('#signup').style.display = 'block';
-  document.querySelector('#logout').style.display = 'none';
+  window.location.replace("/");
 }
 
 var jwt = {};
-checkToken(jwt);
-
-
 var currentUser = {};
-getUserProfile(currentUser).then(()=>{
-  initPortfolio(currentUser, INCOME);
-  initPortfolio(currentUser, COST);
+checkToken(jwt).then((res)=>{
+  getUserProfile(currentUser).then((res)=>{
+    if(!checkToken(jwt)){return;}
+    initPortfolio(currentUser, INCOME);
+    initPortfolio(currentUser, COST);
+  }).then((res)=>{
+    checkFriend();
+  })
 });
 
 const COST = 'COST';
@@ -583,5 +597,69 @@ function clearMessage() {
   message.innerHTML = '';
 }
 
+function addFriend(){
+  if(!checkToken(jwt)){return;}
+  let tokenString = Session.get('token_type') + ' ' + Session.get('token');
+  let url = window.location.href.split('/');
+  let id = url[url.length-1];
+  let addF = document.querySelector('#addFriend');
+  let unF = document.querySelector('#unfriend');
+  
+  let mutation = 'mutation{\
+      addFriend(id:"' + id + '"){\
+          id\
+          friends{\
+            id\
+          }\
+      }\
+  }';
+  superagent
+  .post('/api/v1/graph')
+  .set('accept', 'json')
+  .set('Authorization', tokenString)
+  .send({'query': mutation})
+  .then(function (res) {
+    clearMessage()
+    addF.style.display = 'none';
+    unF.style.display = 'block';
+    input.value = '';
+  })
+  .catch(function (err) {
+      if (err.response) {
+          showMessage(err.response.message);
+      }
+      
+  });
+}
 
-
+function unfriend(){
+  if(!checkToken(jwt)){return;}
+  let tokenString = Session.get('token_type') + ' ' + Session.get('token');
+  let url = window.location.href.split('/');
+  let id = url[url.length-1];
+  let addF = document.querySelector('#addFriend');
+  let unF = document.querySelector('#unfriend');
+  
+  let mutation = 'mutation{\
+    addFriend(id:"' + id + '"){\
+        id\
+    }\
+  }';     
+  superagent
+  .post('/api/v1/graph')
+  .set('accept', 'json')
+  .set('Authorization', tokenString)
+  .send({'query': mutation})
+  .then(function (res) {
+      clearMessage()
+      addF.style.display = 'block';
+      unF.style.display = 'none';
+      input.value = '';
+  })
+  .catch(function (err) {
+      if (err.response) {
+          showMessage(err.response.message);
+      }
+      
+  });
+}

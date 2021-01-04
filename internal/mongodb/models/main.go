@@ -11,7 +11,7 @@ import (
 type UserModel struct {
 	ID              primitive.ObjectID   `bson:"_id" json:"_id,omitempty"`
 	UserID          string               `bson:"userid" json:"userid,omitempty"`
-	Password        string               `bson:"password" json:"password,omitempty"`
+	Password        *string              `bson:"password" json:"password,omitempty"`
 	Email           string               `bson:"email" json:"email,omitempty"`
 	NickName        *string              `bson:"nickname" json:"nickname,omitempty"`
 	CreatedAt       time.Time            `bson:"createAt" json:"createAt,omitempty"`

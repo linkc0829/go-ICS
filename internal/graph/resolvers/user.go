@@ -171,7 +171,6 @@ func (r *mutationResolver) AddFriend(ctx context.Context, id string) (*models.Us
 	if fID == me.ID {
 		return nil, errors.New("Cannot add yourself to friend")
 	}
-
 	//if already friend, remove fID
 	length := len(me.Friends)
 	for i, f := range me.Friends {
@@ -185,11 +184,11 @@ func (r *mutationResolver) AddFriend(ctx context.Context, id string) (*models.Us
 			break
 		}
 	}
+	//previous not friend
 	if length == len(me.Friends) {
 		//add friend
 		me.Friends = append(me.Friends, fID)
 	}
-
 	//update DB
 	q := bson.M{"_id": me.ID}
 	upd := bson.M{"$set": bson.M{"friends": me.Friends}}
@@ -244,8 +243,9 @@ func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.U
 	q := bson.M{"_id": hexID}
 	result := dbModel.UserModel{}
 
+	log.Println(hexID)
 	if err := DB.Users.FindOne(ctx, q).Decode(&result); err != nil {
-		return nil, fmt.Errorf("UserID doesn't exist.")
+		return nil, err
 	}
 
 	friends := getUserFriends(&result)

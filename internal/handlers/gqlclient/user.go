@@ -297,7 +297,6 @@ func GetUserCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 			c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
-		log.Println(query)
 		c.JSON(http.StatusOK, query)
 	}
 }

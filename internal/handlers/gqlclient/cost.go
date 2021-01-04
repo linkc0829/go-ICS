@@ -1,7 +1,6 @@
 package gqlclient
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -115,7 +114,6 @@ func UpdateCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 			"id":              id,
 			"updateCostInput": UpdateCostInput,
 		}
-		log.Println(variables)
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
