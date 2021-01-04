@@ -1,6 +1,9 @@
 package gqlclient
 
 import (
+	"errors"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/linkc0829/go-ics/pkg/utils"
 	"github.com/shurcooL/graphql"
@@ -18,4 +21,19 @@ func newClient(c *gin.Context, cfg *utils.ServerConfig) *graphql.Client {
 
 	gqlServerPath := cfg.SchemaVersioningEndpoint(cfg.GraphQL.Path)
 	return graphql.NewClient(gqlServerPath, httpClient)
+}
+
+//ErrorWriter set redirect header to index and show error message
+func ErrorWriter(c *gin.Context, code int, err error) {
+	//c.Writer.Header().Set("Location", "/")
+	err = errors.New("[gql client] error: " + err.Error())
+	c.Error(err)
+	data := struct {
+		Title        string
+		ErrorMessage string
+	}{
+		Title:        http.StatusText(code),
+		ErrorMessage: err.Error(),
+	}
+	c.HTML(code, "layout", data)
 }

@@ -164,7 +164,6 @@ await superagent
       let url = window.location.href.split('/');
       if(url.length > 4){
         console.log(err);
-        alert(err.response.message);
         logout();
       }
     }
@@ -176,15 +175,18 @@ async function checkToken(jwt){
   jwt.token_expiry = new Date(Session.get('token_expiry'));
   jwt.token_type = Session.get('token_type');
   var now = new Date()
+  //1. check if token expired?
   if (typeof(jwt.token) == 'undefined' || jwt.token_expiry < now){
       await getAccessToken(jwt);
   }
+  //2. if token is valid, hide login&signup, show logout
   if(jwt.token_expiry > now){
     document.querySelector('#login').style.display = 'none';
     document.querySelector('#signup').style.display = 'none';
     document.querySelector('#logout').style.display = 'block';
     return true;
   }
+  //if token invalid, show login & signup, hide logout
   document.querySelector('#login').style.display = 'block';
   document.querySelector('#signup').style.display = 'block';
   document.querySelector('#logout').style.display = 'none';

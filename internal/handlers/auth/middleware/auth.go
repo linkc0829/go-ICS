@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
@@ -12,8 +13,17 @@ import (
 )
 
 func authError(c *gin.Context, err error) {
-	e := gin.H{"message": "[Auth] error: " + err.Error()}
-	c.AbortWithStatusJSON(http.StatusUnauthorized, e)
+
+	err = errors.New("[Auth] error: " + err.Error())
+	c.Error(err)
+	data := struct {
+		Title        string
+		ErrorMessage string
+	}{
+		Title:        http.StatusText(http.StatusUnauthorized),
+		ErrorMessage: err.Error(),
+	}
+	c.HTML(http.StatusUnauthorized, "layout", data)
 }
 
 // Middleware wraps the request with auth middleware

@@ -29,6 +29,21 @@ type RefClaims struct {
 	jwt.StandardClaims
 }
 
+//ErrorWriter set redirect header to index and show error message
+func ErrorWriter(c *gin.Context, code int, err error) {
+	//c.Writer.Header().Set("Location", "/")
+	err = errors.New("[ics secret] error: " + err.Error())
+	c.Error(err)
+	data := struct {
+		Title        string
+		ErrorMessage string
+	}{
+		Title:        http.StatusText(code),
+		ErrorMessage: err.Error(),
+	}
+	c.HTML(code, "layout", data)
+}
+
 func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//check if user exists
@@ -40,12 +55,12 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 
 		_, err := db.FindUserByJWT(email, provider, userID)
 		if err == nil {
-			c.AbortWithError(http.StatusBadRequest, errors.New("ics signup: user exists"))
+			ErrorWriter(c, http.StatusBadRequest, errors.New("ics signup: user exists"))
 		}
 		//encript password
 		password, err = encriptPassword(password)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, errors.New("ics signup: password encripted failed, server error."))
+			ErrorWriter(c, http.StatusInternalServerError, errors.New("ics signup: password encripted failed, server error."))
 		}
 
 		newUser := &models.UserModel{
@@ -63,7 +78,7 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 		//create access token and refresh token
 		token, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, newUser)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			ErrorWriter(c, http.StatusInternalServerError, err)
 		}
 
 		//add to db
@@ -99,23 +114,22 @@ func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc 
 		user, err := db.FindUserByJWT(email, provider, userID)
 
 		if err != nil {
-			c.Writer.Header().Set("Location", "/")
-			c.Error(err)
-			c.AbortWithError(http.StatusUnauthorized, err)
+			err = errors.New("Login failed: " + err.Error())
+			ErrorWriter(c, http.StatusUnauthorized, err)
 			return
 		}
 
 		if !checkPassword(*user.Password, password) {
-			c.Writer.Header().Set("Location", "/")
-			c.AbortWithError(http.StatusUnauthorized, errors.New("password incorrect"))
+			err = errors.New("Login failed: password incorrect")
+			ErrorWriter(c, http.StatusUnauthorized, err)
 			return
 		}
 
 		//create access token and refresh token
 		token, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, user)
 		if err != nil {
-			c.Writer.Header().Set("Location", "/")
-			c.AbortWithError(http.StatusInternalServerError, err)
+			err = errors.New("Login failed: " + err.Error())
+			ErrorWriter(c, http.StatusInternalServerError, err)
 			return
 		}
 
@@ -144,7 +158,7 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.Handl
 	return func(c *gin.Context) {
 		tokenstring, err := c.Cookie("refresh_token")
 		if err != nil {
-			c.AbortWithError(http.StatusUnauthorized, errors.New("cannot find refresh token string in cookie"))
+			ErrorWriter(c, http.StatusUnauthorized, errors.New("cannot find refresh token string in cookie"))
 			return
 		}
 
@@ -157,19 +171,19 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.Handl
 		})
 
 		if err != nil {
-			c.AbortWithError(http.StatusUnauthorized, err)
+			ErrorWriter(c, http.StatusUnauthorized, err)
 			return
 		}
 
 		//check refresh token is expired or not
 		if token.Valid == false {
-			c.AbortWithError(http.StatusUnauthorized, errors.New("token invalid"))
+			ErrorWriter(c, http.StatusUnauthorized, errors.New("token invalid"))
 			return
 		}
 		claims := token.Claims.(jwt.MapClaims)
 		ID, err := primitive.ObjectIDFromHex(claims["_id"].(string))
 		if err != nil {
-			c.AbortWithError(http.StatusUnauthorized, errors.New("invalid object id"))
+			ErrorWriter(c, http.StatusUnauthorized, errors.New("invalid object id"))
 			return
 		}
 
@@ -178,20 +192,20 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.Handl
 		q := bson.M{"_id": ID}
 		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 		if err = db.Users.FindOne(ctx, q).Decode(&result); err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			ErrorWriter(c, http.StatusInternalServerError, err)
 			return
 		}
 
 		//check token match or not
 		if result.RefreshToken != tokenstring {
-			c.AbortWithError(http.StatusInternalServerError, errors.New("tokens doesn't match"))
+			ErrorWriter(c, http.StatusInternalServerError, errors.New("tokens doesn't match"))
 			return
 		}
 
 		//generate new token pair
 		accToken, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, &result)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			ErrorWriter(c, http.StatusInternalServerError, err)
 			return
 		}
 

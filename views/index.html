@@ -172,6 +172,19 @@ span.psw {
 
   </div>
 </div>
+
+
+<div style="margin-left: 20%; margin-right: 20%; color: red;" id='errorMessage'>
+  {{ .ErrorMessage }}
+</div>
+
+<script>
+  let error = document.querySelector('#errorMessage');
+  if(error.innerText.length > 0){
+    alert(error.innerText);
+  }
+</script>
+
 <div class="container" style="margin-left: 25%;">
   <form id='add'>
     <div class='form-row'>
@@ -231,9 +244,7 @@ span.psw {
 </div>
   
 
-  <div style="margin-left: 20%; margin-right: 20%;">
-    <p id='response'></p>
-  </div>
+  
 
 <div class="container-fluid" style="width: 80%;">
   <div class="row">

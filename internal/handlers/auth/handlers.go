@@ -11,7 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/dgrijalva/jwt-go"
-
 	"github.com/linkc0829/go-ics/pkg/utils"
 
 	"github.com/gin-gonic/gin"
