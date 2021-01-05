@@ -52,7 +52,7 @@ func CreateCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 		createCostInput := models.CreateCostInput{}
 		err := c.ShouldBind(&createCostInput)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			ErrorWriter(c, http.StatusInternalServerError, err)
 			return
 		}
 		variables := map[string]interface{}{
@@ -60,7 +60,7 @@ func CreateCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
@@ -107,7 +107,7 @@ func UpdateCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 		UpdateCostInput := models.UpdateCostInput{}
 		err := c.ShouldBind(&UpdateCostInput)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			ErrorWriter(c, http.StatusInternalServerError, err)
 			return
 		}
 		variables := map[string]interface{}{
@@ -116,7 +116,7 @@ func UpdateCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
@@ -142,7 +142,7 @@ func DeleteCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
@@ -168,7 +168,7 @@ func VoteCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)

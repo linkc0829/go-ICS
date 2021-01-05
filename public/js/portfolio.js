@@ -48,7 +48,7 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
   
  })();
 
- async function checkFriend(){
+ async function checkMyStatus(){
   
   let tokenString = Session.get('token_type') + ' ' + Session.get('token');
   let url = window.location.href.split('/');
@@ -78,11 +78,17 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
           document.querySelector('#unfriend').style.display = 'block';
         }
       }
-      //watching my won profile, hide friend sector
+      //watching my own profile, hide friend sector
       if(res.body.data.me.id == id){
         document.querySelector('#addFriend').style.display = 'none';
         document.querySelector('#unfriend').style.display = 'none';
       }
+      let myID = res.body.data.me.id;
+      document.querySelector('#myProfile').href = '/profile/' + myID;
+      document.querySelector('#myHistory').href = '/history/' + myID;
+      document.querySelector('#myFriends').href = '/friends/' + myID;
+      document.querySelector('#myFollowers').href = '/followers/' + myID;
+
       input.value = '';
   })
   .catch(function (err) {
@@ -94,7 +100,6 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
 
 //get UserId through gql API
 async function getUserProfile(currentUser){
-  if(!checkToken(jwt)){return;}
   let tokenString = Session.get('token_type') + ' ' + Session.get('token');
   let url = window.location.href.split('/');
   let id = url[url.length-1];
@@ -132,6 +137,9 @@ async function getUserProfile(currentUser){
       let resp = document.getElementById('response');
       resp.innerHTML = JSON.stringify(res.body);
 
+      document.querySelector('#profile').href = '/profile/' + out.id;
+      document.querySelector('#history').href = '/history/' + out.id;
+
       input.value = '';
   })
   .catch(function (err) {
@@ -148,76 +156,89 @@ await superagent
   .then(function (res) {
       clearMessage();
       console.log(res.body);
-      Session.set('token', res.body.token);
-      Session.set('token_expiry', res.body.token_expiry);
-      Session.set('token_type', res.body.type);
       jwt.token = res.body.token;
       jwt.token_expiry = res.body.token_expiry;
       jwt.token_type = res.body.type;
-      document.querySelector('#login').style.display = 'none';
-      document.querySelector('#signup').style.display = 'none';
-      document.querySelector('#logout').style.display = 'block';
+      setSession(jwt);
       input.value = '';
   })
   .catch(function (err) {
+    //logout if err occur
     if (err.response) {
-      let url = window.location.href.split('/');
-      if(url.length > 4){
-        console.log(err);
-        logout();
-      }
+      console.log(err);
+    }
+    let url = window.location.href.split('/');
+    if(url.length > 4){
+      logout();
     }
   });
 }
 
-async function checkToken(jwt){
-  jwt.token = Session.get('token');
-  jwt.token_expiry = new Date(Session.get('token_expiry'));
-  jwt.token_type = Session.get('token_type');
-  var now = new Date()
-  //1. check if token expired?
-  if (typeof(jwt.token) == 'undefined' || jwt.token_expiry < now){
-      await getAccessToken(jwt);
-  }
-  //2. if token is valid, hide login&signup, show logout
-  if(jwt.token_expiry > now){
-    document.querySelector('#login').style.display = 'none';
-    document.querySelector('#signup').style.display = 'none';
-    document.querySelector('#logout').style.display = 'block';
-    return true;
-  }
-  //if token invalid, show login & signup, hide logout
-  document.querySelector('#login').style.display = 'block';
-  document.querySelector('#signup').style.display = 'block';
-  document.querySelector('#logout').style.display = 'none';
-  return false;
-}
-
 function logout(){
-  Session.set('token_expiry', '-1');
-  jwt.token_expiry = '-1';
-  currentUser.login = false;
+  jwt.token_expiry = new Date('-1');
+  jwt.token = '';
+  setSession(jwt);
 
   //ask server to set refresh token invalid
   var request = new XMLHttpRequest(); 
   request.open('GET', '/api/v1/auth/ics/logout', true);
   request.send();
   request.onerror = showMessage();
-
   window.location.replace("/");
 }
 
-var jwt = {};
+function setJWTFromSession(jwt){
+  jwt.token = Session.get('token');
+  jwt.token_expiry = new Date(Session.get('token_expiry'));
+  jwt.token_type = Session.get('token_type');
+}
+
+function setSession(jwt){
+  Session.set('token', jwt.token);
+  Session.set('token_expiry', jwt.token_expiry);
+  Session.set('token_type', jwt.type);
+}
+
+var jwt = {
+  token: Session.get('token'),
+  token_expiry: new Date(Session.get('token_expiry')),
+  token_type: Session.get('token_type'),
+};
+
+async function checkToken(jwt){
+  await getAccessToken(jwt);
+}
+
+//check if user login
+function isLogin(){
+  //1. if token is expire, try to get new access token
+  if(jwt.token_expiry < new Date() && jwt.token != '' && typeof(jwt.token) != 'undefined'){
+    checkToken();
+  }
+  //2. check if token is invalid
+  if(jwt.token_expiry < new Date() || jwt.token == '' || typeof(jwt.token) == 'undefined'){
+    return false
+  }
+  //3. token is valid
+  document.querySelector('#login').style.display = 'none';
+  document.querySelector('#signup').style.display = 'none';
+  document.querySelector('#logout').style.display = 'block';
+  return true;
+}
+
 var currentUser = {};
-checkToken(jwt).then((res)=>{
+if(isLogin()){
   getUserProfile(currentUser).then((res)=>{
-    if(!checkToken(jwt)){return;}
     initPortfolio(currentUser, INCOME);
     initPortfolio(currentUser, COST);
   }).then((res)=>{
-    checkFriend();
-  })
-});
+    checkMyStatus();
+  });
+  let date = new Date();
+  let date_month = date.getMonth()+1;
+  let occurDate = date.getFullYear() + '-' + date_month + '-' + date.getDate();
+  document.querySelector('#occurDate').min = occurDate;
+}
 
 const COST = 'COST';
 const INCOME = 'INCOME';
@@ -230,7 +251,6 @@ function casePortfolioType(type, upper){
     return upper? 'Income':'income';
   }
 }
-
 
 function createPortfolioRecord(type){
 
@@ -308,11 +328,17 @@ document.addEventListener('DOMContentLoaded', function () {
             ev.preventDefault();
             if(cost.checked){
                 category = costCategory;
-                createPortfolio(COST);
+                createPortfolio(COST).then((res)=>{
+                  initPortfolio(currentUser, COST);
+                  clearForm();
+                })
             }
             else if(income.checked){
                 category = incomeCategory;
-                createPortfolio(INCOME);
+                createPortfolio(INCOME).then((res)=>{
+                  initPortfolio(currentUser, INCOME);
+                  clearForm();
+                })
             }
           }
       }, false);
@@ -322,11 +348,17 @@ document.addEventListener('DOMContentLoaded', function () {
             ev.preventDefault();
             if(cost.checked){
                 category = costCategory;
-                createPortfolio(COST);
+                createPortfolio(COST).then((res)=>{
+                  initPortfolio(currentUser, COST);
+                  clearForm();
+                })
             }
             else if(income.checked){
                 category = incomeCategory;
-                createPortfolio(INCOME);
+                createPortfolio(INCOME).then((res)=>{
+                  initPortfolio(currentUser, INCOME);
+                  clearForm();
+                })
             }
         }
       }, false);
@@ -338,16 +370,23 @@ document.addEventListener('DOMContentLoaded', function () {
           ev.preventDefault();
           if(cost.checked){
               category = costCategory;
-              createPortfolio(COST);
+              createPortfolio(COST).then((res)=>{
+                initPortfolio(currentUser, COST);
+                clearForm();
+              })
+              
           }
           else if(income.checked){
               category = incomeCategory;
-              createPortfolio(INCOME);
+              createPortfolio(INCOME).then((res)=>{
+                initPortfolio(currentUser, INCOME);
+                clearForm();
+              })
           }
       }, false);
 
       async function createPortfolio(type) {
-        checkToken(jwt);
+        isLogin();
         let target = '/api/v1/' + casePortfolioType(type, false);
         let data = {};
         data.description = description.value;
@@ -355,28 +394,46 @@ document.addEventListener('DOMContentLoaded', function () {
         data.category = category.value;
         let date = new Date(occurDate.value);
         data.occurDate = date.toISOString();
+
+        if(data.description == "" || amount == "" ||  data.category == "ZERO"){
+          alert('input incomplete');
+          return;
+        }
+        if(isNaN(amount)){
+          alert('amount must be numbers');
+          return;
+        }
+        if(date < new Date()){
+          alert('OccurDate must in the future.')
+          return;
+        }
             
         await superagent
-            .post(target)
-            .send(data)
-            .set('accept', 'json')
-            .set('Authorization', jwt.token)
-            .then(function (res) {
-                
-                clearMessage();
-                if(type == COST){
-                  addPortfolio(type, res.body.CreateCost);
-                }
-                else{
-                  addPortfolio(type, res.body.CreateIncome);
-                }
-            })
-            .catch(function (err) {
-                if (err.response) {
-                    showMessage(err.response.message);
-                }
-            });
-    }
+          .post(target)
+          .send(data)
+          .set('accept', 'json')
+          .set('Authorization', jwt.token)
+          .then(function (res) {
+              
+              clearMessage();
+              if(type == COST){
+                addPortfolio(type, res.body.CreateCost);
+              }
+              else{
+                addPortfolio(type, res.body.CreateIncome);
+              }
+          })
+          .catch(function (err) {
+            alert(err);
+          });
+      }
+      function clearForm(){
+        document.querySelector('#description').value = "";
+        document.querySelector('#amount').value = "";
+        document.querySelector('#incomeCat').value = "ZERO";
+        document.querySelector('#costCat').value = "ZERO";
+        document.querySelector('#occurDate').value = "";
+      }
   })();
 })
 
@@ -418,7 +475,7 @@ function addPortfolio(res, type) {
   let date = new Date(res.OccurDate);
   let date_month = date.getMonth()+1;
   let occurDate = date.getFullYear() + '-' + date_month + '-' + date.getDate();
-  let vote = res.Vote.length;
+  let vote = (res.Vote? res.Vote.length:0);
 
   let form = document.createElement('form');
   form.setAttribute('id', id);
@@ -462,7 +519,7 @@ function addPortfolio(res, type) {
   vote_label.innerText = vote;
   let voteBtn = form.querySelector('#vote');
   voteBtn.addEventListener('click', (e)=>{
-    checkToken(jwt);
+    isLogin();
     e.preventDefault();
     let target = '/api/v1/' + casePortfolioType(type, false) + '/vote/' + id;
     superagent
@@ -484,7 +541,7 @@ function addPortfolio(res, type) {
 
   let deleteBtn = form.querySelector('#delete');
   deleteBtn.addEventListener('click', (e)=>{
-    checkToken(jwt);
+    isLogin();
     e.preventDefault();
     form.parentNode.removeChild(form);
     let target = '/api/v1/' + casePortfolioType(type, false) + '/' + id;
@@ -545,7 +602,7 @@ function loadPortfolioItem(index, item, type) {
   });
 
   function updateAndSwitch(type){
-    checkToken(jwt);
+    isLogin();
     label.innerText = input.value;
     label.style.display = 'block';
     input.style.display = 'none';
@@ -600,7 +657,7 @@ function clearMessage() {
 }
 
 function addFriend(){
-  if(!checkToken(jwt)){return;}
+  isLogin();
   let tokenString = Session.get('token_type') + ' ' + Session.get('token');
   let url = window.location.href.split('/');
   let id = url[url.length-1];
@@ -635,7 +692,7 @@ function addFriend(){
 }
 
 function unfriend(){
-  if(!checkToken(jwt)){return;}
+  isLogin();
   let tokenString = Session.get('token_type') + ' ' + Session.get('token');
   let url = window.location.href.split('/');
   let id = url[url.length-1];

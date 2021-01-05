@@ -20,6 +20,7 @@ func RegisterRoutes(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB)
 	routes.RestAPI(cfg, r)
 	r.POST("/profile/:id", handlers.UserProfileHandler(cfg))
 	r.GET("/profile/:id", handlers.UserProfileHandler(cfg))
+	r.GET("/history/:id", handlers.UserHistoryHandler(cfg))
 
 }
 

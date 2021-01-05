@@ -78,14 +78,26 @@ func CallBack(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
 		_, err = db.Users.UpdateOne(ctx, q, update)
 
 		//set token
-		json := gin.H{
-			"type":         "Bearer",
-			"token":        accToken,
-			"token_expiry": tokenExpiry,
+		// json := gin.H{
+		// 	"type":         "Bearer",
+		// 	"token":        accToken,
+		// 	"token_expiry": tokenExpiry,
+		// }
+		data := struct {
+			TokenType   string
+			Token       string
+			TokenExpiry time.Time
+			ID          string
+		}{
+			Token:       accToken,
+			TokenType:   "Bearer",
+			TokenExpiry: tokenExpiry,
+			ID:          u.ID.Hex(),
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
-		c.Writer.Header().Set("Location", "/"+u.ID.Hex())
-		c.JSON(http.StatusPermanentRedirect, json)
+		c.HTML(http.StatusOK, "callback", data)
+		//c.Writer.Header().Set("Location", "/"+u.ID.Hex())
+		//c.JSON(http.StatusPermanentRedirect, json)
 
 	}
 }

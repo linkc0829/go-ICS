@@ -97,6 +97,7 @@ func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Po
 	return rets, nil
 }
 
+//GetUserIncome find user's income portfolio, sort them by date and move outdate entries to history
 func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.Portfolio, error) {
 	user, err := getDBUserByID(ctx, r.DB, id)
 	if err != nil {

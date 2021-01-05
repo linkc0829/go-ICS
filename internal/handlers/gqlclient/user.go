@@ -3,8 +3,8 @@ package gqlclient
 import (
 	//"encoding/json"
 
-	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/shurcooL/graphql"
@@ -38,10 +38,9 @@ func GetUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 		err := client.Query(c, &query, variables)
 		if err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
-		log.Println(query)
 		c.JSON(http.StatusOK, query)
 	}
 }
@@ -85,7 +84,7 @@ func CreateUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 		createUserInput := models.CreateUserInput{}
 		err := c.ShouldBind(&createUserInput)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			ErrorWriter(c, http.StatusInternalServerError, err)
 			return
 		}
 		variables := map[string]interface{}{
@@ -93,7 +92,7 @@ func CreateUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
@@ -140,7 +139,7 @@ func UpdateUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 		updateUserInput := models.UpdateUserInput{}
 		err := c.ShouldBind(&updateUserInput)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			ErrorWriter(c, http.StatusInternalServerError, err)
 			return
 		}
 
@@ -150,7 +149,7 @@ func UpdateUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
@@ -177,7 +176,7 @@ func DeleteUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
@@ -227,7 +226,7 @@ func AddFriend(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
@@ -261,7 +260,7 @@ func GetUserIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 		err := client.Query(c, &query, variables)
 		if err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, query)
@@ -294,9 +293,89 @@ func GetUserCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 		err := client.Query(c, &query, variables)
 		if err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, query)
+	}
+}
+
+//GetUserIncomeHistory handle request GET /user/:id/income/history?range=
+func GetUserIncomeHistory(cfg *utils.ServerConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		client := newClient(c, cfg)
+		ID := c.Param("id")
+		Range, err := strconv.Atoi(c.Query("range"))
+		if err != nil {
+			ErrorWriter(c, http.StatusBadRequest, err)
+			return
+		}
+		var query struct {
+			GetUserIncomeHistory []struct {
+				Id    graphql.ID
+				Owner struct {
+					Id graphql.ID
+				}
+				Amount      graphql.Int
+				Category    graphql.String
+				OccurDate   graphql.String
+				Description graphql.String
+				Vote        []struct {
+					Id graphql.ID
+				}
+			} `graphql:"getUserIncomeHistory(id: $ID, range: $Range)"`
+		}
+		variables := map[string]interface{}{
+			"ID":    graphql.ID(ID),
+			"Range": graphql.Int(Range),
+		}
+		err = client.Query(c, &query, variables)
+		if err != nil {
+			ErrorWriter(c, http.StatusBadRequest, err)
+			return
+		}
+		c.JSON(http.StatusOK, query)
+
+	}
+}
+
+//GetUserCostHistory handle request GET /user/:id/income/history?range=
+func GetUserCostHistory(cfg *utils.ServerConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		client := newClient(c, cfg)
+		ID := c.Param("id")
+		Range, err := strconv.Atoi(c.Query("range"))
+		if err != nil {
+			ErrorWriter(c, http.StatusBadRequest, err)
+			return
+		}
+		var query struct {
+			GetUserCostHistory []struct {
+				Id    graphql.ID
+				Owner struct {
+					Id graphql.ID
+				}
+				Amount      graphql.Int
+				Category    graphql.String
+				OccurDate   graphql.String
+				Description graphql.String
+				Vote        []struct {
+					Id graphql.ID
+				}
+			} `graphql:"getUserCostHistory(id: $ID, range: $Range)"`
+		}
+		variables := map[string]interface{}{
+			"ID":    graphql.ID(ID),
+			"Range": graphql.Int(Range),
+		}
+		err = client.Query(c, &query, variables)
+		if err != nil {
+			ErrorWriter(c, http.StatusBadRequest, err)
+			return
+		}
+		c.JSON(http.StatusOK, query)
+
 	}
 }

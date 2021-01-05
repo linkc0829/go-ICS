@@ -101,7 +101,6 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUs
 		Friends:   []string{},
 		Followers: []string{},
 	}
-	log.Println(ret)
 
 	return ret, nil
 }
@@ -242,8 +241,6 @@ func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.U
 
 	q := bson.M{"_id": hexID}
 	result := dbModel.UserModel{}
-
-	log.Println(hexID)
 	if err := DB.Users.FindOne(ctx, q).Decode(&result); err != nil {
 		return nil, err
 	}

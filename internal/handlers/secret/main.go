@@ -92,14 +92,19 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 		}
 
 		//set token
-		json := gin.H{
-			"type":         "Bearer",
-			"token":        token,
-			"token_expiry": tokenExpiry,
+		data := struct {
+			TokenType   string
+			Token       string
+			TokenExpiry time.Time
+			ID          string
+		}{
+			Token:       token,
+			TokenType:   "Bearer",
+			TokenExpiry: tokenExpiry,
+			ID:          newUser.ID.Hex(),
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
-		c.Writer.Header().Set("Location", "/profile/"+newUser.ID.Hex())
-		c.JSON(http.StatusOK, json)
+		c.HTML(http.StatusOK, "callback", data)
 	}
 
 }
@@ -141,14 +146,19 @@ func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc 
 		_, err = db.Users.UpdateOne(ctx, q, update)
 
 		//set token
-		json := gin.H{
-			"type":         "Bearer",
-			"token":        token,
-			"token_expiry": tokenExpiry,
+		data := struct {
+			TokenType   string
+			Token       string
+			TokenExpiry time.Time
+			ID          string
+		}{
+			Token:       token,
+			TokenType:   "Bearer",
+			TokenExpiry: tokenExpiry,
+			ID:          user.ID.Hex(),
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
-		c.Writer.Header().Set("Location", "/profile/"+user.ID.Hex())
-		c.JSON(http.StatusOK, json)
+		c.HTML(http.StatusOK, "callback", data)
 
 	}
 }

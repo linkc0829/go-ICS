@@ -1,0 +1,19 @@
+{{ define "callback" }}
+
+<script src='/public/js/session.js'></script>
+
+<div id='token' style="display: none;">{{.Token}}</div>
+<div id='token_type' style="display: none;">{{.TokenType}}</div>
+<div id='token_expiry' style="display: none;">{{.TokenExpiry}}</div>
+<div id='id' style="display: none;">{{.ID}}</div>
+
+<script>
+    Session.set('token', document.querySelector('#token').innerText);
+    Session.set('token_type', document.querySelector('#token_type').innerText);
+    Session.set('token_expiry', document.querySelector('#token_expiry').innerText);
+
+    let redirect = "/profile/" + document.querySelector('#id').innerText
+    window.location.replace(redirect);
+</script>
+
+{{ end }}

@@ -1,4 +1,4 @@
-{{ define "profile" }}
+{{ define "history" }}
 
 <!DOCTYPE html>
 <html>
@@ -21,10 +21,10 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-          <a class="nav-link" href="#" id='profile'>Profile</a>
+          <a class="nav-link" href="#">Profile <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" id='history'>History</a>
+          <a class="nav-link" href="#">History</a>
         </li>
       </ul>
       <ul class="navbar-nav">
@@ -35,17 +35,17 @@
           <a class="nav-link" href="#" onclick="document.getElementById('id02').style.display='block'" style="display: block;">Free Trial</a>
         </li>
         <li class="nav-item dropdown" id='logout' style="display: block;">
-          <a class="nav-link dropdown-toggle" href="#" id="myAccount" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            My Account
-          </a>
-          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="myAccount" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                My Account
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             <a class="dropdown-item" href="#" id='myProfile'>My Profile</a>
             <a class="dropdown-item" href="#" id='myHistory'>My History</a>
             <a class="dropdown-item" href="#" id='myFriends'>My Friends</a>
             <a class="dropdown-item" href="#" id='myFollowers'>My Followers</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#" onclick="logout()">Logout</a>
-          </div>
+            <a class="dropdown-item" href="#" onclick=logout()>Logout</a>
+            </div>
         </li>
 
       </ul>
@@ -56,7 +56,7 @@
 <div class="container">
   <div class="row">
     <div class="col-md-8">
-      <h2>{{ .Title }}</h2>
+      <h2>{{ .Title }} Portfolio History</h2>
     </div>
     
     <div class="col-md">
@@ -69,70 +69,36 @@
   </div>
 </div>
 
-<div style="margin-left: 20%; margin-right: 20%; color: red;" id='errorMessage'>
-  
-</div>
+<div class="container border" style="margin-left: 25%; width: 48%;">
+    <div class="row">
+        <div class="col-md" style="text-align: right; padding-top: 20px; padding-right: 10px;">Query Range: Last 
+            <a href="#" style="padding-right: 20px;" onclick="reloadHistory(7)">7 days</a>
+            <a href="#" style="padding-right: 20px;" onclick="reloadHistory(14)">14 days</a>
+            <a href="#" style="padding-right: 20px;" onclick="reloadHistory(30)">30 days</a>
+        </div>
+        
+        <div class="col-md">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon1" style="margin-top: 8px;">Custom: </span>
+                </div>
+                <input type="text" class="form-control" placeholder="30" aria-label="custom" aria-describedby="basic-addon1" name='custom' id='custom'>
+                <div class="input-group-append">
+                    <span class="input-group-text" id="basic-addon2" style="margin-top: 8px;">days</span>
+                </div>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id='customQuery' style="margin-bottom: 0;" onclick="reloadHistory(document.querySelector('#custom').value)">Query</button>
+                </div>
+              </div>
+              
+              
 
-<div class="container" style="margin-left: 25%;">
-  <form id='add'>
-    <div class='form-row'>
-      <div class="col-md-4">
-        <label for='description'>Description:</label>
-        <input type='text' class='form-control' name='description' placeholder='Describe your portfolio here' id='description' required>
-      </div>
-      <div class="col-md-2">
-        <label for='amount'>Amount:</label>
-        <input type='text' class='form-control' name='amount' placeholder='how much' id='amount' required>
-        <div class="valid-feedback">Please enter a number.</div>
-      </div>
-      <div class="col-md-2">
-        <div class="form-check" style="padding-top: 25px;">
-          <p>Type:</p>
-          <input type="radio" id="income" name="portfolio" value="income" checked style="padding-top: 30px;">
-          <label for="income">Income</label>
         </div>
-      </div>
     </div>
-    <div class='form-row'>
-      <div class="col-md-4">
-        <label for='category'>Catepory:</label>
-        <select name='category' id='incomeCat' class="custom-select">
-          <option value='ZERO' selected>Choose a category</option>
-          <option value='INVESTMENT'>INVESTMENT</option>
-          <option value='SALARY'>SALARY</option>
-          <option value='PARTTIME'>PART TIME</option>
-          <option value='OTHERS'>OTHERS</option>
-        </select>
-        <select name='category' id='costCat' style="display: none;" class="custom-select">
-          <option value='ZERO' selected>Choose a category</option>
-          <option value='INVESTMENT'>INVESTMENT</option>
-          <option value='DAILY'>DAILY</option>
-          <option value='LEARNING'>LEARNING</option>
-          <option value='CHARITY'>CHARITY</option>
-          <option value='OTHERS'>OTHERS</option>
-        </select>
-      </div>
-      <div class="col-md-2">
-        <label for='occueDate'>OccueDate:</label>
-        <input type='date' class='form-control' name='occurDate' placeholder='occurDate' id='occurDate' min='' required>
-      </div>
-      <div class="col-md-2">
-        <div class="form-check">
-          <input type="radio" id="cost" name="portfolio" value="cost">
-          <label for="cost">Cost</label>
-        </div>
-      </div>
-    </div>
-    <div class='form-row' style="margin-left: 20%;">
-      <div class="col-md">
-        <button class='btn btn-primary' style="width: 25%;" id='create'>Create</button>
-      </div>
-    </div>
-  </form>
 </div>
   
 
-  <div style="margin-left: 20%; margin-right: 20%;">
+  <div style="margin-left: 20%; margin-right: 20%; padding-top: 15px;">
     <p id='response'></p>
   </div>
 
@@ -294,13 +260,6 @@
 
 
 <script>
-  let error = document.querySelector('#errorMessage');
-  if(error.innerText.length > 0){
-    alert(error.innerText);
-  }
-</script>
-
-<script>
 // Get the modal
 var modal = document.getElementById('id01');
 
@@ -335,9 +294,10 @@ incomeChecked.addEventListener('click', (e)=>{
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/2.0.15/bootstrap-native-v4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/4.1.0/superagent.min.js" integrity="sha256-XwGIb0dW2d+hM8XPl9RcTbaNJoTfQ/xKV1n5EBYH0n4=" crossorigin="anonymous"></script>
-<script src='/public/js/portfolio.js'></script>
+<script src='/public/js/history.js'></script>
 
 
 </body>
 </html>
+
 {{ end }}

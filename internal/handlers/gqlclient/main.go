@@ -28,12 +28,9 @@ func ErrorWriter(c *gin.Context, code int, err error) {
 	//c.Writer.Header().Set("Location", "/")
 	err = errors.New("[gql client] error: " + err.Error())
 	c.Error(err)
-	data := struct {
-		Title        string
-		ErrorMessage string
-	}{
-		Title:        http.StatusText(code),
-		ErrorMessage: err.Error(),
+	json := gin.H{
+		"Title":        http.StatusText(code),
+		"ErrorMessage": err.Error(),
 	}
-	c.HTML(code, "layout", data)
+	c.JSON(code, json)
 }

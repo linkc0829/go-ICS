@@ -20,3 +20,17 @@ func UserProfileHandler(cfg *utils.ServerConfig) gin.HandlerFunc {
 
 	}
 }
+
+func UserHistoryHandler(cfg *utils.ServerConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		data := struct {
+			Title string
+		}{
+			Title: "User History | ICS",
+		}
+
+		c.HTML(http.StatusOK, "history", data)
+
+	}
+}

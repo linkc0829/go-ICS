@@ -17,6 +17,8 @@ func RestAPI(cfg *utils.ServerConfig, r *gin.Engine) {
 	g.PUT("addfriend/:id", gqlclient.AddFriend(cfg))
 	g.GET(":id/income", gqlclient.GetUserIncome(cfg))
 	g.GET(":id/cost", gqlclient.GetUserCost(cfg))
+	g.GET(":id/income/history", gqlclient.GetUserIncomeHistory(cfg))
+	g.GET(":id/cost/history", gqlclient.GetUserCostHistory(cfg))
 
 	in := r.Group(cfg.VersioningEndpoint("/income"))
 	in.POST("", gqlclient.CreateIncome(cfg))

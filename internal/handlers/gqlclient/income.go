@@ -52,7 +52,8 @@ func CreateIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 		createIncomeInput := models.CreateIncomeInput{}
 		err := c.ShouldBind(&createIncomeInput)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
+			//c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 		variables := map[string]interface{}{
@@ -60,7 +61,7 @@ func CreateIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
@@ -107,7 +108,7 @@ func UpdateIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 		UpdateIncomeInput := models.UpdateIncomeInput{}
 		err := c.ShouldBind(&UpdateIncomeInput)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			ErrorWriter(c, http.StatusInternalServerError, err)
 			return
 		}
 		variables := map[string]interface{}{
@@ -116,7 +117,7 @@ func UpdateIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
@@ -142,7 +143,7 @@ func DeleteIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
@@ -168,7 +169,7 @@ func VoteIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 		}
 
 		if err := client.Mutate(c, &mutation, variables); err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			ErrorWriter(c, http.StatusBadRequest, err)
 			return
 		}
 		c.JSON(http.StatusOK, mutation)
