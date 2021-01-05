@@ -167,7 +167,7 @@ func (r *queryResolver) GetUserIncomeHistory(ctx context.Context, id string, ran
 	}
 
 	fromDate, toDate := getDateRange(rangeArg)
-	q := bson.M{"owner": user.ID, "OccurDate": bson.M{
+	q := bson.M{"owner": user.ID, "occurDate": bson.M{
 		"$gte": fromDate,
 		"$lte": toDate,
 	}}
@@ -190,7 +190,7 @@ func (r *queryResolver) GetUserCostHistory(ctx context.Context, id string, range
 	}
 
 	fromDate, toDate := getDateRange(rangeArg)
-	q := bson.M{"owner": user.ID, "OccurDate": bson.M{
+	q := bson.M{"owner": user.ID, "occurDate": bson.M{
 		"$gte": fromDate,
 		"$lte": toDate,
 	}}
@@ -219,7 +219,7 @@ func getDateRange(days int) (time.Time, time.Time) {
 	from := time.Now().Add(duration)
 	fromDate := time.Date(from.Year(), from.Month(), from.Day(), 0, 0, 0, 0, time.Local)
 
-	return toDate, fromDate
+	return fromDate, toDate
 }
 
 func decodeFindResult(results []bson.M) []models.Portfolio {

@@ -1,0 +1,94 @@
+{{ block "protfolioList" .}}
+
+<div class="container-fluid" style="width: 80%;">
+  <div class="row">
+    <div class="col-md" id='income-list' style="background: beige;">
+      <form id='0000'>
+        <div class='form-row'>
+          <div class="col-md-7 border">
+            <label for='description' id='description_label'>Income Description</label>
+            <input type='text' class='form-control' name='description' placeholder='Income Description' id='description_input' style="display: none;">
+          </div>
+          <div class="col-md-3 border">
+            <label for='amount' id='amount_label'>Amount: $888</label>
+            <input type='text' class='form-control' name='amount' placeholder='888' id='amount_input' style="display: none;">
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-secondary' id='update'>Update</button>
+          </div>
+        </div>
+        <div class='form-row'>
+          <div class="col-md-3 border">
+            <label for='category' id='category_label'>INVESTMENT</label>
+            <select name='category' id='category_input' class="custom-select" style="display: none;">
+              <option selected>Choose a category</option>
+              <option value='INVESTMENT'>INVESTMENT</option>
+              <option value='SALARY'>SALARY</option>
+              <option value='PARTTIME'>PART TIME</option>
+              <option value='OTHERS'>OTHERS</option>
+            </select>
+          </div>
+          <div class="col-md-3 border">
+            <label for='occueDate' id='occueDate_label'>@ 2021-01-01</label>
+            <input type='date' class='form-control' name='occurDate' placeholder='occurDate' min='' value='2021-01-01' style="display: none;" id='occurDate_input'>
+          </div>
+          <div class="col-md-2 border">
+            <label id='vote_label'>Vote: 555</label>
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-primary' id='vote'>Vote</button>
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-danger' id='delete'>Delete</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="col-md" id='cost-list' style="background: #e9ecef;">
+      <form id='_id'>
+        <div class='form-row'>
+          <div class="col-md-7 border">
+            <label for='description' id='description_label'>Cost Description</label>
+            <input type='text' class='form-control' name='description' placeholder='Income Description' id='description_input' style="display: none;">
+          </div>
+          <div class="col-md-3 border">
+            <label for='amount' id='amount_label'>Amount: $888</label>
+            <input type='text' class='form-control' name='amount' placeholder='888' id='amount_input' style="display: none;">
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-secondary' id='update'>Update</button>
+          </div>
+        </div>
+        <div class='form-row'>
+          <div class="col-md-3 border">
+            <label for='category' id='category_label'>LEARNING</label>
+            <select name='category' id='costCat' style="display: none;" class="custom-select">
+              <option selected>Choose a category</option>
+              <option value='INVESTMENT'>INVESTMENT</option>
+              <option value='DAILY'>DAILY</option>
+              <option value='LEARNING'>LEARNING</option>
+              <option value='CHARITY'>CHARITY</option>
+              <option value='OTHERS'>OTHERS</option>
+            </select>
+          </div>
+          <div class="col-md-3 border">
+            <label for='occueDate' id='occueDate_label'>@ 2021-01-01</label>
+            <input type='date' class='form-control' name='occurDate' placeholder='occurDate' id='occurDate_input' min='' value='2021-01-01' style="display: none;">
+          </div>
+          <div class="col-md-2 border">
+            <label>Vote: 555</label>
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-primary' id='vote'>Vote</button>
+          </div>
+          <div class="col-md-2">
+            <button class='btn btn-danger' id='delete'>Delete</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+{{ end }}

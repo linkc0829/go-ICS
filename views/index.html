@@ -13,45 +13,7 @@
 </head>
 <body>
 
-  <nav class="navbar navbar-expand-lg navbar-light bg-light" style="background-color: #e3f2fd; padding-left: 10%; padding-right: 10%;">
-    <a class="navbar-brand" href="http://localhost:8080">ICS</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="#">Profile <span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">History</a>
-        </li>
-      </ul>
-      <ul class="navbar-nav">
-        <li class="nav-item" id='login'>
-          <a class="nav-link" href="#" onclick="document.getElementById('id01').style.display='block'" style="display: block;">Login</a>
-        </li>
-        <li class="nav-item" id='signup'>
-          <a class="nav-link" href="#" onclick="document.getElementById('id02').style.display='block'" style="display: block;">Signup</a>
-        </li>
-        <li class="nav-item dropdown" id='logout' style="display: block;">
-          <a class="nav-link dropdown-toggle" href="#" id="myAccount" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            My Account
-          </a>
-          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="#" id='myProfile'>My Profile</a>
-            <a class="dropdown-item" href="#" id='myHistory'>My History</a>
-            <a class="dropdown-item" href="#" id='myFriends'>My Friends</a>
-            <a class="dropdown-item" href="#" id='myFollowers'>My Followers</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#" onclick=logout()>Logout</a>
-          </div>
-        </li>
-
-      </ul>
-      
-    </div>
-  </nav>
+  {{ template "nav" .}}
 
 
 
@@ -83,159 +45,9 @@
   }
 </script>
 
-<div class="container" style="margin-left: 25%;">
-  <form id='add'>
-    <div class='form-row'>
-      <div class="col-md-4">
-        <label for='description'>Description:</label>
-        <input type='text' class='form-control' name='description' placeholder='Describe your portfolio here' id='description' required>
-      </div>
-      <div class="col-md-2">
-        <label for='amount'>Amount:</label>
-        <input type='text' class='form-control' name='amount' placeholder='how much' id='amount' required>
-        <div class="valid-feedback">Please enter a number.</div>
-      </div>
-      <div class="col-md-2">
-        <div class="form-check" style="padding-top: 25px;">
-          <p>Type:</p>
-          <input type="radio" id="income" name="portfolio" value="income" checked style="padding-top: 30px;">
-          <label for="income">Income</label>
-        </div>
-      </div>
-    </div>
-    <div class='form-row'>
-      <div class="col-md-4">
-        <label for='category'>Catepory:</label>
-        <select name='category' id='incomeCat' class="custom-select">
-          <option selected>Choose a category</option>
-          <option value='INVESTMENT'>INVESTMENT</option>
-          <option value='SALARY'>SALARY</option>
-          <option value='PARTTIME'>PART TIME</option>
-          <option value='OTHERS'>OTHERS</option>
-        </select>
-        <select name='category' id='costCat' style="display: none;" class="custom-select">
-          <option selected>Choose a category</option>
-          <option value='INVESTMENT'>INVESTMENT</option>
-          <option value='DAILY'>DAILY</option>
-          <option value='LEARNING'>LEARNING</option>
-          <option value='CHARITY'>CHARITY</option>
-          <option value='OTHERS'>OTHERS</option>
-        </select>
-      </div>
-      <div class="col-md-2">
-        <label for='occueDate'>OccueDate:</label>
-        <input type='date' class='form-control' name='occurDate' placeholder='occurDate' id='occurDate' min='' required>
-      </div>
-      <div class="col-md-2">
-        <div class="form-check">
-          <input type="radio" id="cost" name="portfolio" value="cost">
-          <label for="cost">Cost</label>
-        </div>
-      </div>
-    </div>
-    <div class='form-row' style="margin-left: 20%;">
-      <div class="col-md">
-        <button class='btn btn-primary' style="width: 25%;" id='create'>Create</button>
-      </div>
-    </div>
-  </form>
-</div>
+{{ template "create" .}}
   
-
-  
-
-<div class="container-fluid" style="width: 80%;">
-  <div class="row">
-    <div class="col-md" id='income-list' style="background: beige;">
-      <form id='0000'>
-        <div class='form-row'>
-          <div class="col-md-7 border">
-            <label for='description' id='description_label'>Income Description</label>
-            <input type='text' class='form-control' name='description' placeholder='Income Description' id='description_input' style="display: none;">
-          </div>
-          <div class="col-md-3 border">
-            <label for='amount' id='amount_label'>Amount: $888</label>
-            <input type='text' class='form-control' name='amount' placeholder='888' id='amount_input' style="display: none;">
-          </div>
-          <div class="col-md-2">
-            <button class='btn btn-secondary' id='update'>Update</button>
-          </div>
-        </div>
-        <div class='form-row'>
-          <div class="col-md-3 border">
-            <label for='category' id='category_label'>INVESTMENT</label>
-            <select name='category' id='category_input' class="custom-select" style="display: none;">
-              <option selected>Choose a category</option>
-              <option value='INVESTMENT'>INVESTMENT</option>
-              <option value='SALARY'>SALARY</option>
-              <option value='PARTTIME'>PART TIME</option>
-              <option value='OTHERS'>OTHERS</option>
-            </select>
-          </div>
-          <div class="col-md-3 border">
-            <label for='occueDate' id='occueDate_label'>@ 2021-01-01</label>
-            <input type='date' class='form-control' name='occurDate' placeholder='occurDate' min='' value='2021-01-01' style="display: none;" id='occurDate_input'>
-          </div>
-          <div class="col-md-2 border">
-            <label id='vote_label'>Vote: 555</label>
-          </div>
-          <div class="col-md-2">
-            <button class='btn btn-primary' id='vote'>Vote</button>
-          </div>
-          <div class="col-md-2">
-            <button class='btn btn-danger' id='delete'>Delete</button>
-          </div>
-        </div>
-      </form>
-    </div>
-    <div class="col-md" id='cost-list' style="background: #e9ecef;">
-      <form id='_id'>
-        <div class='form-row'>
-          <div class="col-md-7 border">
-            <label for='description' id='description_label'>Cost Description</label>
-            <input type='text' class='form-control' name='description' placeholder='Income Description' id='description_input' style="display: none;">
-          </div>
-          <div class="col-md-3 border">
-            <label for='amount' id='amount_label'>Amount: $888</label>
-            <input type='text' class='form-control' name='amount' placeholder='888' id='amount_input' style="display: none;">
-          </div>
-          <div class="col-md-2">
-            <button class='btn btn-secondary' id='update'>Update</button>
-          </div>
-        </div>
-        <div class='form-row'>
-          <div class="col-md-3 border">
-            <label for='category' id='category_label'>LEARNING</label>
-            <select name='category' id='costCat' style="display: none;" class="custom-select">
-              <option selected>Choose a category</option>
-              <option value='INVESTMENT'>INVESTMENT</option>
-              <option value='DAILY'>DAILY</option>
-              <option value='LEARNING'>LEARNING</option>
-              <option value='CHARITY'>CHARITY</option>
-              <option value='OTHERS'>OTHERS</option>
-            </select>
-          </div>
-          <div class="col-md-3 border">
-            <label for='occueDate' id='occueDate_label'>@ 2021-01-01</label>
-            <input type='date' class='form-control' name='occurDate' placeholder='occurDate' id='occurDate_input' min='' value='2021-01-01' style="display: none;">
-          </div>
-          <div class="col-md-2 border">
-            <label>Vote: 555</label>
-          </div>
-          <div class="col-md-2">
-            <button class='btn btn-primary' id='vote'>Vote</button>
-          </div>
-          <div class="col-md-2">
-            <button class='btn btn-danger' id='delete'>Delete</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-
-
+{{ template "protfolioList" .}}
 
   <div class='row'>
       <div class='offset-lg-2 col-lg-8 offset-md-1 col-md-10 col-sm-12'>
@@ -244,74 +56,10 @@
   </div>
 </div>
 
-<div id="id01" class="modal">
-  <form class="modal-content animate" action="/api/v1/auth/ics/login" method="post">
-    <p class="text-md-center" style="font-size: 2rem; padding-top: 15px;">Login</p>
-    <div class="imgcontainer">
-      <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
-    </div>
 
-    <div class="container">
-      <label for="userID"><b>Username</b></label>
-      <input type="text" placeholder="Enter Username" name="userID" required>
-
-      <label for="email"><b>Email</b></label>
-      <input type="text" placeholder="Enter Email" name="email" required>
-
-      <label for="password"><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" name="password" required>
-        
-      <button type="submit">Login</button>
-    </div>
-
-    <div class="container" style="background-color:#f1f1f1">
-      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
-    </div>
-  </form>
-</div>
-
-<div id="id02" class="modal">
-  
-  <form class="modal-content animate" action="/api/v1/auth/ics/signup" method="post">
-    <p class="text-md-center" style="font-size: 2rem; padding-top: 15px;">Free Trial Signup</p>
-    <div class="imgcontainer">
-      <span onclick="document.getElementById('id02').style.display='none'" class="close" title="Close Modal">&times;</span>
-    </div>
-
-    <div class="container">
-      <label for="userID"><b>Username</b></label>
-      <input type="text" placeholder="Enter Username" name="userID" required>
-
-      <label for="email"><b>Email</b></label>
-      <input type="text" placeholder="Enter Email" name="email" required>
-
-      <label for="password"><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" name="password" required>
-
-      <label for="nickname"><b>Nickname</b></label>
-      <input type="text" placeholder="Enter Nickname" name="nickname">
-        
-      <button type="submit">Signup</button>
-    </div>
-
-    <div class="container" style="background-color:#f1f1f1">
-      <button type="button" onclick="document.getElementById('id02').style.display='none'" class="cancelbtn">Cancel</button>
-    </div>
-  </form>
-</div>
 
 
 <script>
-// Get the modal
-var modal = document.getElementById('id01');
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
-
 //switch category selector
 let costChecked = document.querySelector('#cost');
 let incomeChecked = document.querySelector('#income');

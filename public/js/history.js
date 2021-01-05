@@ -310,9 +310,6 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
     </div>"
     return ret;
   }
-
-
-  
   //load user portfolio, for init or reload
   async function initPortfolio(user, type, range){
     let target = '/api/v1/user/' + user.id + (type==INCOME? '/income': '/cost') + '/history?range=' + range;
@@ -324,12 +321,13 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
         .set('Authorization', jwt.token)
         .then(function (res) {
             clearMessage();
+            console.log(res);
             let portfolio;
             if(type == INCOME){
-              portfolio = res.body.GetUserIncome;
+              portfolio = res.body.GetUserIncomeHistory;
             }
             else{
-              portfolio = res.body.GetUserCost;
+              portfolio = res.body.GetUserCostHistory;
             }
             for (let i = 0; i < portfolio.length; i++) {
               addPortfolio(portfolio[i], type);
@@ -362,7 +360,7 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
     let description_label = form.querySelector('#description_label');
     description_label.innerText = description;
     description_label.htmlFor = 'description_' + id;
-    description_label.addEventListener('click', ()=>{ loadPortfolioItem(id, 'description', type)})
+    //description_label.addEventListener('click', ()=>{ loadPortfolioItem(id, 'description', type)})
     let description_input = form.querySelector('#description_input');
     description_input.name = 'description_' + id;
     description_input.value = description;
@@ -370,7 +368,7 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
     let amount_label = form.querySelector('#amount_label');
     amount_label.innerText = amount;
     amount_label.htmlFor = 'amount_' + id;
-    amount_label.addEventListener('click', ()=>{ loadPortfolioItem(id, 'amount', type)})
+    //amount_label.addEventListener('click', ()=>{ loadPortfolioItem(id, 'amount', type)})
     let amount_input = form.querySelector('#amount_input');
     amount_input.name = 'amount_' + id;
     amount_input.value = amount;
@@ -378,7 +376,7 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
     let category_label = form.querySelector('#category_label');
     category_label.innerText = category;
     category_label.htmlFor = 'category_' + id;
-    category_label.addEventListener('click', ()=>{ loadPortfolioItem(id, 'category', type)})
+    //category_label.addEventListener('click', ()=>{ loadPortfolioItem(id, 'category', type)})
     let category_input = form.querySelector('#category_input');
     category_input.name = 'category_' + id;
     category_input.value = category;
@@ -386,129 +384,14 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
     let occurDate_label = form.querySelector('#occurDate_label');
     occurDate_label.innerText = occurDate;
     occurDate_label.htmlFor = 'occueDate_' + id;
-    occurDate_label.addEventListener('click', ()=>{ loadPortfolioItem(id, 'occurDate', type)})
+    //occurDate_label.addEventListener('click', ()=>{ loadPortfolioItem(id, 'occurDate', type)})
     let occurDate_input = form.querySelector('#occurDate_input');
     occurDate_input.name = 'occueDate_' + id;
     occurDate_input.value = occurDate;
   
     let vote_label = form.querySelector('#vote_label');
     vote_label.innerText = vote;
-    let voteBtn = form.querySelector('#vote');
-    voteBtn.addEventListener('click', (e)=>{
-      isLogin();
-      e.preventDefault();
-      let target = '/api/v1/' + casePortfolioType(type, false) + '/vote/' + id;
-      superagent
-          .put(target)
-          .set('accept', 'json')
-          .set('Authorization', jwt.token)
-          .then(function (res) {
-              clearMessage();
-              input = '';
-              vote_label.innerText = (type==INCOME? res.body.VoteIncome:res.body.VoteCost);
-          })
-          .catch(function (err) {
-              if (err.response) {
-                  showMessage(err.response.message);
-                  initPortfolio(currentUser, type);
-              }
-          });
-    })
-  
-    let deleteBtn = form.querySelector('#delete');
-    deleteBtn.addEventListener('click', (e)=>{
-      isLogin();
-      e.preventDefault();
-      form.parentNode.removeChild(form);
-      let target = '/api/v1/' + casePortfolioType(type, false) + '/' + id;
-      /* Send `DELETE` event with Ajax. */
-      superagent
-          .delete(target)
-          .set('accept', 'json')
-          .set('Authorization', jwt.token)
-          .then(function () {
-              clearMessage();
-          })
-          .catch(function (err) {
-              if (err.response) {
-                  showMessage(err.response.message);
-                  initPortfolio(currentUser, type);
-              }
-          });
-    });
-  }
-  
-  /* Convert target label element into a input element while keeping the data. */
-  function loadPortfolioItem(index, item, type) {
     
-    let form = document.getElementById(index);
-    let label_id = '#' + item + '_label';
-    let input_id = '#' + item + '_input';
-    let label = form.querySelector(label_id);
-    let input = form.querySelector(input_id);
-  
-    label.style.display = 'none';
-    input.style.display = 'block';
-    input.focus();
-  
-    if(item == 'category' || item == 'occurDate'){
-        input.addEventListener('change', ()=>{ updateAndSwitch(type);});
-    }
-  
-    let updateBtn = form.querySelector('#update');
-    updateBtn.addEventListener('click', (e)=>{ 
-      e.preventDefault();
-      updateAndSwitch(type);
-    });
-  
-    input.addEventListener('keydown', (event)=> {
-        /* Cancel input when pressing ESC. */
-        if(event.keyCode == 27){
-          event.preventDefault();
-          label.style.display = 'block';
-          input.style.display = 'none';
-          input.value = label.innerText;
-        }
-  
-        /* Update data when pressing ENTER. */
-        if (event.keyCode === 13) {
-          event.preventDefault();
-          updateAndSwitch(type);
-        }
-    });
-  
-    function updateAndSwitch(type){
-      isLogin();
-      label.innerText = input.value;
-      label.style.display = 'block';
-      input.style.display = 'none';
-  
-      target = '/api/v1/' + casePortfolioType(type, false) + '/' + index;
-      let data = {};
-      if(item == 'occurDate'){
-        let date = new Date(input.value);
-        data[item] = date.toISOString();
-      }
-      else {
-        data[item] = input.value;
-      }
-  
-      /* Update the income item by sending a `PATCH` event with Ajax. */
-      superagent
-          .patch(target)
-          .send(data)
-          .set('accept', 'json')
-          .set('Authorization', jwt.token)
-          .then(function () {
-              clearMessage();
-          })
-          .catch(function (err) {
-              if (err.response) {
-                  showMessage(err.response.message);
-                  initPortfolio(currentUser, type);
-              }
-          });
-    }
   }
   
   function showMessage(msg) {

@@ -217,12 +217,18 @@ function isLogin(){
   }
   //2. check if token is invalid
   if(jwt.token_expiry < new Date() || jwt.token == '' || typeof(jwt.token) == 'undefined'){
+    
+    document.querySelector('#login').style.display = 'block';
+    document.querySelector('#signup').style.display = 'block';
+    document.querySelector('#history').style.display = 'none';
+    document.querySelector('#logout').style.display = 'none';
     return false
   }
   //3. token is valid
   document.querySelector('#login').style.display = 'none';
   document.querySelector('#signup').style.display = 'none';
   document.querySelector('#logout').style.display = 'block';
+  
   return true;
 }
 
@@ -413,8 +419,7 @@ document.addEventListener('DOMContentLoaded', function () {
           .send(data)
           .set('accept', 'json')
           .set('Authorization', jwt.token)
-          .then(function (res) {
-              
+          .then(function (res) {            
               clearMessage();
               if(type == COST){
                 addPortfolio(type, res.body.CreateCost);

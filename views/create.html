@@ -1,0 +1,61 @@
+{{ block "create" . }}
+<div class="container" style="margin-left: 25%;">
+  <form id='add'>
+    <div class='form-row'>
+      <div class="col-md-4">
+        <label for='description'>Description:</label>
+        <input type='text' class='form-control' name='description' placeholder='Describe your portfolio here' id='description' required>
+      </div>
+      <div class="col-md-2">
+        <label for='amount'>Amount:</label>
+        <input type='text' class='form-control' name='amount' placeholder='how much' id='amount' required>
+        <div class="valid-feedback">Please enter a number.</div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-check" style="padding-top: 25px;">
+          <p>Type:</p>
+          <input type="radio" id="income" name="portfolio" value="income" checked style="padding-top: 30px;">
+          <label for="income">Income</label>
+        </div>
+      </div>
+    </div>
+    <div class='form-row'>
+      <div class="col-md-4">
+        <label for='category'>Catepory:</label>
+        <select name='category' id='incomeCat' class="custom-select">
+          <option value='ZERO' selected>Choose a category</option>
+          <option value='INVESTMENT'>INVESTMENT</option>
+          <option value='SALARY'>SALARY</option>
+          <option value='PARTTIME'>PART TIME</option>
+          <option value='OTHERS'>OTHERS</option>
+        </select>
+        <select name='category' id='costCat' style="display: none;" class="custom-select">
+          <option value='ZERO' selected>Choose a category</option>
+          <option value='INVESTMENT'>INVESTMENT</option>
+          <option value='DAILY'>DAILY</option>
+          <option value='LEARNING'>LEARNING</option>
+          <option value='CHARITY'>CHARITY</option>
+          <option value='OTHERS'>OTHERS</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for='occueDate'>OccueDate:</label>
+        <input type='date' class='form-control' name='occurDate' placeholder='occurDate' id='occurDate' min='' required>
+      </div>
+      <div class="col-md-2">
+        <div class="form-check">
+          <input type="radio" id="cost" name="portfolio" value="cost">
+          <label for="cost">Cost</label>
+        </div>
+      </div>
+    </div>
+    <div class='form-row' style="margin-left: 20%;">
+      <div class="col-md">
+        <button class='btn btn-primary' style="width: 25%;" id='create'>Create</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+{{ end }}
