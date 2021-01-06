@@ -104,6 +104,7 @@ type ComplexityRoot struct {
 		Friends   func(childComplexity int) int
 		ID        func(childComplexity int) int
 		NickName  func(childComplexity int) int
+		Role      func(childComplexity int) int
 		UserID    func(childComplexity int) int
 	}
 }
@@ -128,7 +129,7 @@ type MutationResolver interface {
 	CreateCost(ctx context.Context, input models.CreateCostInput) (*models.Cost, error)
 	UpdateCost(ctx context.Context, id string, input models.UpdateCostInput) (*models.Cost, error)
 	DeleteCost(ctx context.Context, id string) (bool, error)
-	AddFriend(ctx context.Context, id string) (*models.User, error)
+	AddFriend(ctx context.Context, id string) (bool, error)
 	VoteCost(ctx context.Context, id string) (int, error)
 	VoteIncome(ctx context.Context, id string) (int, error)
 }
@@ -148,6 +149,7 @@ type QueryResolver interface {
 type UserResolver interface {
 	Friends(ctx context.Context, obj *models.User) ([]*models.User, error)
 	Followers(ctx context.Context, obj *models.User) ([]*models.User, error)
+	Role(ctx context.Context, obj *models.User) (models.Role, error)
 }
 
 type executableSchema struct {
@@ -561,6 +563,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.NickName(childComplexity), true
 
+	case "User.role":
+		if e.complexity.User.Role == nil {
+			break
+		}
+
+		return e.complexity.User.Role(childComplexity), true
+
 	case "User.userId":
 		if e.complexity.User.UserID == nil {
 			break
@@ -645,7 +654,12 @@ type User{
   friends: [User!]	  
   "permission to view followers portfolio"
   followers: [User!]	  
+  role: Role!
+}
 
+enum Role {
+    ADMIN
+    USER
 }
 
 interface Portfolio{
@@ -653,7 +667,7 @@ interface Portfolio{
   owner: User!
   amount: Int!
   occurDate: Time!
-  description: String
+  description: String!
   vote: [User]
   category: PortfolioCategory!
 }
@@ -689,7 +703,7 @@ type Income implements Portfolio{
   amount: Int!
   occurDate: Time!
   category: PortfolioCategory!
-  description: String
+  description: String!
   vote: [User]
 }
 
@@ -699,7 +713,7 @@ type Cost implements Portfolio{
   amount: Int!
   occurDate: Time!
   category: PortfolioCategory!
-  description: String
+  description: String!
   vote: [User]
 }
 
@@ -716,7 +730,10 @@ input CreateUserInput {
   nickName: String
 }
 
-"""occurDate format: 2020-12-26T12:14:36.986+00:00"""
+"""
+occurDate format: 2020-12-26T12:14:36.986+00:00
+occurDate should not before today
+"""
 input UpdateIncomeInput{
   amount: Int
   occurDate: Time
@@ -728,7 +745,7 @@ input CreateIncomeInput{
   amount: Int!
   occurDate: Time!
   category: IncomeCategory!
-  description: String
+  description: String!
 }
 
 input UpdateCostInput{
@@ -742,7 +759,7 @@ input CreateCostInput{
   amount: Int!
   occurDate: Time!
   category: CostCategory!
-  description: String
+  description: String!
 }
 
 # Define mutations here
@@ -761,7 +778,7 @@ type Mutation {
   deleteCost(id: ID!): Boolean!
   
   "For current user to operate"
-  addFriend(id: ID!): User!
+  addFriend(id: ID!): Boolean!
   voteCost(id: ID!): Int!
   voteIncome(id: ID!): Int!
 
@@ -1369,11 +1386,14 @@ func (ec *executionContext) _Cost_description(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Cost_vote(ctx context.Context, field graphql.CollectedField, obj *models.Cost) (ret graphql.Marshaler) {
@@ -1601,11 +1621,14 @@ func (ec *executionContext) _Income_description(ctx context.Context, field graph
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Income_vote(ctx context.Context, field graphql.CollectedField, obj *models.Income) (ret graphql.Marshaler) {
@@ -2044,9 +2067,9 @@ func (ec *executionContext) _Mutation_addFriend(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.User)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_voteCost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2850,6 +2873,40 @@ func (ec *executionContext) _User_followers(ctx context.Context, field graphql.C
 	res := resTmp.([]*models.User)
 	fc.Result = res
 	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_role(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().Role(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(models.Role)
+	fc.Result = res
+	return ec.marshalNRole2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐRole(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3941,7 +3998,7 @@ func (ec *executionContext) unmarshalInputCreateCostInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("description"))
-			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Description, err = ec.unmarshalNString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3985,7 +4042,7 @@ func (ec *executionContext) unmarshalInputCreateIncomeInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("description"))
-			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Description, err = ec.unmarshalNString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4233,6 +4290,9 @@ func (ec *executionContext) _Cost(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "description":
 			out.Values[i] = ec._Cost_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "vote":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -4302,6 +4362,9 @@ func (ec *executionContext) _Income(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "description":
 			out.Values[i] = ec._Income_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "vote":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -4647,6 +4710,20 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._User_followers(ctx, field, obj)
+				return res
+			})
+		case "role":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_role(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		default:
@@ -5060,6 +5137,16 @@ func (ec *executionContext) marshalNPortfolioCategory2githubᚗcomᚋlinkc0829�
 	return v
 }
 
+func (ec *executionContext) unmarshalNRole2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐRole(ctx context.Context, v interface{}) (models.Role, error) {
+	var res models.Role
+	err := res.UnmarshalGQL(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNRole2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v models.Role) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.WrapErrorWithInputPath(ctx, err)
@@ -5067,6 +5154,27 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v inter
 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := graphql.MarshalString(*v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
