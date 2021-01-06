@@ -62,7 +62,7 @@ func (r *mutationResolver) UpdateIncome(ctx context.Context, id string, input mo
 		result.Category = cat
 	}
 	if input.Description != nil {
-		result.Description = input.Description
+		result.Description = *input.Description
 	}
 	if input.OccurDate != nil {
 		result.OccurDate = *input.OccurDate

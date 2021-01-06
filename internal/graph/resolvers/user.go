@@ -104,6 +104,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUs
 		CreatedAt: newUser.CreatedAt,
 		Friends:   []string{},
 		Followers: []string{},
+		Role:      models.RoleUser,
 	}
 
 	return ret, nil
@@ -173,16 +174,16 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 }
 
 //AddFriends add id to my Friends
-func (r *mutationResolver) AddFriend(ctx context.Context, id string) (*models.User, error) {
+func (r *mutationResolver) AddFriend(ctx context.Context, id string) (bool, error) {
 
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
 	fID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		//not a valid objectID
-		return nil, err
+		return false, err
 	}
 	if fID == me.ID {
-		return nil, errors.New("Cannot add yourself to friend")
+		return false, errors.New("Cannot add yourself to friend")
 	}
 	//if already friend, remove fID
 	length := len(me.Friends)
@@ -207,14 +208,9 @@ func (r *mutationResolver) AddFriend(ctx context.Context, id string) (*models.Us
 	upd := bson.M{"$set": bson.M{"friends": me.Friends}}
 	_, err = r.DB.Users.UpdateOne(ctx, q, upd)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
-	//return user
-	update, err := getUserByID(ctx, r.DB, me.ID.Hex())
-	if err != nil {
-		return nil, err
-	}
-	return update, nil
+	return true, nil
 }
 
 type userResolver struct{ *Resolver }
@@ -225,6 +221,10 @@ func (r *userResolver) Friends(ctx context.Context, obj *models.User) ([]*models
 
 func (r *userResolver) Followers(ctx context.Context, obj *models.User) ([]*models.User, error) {
 	return r.resolveUsers(ctx, obj.Followers...)
+}
+
+func (r *userResolver) Role(ctx context.Context, obj *models.User) (models.Role, error) {
+	panic("not implemented")
 }
 
 //helper functions

@@ -13,7 +13,7 @@ type Cost struct {
 	Owner       string            `json:"owner"`
 	Amount      int               `json:"amount,string"`
 	OccurDate   time.Time         `json:"occurDate"`
-	Description *string           `json:"description"`
+	Description string            `json:"description"`
 	Vote        []string          `json:"vote"`
 	Category    PortfolioCategory `json:"category"`
 }
@@ -24,14 +24,14 @@ type CreateCostInput struct {
 	Amount      int          `bson:"amount,omitempty" json:"amount,string,omitempty"`
 	OccurDate   time.Time    `bson:"occurDate,omitempty" json:"occurDate,omitempty"`
 	Category    CostCategory `bson:"category,omitempty" json:"category,omitempty"`
-	Description *string      `bson:"description,omitempty" json:"description,omitempty"`
+	Description string       `bson:"description,omitempty" json:"description,omitempty"`
 }
 
 type CreateIncomeInput struct {
 	Amount      int            `bson:"amount,omitempty" json:"amount,string,omitempty"`
 	OccurDate   time.Time      `bson:"occurDate,omitempty" json:"occurDate,omitempty"`
 	Category    IncomeCategory `bson:"category,omitempty" json:"category,omitempty"`
-	Description *string        `bson:"description,omitempty" json:"description,omitempty"`
+	Description string         `bson:"description,omitempty" json:"description,omitempty"`
 }
 
 type CreateUserInput struct {
@@ -45,7 +45,7 @@ type Income struct {
 	Owner       string            `json:"owner"`
 	Amount      int               `json:"amount,string"`
 	OccurDate   time.Time         `json:"occurDate"`
-	Description *string           `json:"description"`
+	Description string            `json:"description"`
 	Vote        []string          `json:"vote"`
 	Category    PortfolioCategory `json:"category"`
 }
@@ -82,6 +82,7 @@ type User struct {
 	Friends []string `json:"friends"`
 	// permission to view followers portfolio
 	Followers []string `json:"followers"`
+	Role      Role     `json:"role"`
 }
 
 type UserInput struct {

@@ -63,7 +63,7 @@ func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input mode
 		result.Category = cat
 	}
 	if input.Description != nil {
-		result.Description = input.Description
+		result.Description = *input.Description
 	}
 	if input.OccurDate != nil {
 		result.OccurDate = *input.OccurDate
