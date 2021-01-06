@@ -16,12 +16,19 @@ type UserModel struct {
 	NickName        *string              `bson:"nickname" json:"nickname,omitempty"`
 	CreatedAt       time.Time            `bson:"createAt" json:"createAt,omitempty"`
 	Friends         []primitive.ObjectID `bson:"friends" json:"friends,omitempty"`
-	RefreshToken    string               `bson:"refreshToken" json:"refreshToken,omitempty"` // graphql only
+	RefreshToken    string               `bson:"refreshToken" json:"refreshToken,omitempty"`
 	LastIncomeQuery time.Time            `bson:"lastIncomeQuery" json:"lastIncomeQuery,omitempty"`
 	LastCostQuery   time.Time            `bson:"lastCostQuery" json:"lastCostQuery,omitempty"`
 	Provider        string               `bson:"provider" json:"provider,omitempty"`
 	AvatarURL       string               `bson:"avatarURL" json:"avatarURL,omitempty"`
+	Role            string               `bson:"role" json:"role,omitempty"`
 }
+
+//role constants
+const (
+	ADMIN string = "ADMIN"
+	USER  string = "USER"
+)
 
 type PortfolioModel interface {
 	IsPortfolio()

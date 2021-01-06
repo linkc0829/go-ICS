@@ -11,6 +11,12 @@ type User{
   friends: [User!]	  
   "permission to view followers portfolio"
   followers: [User!]	  
+  role: Role!
+}
+
+enum Role {
+    ADMIN
+    USER
 }
 
 interface Portfolio{
@@ -18,7 +24,7 @@ interface Portfolio{
   owner: User!
   amount: Int!
   occurDate: Time!
-  description: String
+  description: String!
   vote: [User]
   category: PortfolioCategory!
 }
@@ -54,7 +60,7 @@ type Income implements Portfolio{
   amount: Int!
   occurDate: Time!
   category: PortfolioCategory!
-  description: String
+  description: String!
   vote: [User]
 }
 
@@ -64,7 +70,7 @@ type Cost implements Portfolio{
   amount: Int!
   occurDate: Time!
   category: PortfolioCategory!
-  description: String
+  description: String!
   vote: [User]
 }
 
@@ -94,7 +100,7 @@ input CreateIncomeInput{
   amount: Int!
   occurDate: Time!
   category: IncomeCategory!
-  description: String
+  description: String!
 }
 
 input UpdateCostInput{
@@ -108,7 +114,7 @@ input CreateCostInput{
   amount: Int!
   occurDate: Time!
   category: CostCategory!
-  description: String
+  description: String!
 }
 
 # Define mutations here
@@ -127,7 +133,7 @@ type Mutation {
   deleteCost(id: ID!): Boolean!
   
   "For current user to operate"
-  addFriend(id: ID!): User!
+  addFriend(id: ID!): Boolean!
   voteCost(id: ID!): Int!
   voteIncome(id: ID!): Int!
 

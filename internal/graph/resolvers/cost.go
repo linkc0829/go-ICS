@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"context"
+	"errors"
 
 	"github.com/linkc0829/go-ics/internal/graph/models"
 	dbModel "github.com/linkc0829/go-ics/internal/mongodb/models"
@@ -37,6 +38,7 @@ func (r *mutationResolver) CreateCost(ctx context.Context, input models.CreateCo
 }
 
 func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input models.UpdateCostInput) (*models.Cost, error) {
+
 	costID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -46,6 +48,11 @@ func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input mode
 	result := dbModel.CostModel{}
 	if err := r.DB.Cost.FindOne(ctx, q).Decode(&result); err != nil {
 		return nil, err
+	}
+
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
+	if !isAdmin(ctx, r.DB, me.ID.Hex()) && me.ID != result.Owner {
+		return nil, errors.New("permission denied")
 	}
 
 	if input.Amount != nil {
@@ -78,11 +85,21 @@ func (r *mutationResolver) DeleteCost(ctx context.Context, id string) (bool, err
 		return false, err
 	}
 	q := bson.M{"_id": primID}
-	result, err := r.DB.Cost.DeleteOne(ctx, q)
+	result := dbModel.CostModel{}
+	if err := r.DB.Cost.FindOne(ctx, q).Decode(&result); err != nil {
+		return false, err
+	}
+
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
+	if !isAdmin(ctx, r.DB, me.ID.Hex()) && me.ID != result.Owner {
+		return false, errors.New("permission denied")
+	}
+
+	delete, err := r.DB.Cost.DeleteOne(ctx, q)
 	if err != nil {
 		return false, err
 	}
-	if result.DeletedCount == 1 {
+	if delete.DeletedCount == 1 {
 		return true, nil
 	}
 	return false, nil
@@ -99,6 +116,10 @@ func (r *mutationResolver) VoteCost(ctx context.Context, id string) (int, error)
 	cost := dbModel.CostModel{}
 	if err := r.DB.Cost.FindOne(ctx, q).Decode(&cost); err != nil {
 		return -1, err
+	}
+
+	if !isAdmin(ctx, r.DB, me.ID.Hex()) && !couldView(ctx, r.DB, me.ID.Hex(), id) && me.ID != cost.Owner {
+		return -1, errors.New("permission denied")
 	}
 
 	//if already voted, revoke

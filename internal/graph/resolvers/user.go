@@ -53,7 +53,10 @@ func (r *queryResolver) MyFollowers(ctx context.Context) ([]*models.User, error)
 }
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUserInput) (*models.User, error) {
-
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
+	if !isAdmin(ctx, r.DB, me.ID.Hex()) {
+		return nil, errors.New("permission denied, only Admin oculd create user")
+	}
 	//check if user exists
 	var result dbModel.UserModel
 	q := bson.M{"email": input.Email, "provider": "ics", "userid": input.UserID}
@@ -84,6 +87,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUs
 		LastCostQuery:   LastCostQuery,
 		Provider:        "ics",
 		Friends:         []primitive.ObjectID{},
+		Role:            dbModel.USER,
 	}
 
 	//insert to db
@@ -106,6 +110,13 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUs
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input models.UpdateUserInput) (*models.User, error) {
+
+	//check editorial permission
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
+	if !isAdmin(ctx, r.DB, me.ID.Hex()) && me.ID.Hex() != id {
+		return nil, errors.New("permission denied")
+	}
+
 	user, err := getUserByID(ctx, r.DB, id)
 	if err != nil {
 		return nil, err
@@ -142,6 +153,10 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 }
 
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, error) {
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
+	if !isAdmin(ctx, r.DB, me.ID.Hex()) {
+		return false, errors.New("permission denied")
+	}
 	primID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return false, err
@@ -161,7 +176,6 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 func (r *mutationResolver) AddFriend(ctx context.Context, id string) (*models.User, error) {
 
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-
 	fID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		//not a valid objectID
@@ -195,13 +209,11 @@ func (r *mutationResolver) AddFriend(ctx context.Context, id string) (*models.Us
 	if err != nil {
 		return nil, err
 	}
-
 	//return user
 	update, err := getUserByID(ctx, r.DB, me.ID.Hex())
 	if err != nil {
 		return nil, err
 	}
-
 	return update, nil
 }
 
@@ -233,23 +245,15 @@ func getDBUserByID(ctx context.Context, DB *mongodb.MongoDB, id string) (*dbMode
 
 func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.User, error) {
 
-	hexID, err := primitive.ObjectIDFromHex(ID)
-	if err != nil {
-		//not a valid objectID
-		return nil, err
-	}
-
-	q := bson.M{"_id": hexID}
-	result := dbModel.UserModel{}
-	if err := DB.Users.FindOne(ctx, q).Decode(&result); err != nil {
-		return nil, err
-	}
-
-	friends := getUserFriends(&result)
+	result, err := getDBUserByID(ctx, DB, ID)
 	if err != nil {
 		return nil, err
 	}
-	followers, err := getUserFollowers(ctx, DB, &result)
+	friends := getUserFriends(result)
+	if err != nil {
+		return nil, err
+	}
+	followers, err := getUserFollowers(ctx, DB, result)
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +272,6 @@ func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.U
 }
 
 func getUserFriends(user *dbModel.UserModel) (friends []string) {
-
 	for _, f_id := range user.Friends {
 		f := f_id.Hex()
 		friends = append(friends, f)
@@ -298,4 +301,36 @@ func getUserFollowers(ctx context.Context, DB *mongodb.MongoDB, me *dbModel.User
 		followers = append(followers, follower)
 	}
 	return
+}
+
+//is user admin?
+func isAdmin(ctx context.Context, DB *mongodb.MongoDB, id string) bool {
+	result, err := getDBUserByID(ctx, DB, id)
+	if err != nil {
+		return false
+	}
+	if result.Role == dbModel.ADMIN {
+		return true
+	}
+	return false
+}
+
+//could userA get userB's information?
+//or did userB add userA to friend?
+func couldView(ctx context.Context, DB *mongodb.MongoDB, userA string, userB string) bool {
+	if userA == userB {
+		return true
+	}
+
+	UserB, err := getDBUserByID(ctx, DB, userB)
+	if err != nil {
+		return false
+	}
+	UserA, _ := primitive.ObjectIDFromHex(userA)
+	for _, f := range UserB.Friends {
+		if UserA == f {
+			return true
+		}
+	}
+	return false
 }

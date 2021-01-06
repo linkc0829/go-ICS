@@ -21,6 +21,8 @@ func RegisterRoutes(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB)
 	r.POST("/profile/:id", handlers.UserProfileHandler(cfg))
 	r.GET("/profile/:id", handlers.UserProfileHandler(cfg))
 	r.GET("/history/:id", handlers.UserHistoryHandler(cfg))
+	r.GET("/friends/:id", handlers.UserFriendsHandler(cfg, db))
+	r.GET("/followers/:id", handlers.UserFollowersHandler(cfg, db))
 
 }
 

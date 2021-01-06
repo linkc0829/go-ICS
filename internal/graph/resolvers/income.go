@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"context"
+	"errors"
 
 	"github.com/linkc0829/go-ics/internal/graph/models"
 	tf "github.com/linkc0829/go-ics/internal/graph/resolvers/transformer"
@@ -48,6 +49,11 @@ func (r *mutationResolver) UpdateIncome(ctx context.Context, id string, input mo
 		return nil, err
 	}
 
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
+	if !isAdmin(ctx, r.DB, me.ID.Hex()) && me.ID != result.Owner {
+		return nil, errors.New("permission denied")
+	}
+
 	if input.Amount != nil {
 		result.Amount = *input.Amount
 	}
@@ -78,11 +84,20 @@ func (r *mutationResolver) DeleteIncome(ctx context.Context, id string) (bool, e
 		return false, err
 	}
 	q := bson.M{"_id": primID}
-	result, err := r.DB.Income.DeleteOne(ctx, q)
+	result := dbModel.IncomeModel{}
+	if err := r.DB.Cost.FindOne(ctx, q).Decode(&result); err != nil {
+		return false, err
+	}
+
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
+	if !isAdmin(ctx, r.DB, me.ID.Hex()) && me.ID != result.Owner {
+		return false, errors.New("permission denied")
+	}
+	delete, err := r.DB.Income.DeleteOne(ctx, q)
 	if err != nil {
 		return false, err
 	}
-	if result.DeletedCount == 1 {
+	if delete.DeletedCount == 1 {
 		return true, nil
 	}
 	return false, nil
@@ -99,6 +114,10 @@ func (r *mutationResolver) VoteIncome(ctx context.Context, id string) (int, erro
 	income := dbModel.IncomeModel{}
 	if err := r.DB.Income.FindOne(ctx, q).Decode(&income); err != nil {
 		return -1, err
+	}
+
+	if !isAdmin(ctx, r.DB, me.ID.Hex()) && !couldView(ctx, r.DB, me.ID.Hex(), id) && me.ID != income.Owner {
+		return -1, errors.New("permission denied")
 	}
 
 	//if already voted, revoke

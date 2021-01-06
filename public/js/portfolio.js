@@ -60,6 +60,9 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
         friends{\
           id\
         }\
+        followers{\
+          id\
+        }\
       }\
     }';
 
@@ -69,7 +72,23 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
   .set('Authorization', tokenString)
   .send({'Query': query,})
   .then(function (res) {
-      clearMessage()
+      let myFollowers = res.body.data.me.followers;
+      let permission = false;
+      for(let i = 0; i < myFollowers.length; i++){
+        if(id == myFollowers[i].id){
+          permission = true;
+        }
+      }
+      //watching my own profile, hide friend sector
+      if(res.body.data.me.id == id){
+        permission = true;
+      }
+
+      if(!permission){
+        alert("permission denied: you could only see followers' profile!")
+        window.location.replace("/profile/" + res.body.data.me.id);
+      }
+      //check if being friend
       let out = res.body.data.me.friends;
       console.log(out);
       for(let i = 0; i < out.length; i++){
@@ -83,18 +102,15 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
         document.querySelector('#addFriend').style.display = 'none';
         document.querySelector('#unfriend').style.display = 'none';
       }
+      //add my account links
       let myID = res.body.data.me.id;
       document.querySelector('#myProfile').href = '/profile/' + myID;
       document.querySelector('#myHistory').href = '/history/' + myID;
       document.querySelector('#myFriends').href = '/friends/' + myID;
       document.querySelector('#myFollowers').href = '/followers/' + myID;
-
-      input.value = '';
   })
   .catch(function (err) {
-      if (err.response) {
-          showMessage(err.response.message);
-      }
+      alert(err);
   });
  }
 
@@ -103,6 +119,7 @@ async function getUserProfile(currentUser){
   let tokenString = Session.get('token_type') + ' ' + Session.get('token');
   let url = window.location.href.split('/');
   let id = url[url.length-1];
+  
 
   query = '{\
       getUser(id: "' + id + '"){\
@@ -131,8 +148,9 @@ async function getUserProfile(currentUser){
       currentUser.userId = out.userId;
       currentUser.nickName = out.nickName;
       currentUser.email = out.email;
-      currentUser.friends = [...out.friends];
-      currentUser.followers = [...out.followers];
+      
+      currentUser.friends = (out.friends == null ? []: [...out.friends]);
+      currentUser.followers = (out.followers == null ? []: [...out.followers]);
 
       let resp = document.getElementById('response');
       resp.innerHTML = JSON.stringify(res.body);
@@ -140,12 +158,9 @@ async function getUserProfile(currentUser){
       document.querySelector('#profile').href = '/profile/' + out.id;
       document.querySelector('#history').href = '/history/' + out.id;
 
-      input.value = '';
   })
   .catch(function (err) {
-      if (err.response) {
-          showMessage(err.response.message);
-      }
+    alert(err);
   });
 }
 
@@ -154,19 +169,14 @@ await superagent
   .get('/api/v1/auth/ics/refresh_token')
   .set('accept', 'json')
   .then(function (res) {
-      clearMessage();
-      console.log(res.body);
       jwt.token = res.body.token;
       jwt.token_expiry = res.body.token_expiry;
       jwt.token_type = res.body.type;
       setSession(jwt);
-      input.value = '';
   })
   .catch(function (err) {
     //logout if err occur
-    if (err.response) {
-      console.log(err);
-    }
+    alert(err + "get access token failed, now logout");
     let url = window.location.href.split('/');
     if(url.length > 4){
       logout();
@@ -234,11 +244,11 @@ function isLogin(){
 
 var currentUser = {};
 if(isLogin()){
-  getUserProfile(currentUser).then((res)=>{
-    initPortfolio(currentUser, INCOME);
-    initPortfolio(currentUser, COST);
-  }).then((res)=>{
-    checkMyStatus();
+  checkMyStatus().then((res)=>{
+    getUserProfile(currentUser).then((res)=>{
+      initPortfolio(currentUser, INCOME);
+      initPortfolio(currentUser, COST);
+    })
   });
   let date = new Date();
   let date_month = date.getMonth()+1;
@@ -420,7 +430,6 @@ document.addEventListener('DOMContentLoaded', function () {
           .set('accept', 'json')
           .set('Authorization', jwt.token)
           .then(function (res) {            
-              clearMessage();
               if(type == COST){
                 addPortfolio(type, res.body.CreateCost);
               }
@@ -452,22 +461,19 @@ async function initPortfolio(user, type){
       .set('accept', 'json')
       .set('Authorization', jwt.token)
       .then(function (res) {
-          clearMessage();
-          let portfolio;
-          if(type == INCOME){
-            portfolio = res.body.GetUserIncome;
-          }
-          else{
-            portfolio = res.body.GetUserCost;
-          }
-          for (let i = 0; i < portfolio.length; i++) {
-            addPortfolio(portfolio[i], type);
+        let portfolio;
+        if(type == INCOME){
+          portfolio = res.body.GetUserIncome;
+        }
+        else{
+          portfolio = res.body.GetUserCost;
+        }
+        for (let i = 0; i < portfolio.length; i++) {
+          addPortfolio(portfolio[i], type);
         }
       })
       .catch(function (err) {
-          if (err.reponse) {
-              showMessage(err.reponse.message);
-          }
+          alert(err)
       });
 }
 
@@ -532,15 +538,15 @@ function addPortfolio(res, type) {
         .set('accept', 'json')
         .set('Authorization', jwt.token)
         .then(function (res) {
-            clearMessage();
-            input = '';
-            vote_label.innerText = (type==INCOME? res.body.VoteIncome:res.body.VoteCost);
+          if(res.errors){
+            alert(res.errors);
+            initPortfolio(currentUser, type);
+          }
+          vote_label.innerText = (type==INCOME? res.body.VoteIncome:res.body.VoteCost);
         })
         .catch(function (err) {
-            if (err.response) {
-                showMessage(err.response.message);
-                initPortfolio(currentUser, type);
-            }
+          alert(err);
+          initPortfolio(currentUser, type);
         });
   })
 
@@ -555,14 +561,15 @@ function addPortfolio(res, type) {
         .delete(target)
         .set('accept', 'json')
         .set('Authorization', jwt.token)
-        .then(function () {
-            clearMessage();
+        .then((res)=>{
+          if(res.errors){
+            alert(res.errors);
+            initPortfolio(currentUser, type);
+          }
         })
         .catch(function (err) {
-            if (err.response) {
-                showMessage(err.response.message);
-                initPortfolio(currentUser, type);
-            }
+          alert(err);
+          initPortfolio(currentUser, type);
         });
   });
 }
@@ -628,14 +635,15 @@ function loadPortfolioItem(index, item, type) {
         .send(data)
         .set('accept', 'json')
         .set('Authorization', jwt.token)
-        .then(function () {
-            clearMessage();
+        .then((res)=>{
+          if(res.errors){
+            alert(res.errors);
+            initPortfolio(currentUser, type);
+          }
         })
         .catch(function (err) {
-            if (err.response) {
-                showMessage(err.response.message);
-                initPortfolio(currentUser, type);
-            }
+          alert(err);
+          initPortfolio(currentUser, type);
         });
   }
 }
@@ -683,16 +691,11 @@ function addFriend(){
   .set('Authorization', tokenString)
   .send({'query': mutation})
   .then(function (res) {
-    clearMessage()
     addF.style.display = 'none';
     unF.style.display = 'block';
-    input.value = '';
   })
   .catch(function (err) {
-      if (err.response) {
-          showMessage(err.response.message);
-      }
-      
+      alert(err);
   });
 }
 
@@ -715,15 +718,11 @@ function unfriend(){
   .set('Authorization', tokenString)
   .send({'query': mutation})
   .then(function (res) {
-      clearMessage()
       addF.style.display = 'block';
       unF.style.display = 'none';
-      input.value = '';
   })
   .catch(function (err) {
-      if (err.response) {
-          showMessage(err.response.message);
-      }
+      alert(err);
       
   });
 }
