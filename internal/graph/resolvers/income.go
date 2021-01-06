@@ -50,7 +50,7 @@ func (r *mutationResolver) UpdateIncome(ctx context.Context, id string, input mo
 	}
 
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) && me.ID != result.Owner {
+	if !isAdmin(ctx) && me.ID != result.Owner {
 		return nil, errors.New("permission denied")
 	}
 
@@ -90,7 +90,7 @@ func (r *mutationResolver) DeleteIncome(ctx context.Context, id string) (bool, e
 	}
 
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) && me.ID != result.Owner {
+	if !isAdmin(ctx) && me.ID != result.Owner {
 		return false, errors.New("permission denied")
 	}
 	delete, err := r.DB.Income.DeleteOne(ctx, q)
@@ -116,7 +116,7 @@ func (r *mutationResolver) VoteIncome(ctx context.Context, id string) (int, erro
 		return -1, err
 	}
 
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) && !couldView(ctx, r.DB, me.ID.Hex(), id) && me.ID != income.Owner {
+	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) && me.ID != income.Owner {
 		return -1, errors.New("permission denied")
 	}
 

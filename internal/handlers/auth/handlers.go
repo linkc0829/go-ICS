@@ -25,9 +25,7 @@ type Claims struct {
 
 // Begin login with the auth provider
 func Begin() gin.HandlerFunc {
-
 	return func(c *gin.Context) {
-
 		c.Request = AddProviderToContext(c, c.Param("provider"))
 		provider := c.Request.Context().Value("provider").(string)
 		log.Println("Add Provider To Context: " + provider)

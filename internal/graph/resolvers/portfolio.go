@@ -40,7 +40,7 @@ func (r *queryResolver) MyCost(ctx context.Context) ([]models.Portfolio, error) 
 //GetUserCost returns user id's cost
 func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Portfolio, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
+	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
 		return nil, errors.New("permission denied")
 	}
 
@@ -105,7 +105,7 @@ func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Po
 //GetUserIncome find user's income portfolio, sort them by date and move outdate entries to history
 func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.Portfolio, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
+	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
 		return nil, errors.New("permission denied")
 	}
 
@@ -171,7 +171,7 @@ func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.
 
 func (r *queryResolver) GetUserIncomeHistory(ctx context.Context, id string, rangeArg int) ([]models.Portfolio, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
+	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
 		return nil, errors.New("permission denied")
 	}
 
@@ -199,7 +199,7 @@ func (r *queryResolver) GetUserIncomeHistory(ctx context.Context, id string, ran
 
 func (r *queryResolver) GetUserCostHistory(ctx context.Context, id string, rangeArg int) ([]models.Portfolio, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
+	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
 		return nil, errors.New("permission denied")
 	}
 

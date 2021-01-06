@@ -73,6 +73,7 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 			LastIncomeQuery: time.Now(),
 			LastCostQuery:   time.Now(),
 			Provider:        provider,
+			Role:            models.USER,
 		}
 
 		//create access token and refresh token

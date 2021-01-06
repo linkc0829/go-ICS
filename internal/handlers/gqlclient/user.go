@@ -31,6 +31,7 @@ func GetUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Followers []struct {
 					Id graphql.ID
 				}
+				Role graphql.String
 			} `graphql:"getUser(id: $ID)"`
 		}
 		variables := map[string]interface{}{
@@ -79,6 +80,7 @@ func CreateUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Followers []struct {
 					Id graphql.ID
 				}
+				Roles graphql.String
 			} `graphql:"createUser(input: $createUserInput)"`
 		}
 		createUserInput := models.CreateUserInput{}
@@ -133,6 +135,7 @@ func UpdateUser(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Followers []struct {
 					Id graphql.ID
 				}
+				Role graphql.String
 			} `graphql:"updateUser(id: $id, input: $updateUserInput)"`
 		}
 		id := c.Param("id")
@@ -218,6 +221,7 @@ func AddFriend(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Followers []struct {
 					Id graphql.ID
 				}
+				Role graphql.String
 			} `graphql:"addFriend(id: $id)"`
 		}
 		id := c.Param("id")

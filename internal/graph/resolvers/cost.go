@@ -51,7 +51,7 @@ func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input mode
 	}
 
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) && me.ID != result.Owner {
+	if !isAdmin(ctx) && me.ID != result.Owner {
 		return nil, errors.New("permission denied")
 	}
 
@@ -91,7 +91,7 @@ func (r *mutationResolver) DeleteCost(ctx context.Context, id string) (bool, err
 	}
 
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) && me.ID != result.Owner {
+	if !isAdmin(ctx) && me.ID != result.Owner {
 		return false, errors.New("permission denied")
 	}
 
@@ -118,7 +118,7 @@ func (r *mutationResolver) VoteCost(ctx context.Context, id string) (int, error)
 		return -1, err
 	}
 
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) && !couldView(ctx, r.DB, me.ID.Hex(), id) && me.ID != cost.Owner {
+	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) && me.ID != cost.Owner {
 		return -1, errors.New("permission denied")
 	}
 

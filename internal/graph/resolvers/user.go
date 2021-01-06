@@ -53,8 +53,7 @@ func (r *queryResolver) MyFollowers(ctx context.Context) ([]*models.User, error)
 }
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUserInput) (*models.User, error) {
-	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) {
+	if !isAdmin(ctx) {
 		return nil, errors.New("permission denied, only Admin oculd create user")
 	}
 	//check if user exists
@@ -114,7 +113,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 
 	//check editorial permission
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) && me.ID.Hex() != id {
+	if !isAdmin(ctx) && me.ID.Hex() != id {
 		return nil, errors.New("permission denied")
 	}
 
@@ -154,8 +153,8 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 }
 
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, error) {
-	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx, r.DB, me.ID.Hex()) {
+
+	if !isAdmin(ctx) {
 		return false, errors.New("permission denied")
 	}
 	primID, err := primitive.ObjectIDFromHex(id)
@@ -257,6 +256,10 @@ func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.U
 	if err != nil {
 		return nil, err
 	}
+	role := models.RoleUser
+	if result.Role == string(models.RoleAdmin) {
+		role = models.RoleAdmin
+	}
 
 	r := &models.User{
 		ID:        result.ID.Hex(),
@@ -266,6 +269,7 @@ func getUserByID(ctx context.Context, DB *mongodb.MongoDB, ID string) (*models.U
 		CreatedAt: result.CreatedAt,
 		Friends:   friends,
 		Followers: followers,
+		Role:      role,
 	}
 
 	return r, nil
@@ -304,12 +308,9 @@ func getUserFollowers(ctx context.Context, DB *mongodb.MongoDB, me *dbModel.User
 }
 
 //is user admin?
-func isAdmin(ctx context.Context, DB *mongodb.MongoDB, id string) bool {
-	result, err := getDBUserByID(ctx, DB, id)
-	if err != nil {
-		return false
-	}
-	if result.Role == dbModel.ADMIN {
+func isAdmin(ctx context.Context) bool {
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
+	if me.Role == dbModel.ADMIN {
 		return true
 	}
 	return false

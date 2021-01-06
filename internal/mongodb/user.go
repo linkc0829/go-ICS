@@ -61,6 +61,7 @@ func (db *MongoDB) CreateUserFromGoth(user *goth.User) (*models.UserModel, error
 		LastCostQuery:   time.Now(),
 		Provider:        user.Provider,
 		AvatarURL:       user.AvatarURL,
+		Role:            models.USER,
 	}
 
 	//insert to db

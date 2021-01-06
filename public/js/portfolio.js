@@ -48,7 +48,7 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
   
  })();
 
- async function checkMyStatus(){
+ async function checkMyStatus(permission){
   
   let tokenString = Session.get('token_type') + ' ' + Session.get('token');
   let url = window.location.href.split('/');
@@ -63,6 +63,7 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
         followers{\
           id\
         }\
+        role\
       }\
     }';
 
@@ -72,8 +73,8 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
   .set('Authorization', tokenString)
   .send({'Query': query,})
   .then(function (res) {
+      
       let myFollowers = res.body.data.me.followers;
-      let permission = false;
       for(let i = 0; i < myFollowers.length; i++){
         if(id == myFollowers[i].id){
           permission = true;
@@ -83,10 +84,12 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
       if(res.body.data.me.id == id){
         permission = true;
       }
-
+      if(res.body.data.me.role != "ADMIN"){
+        permission = true;
+      }
       if(!permission){
-        alert("permission denied: you could only see followers' profile!")
-        window.location.replace("/profile/" + res.body.data.me.id);
+        document.querySelector('#income-list').style.display = 'none';
+        document.querySelector('#cost-list').style.display = 'none';
       }
       //check if being friend
       let out = res.body.data.me.friends;
@@ -101,6 +104,10 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
       if(res.body.data.me.id == id){
         document.querySelector('#addFriend').style.display = 'none';
         document.querySelector('#unfriend').style.display = 'none';
+      }
+      //watching others profile, hide add sector
+      if(res.body.data.me.id != id){
+        document.querySelector('#add').style.display = 'none';
       }
       //add my account links
       let myID = res.body.data.me.id;
@@ -120,7 +127,6 @@ async function getUserProfile(currentUser){
   let url = window.location.href.split('/');
   let id = url[url.length-1];
   
-
   query = '{\
       getUser(id: "' + id + '"){\
         id\
@@ -176,7 +182,7 @@ await superagent
   })
   .catch(function (err) {
     //logout if err occur
-    alert(err + "get access token failed, now logout");
+    alert(err + " get access token failed, now logout");
     let url = window.location.href.split('/');
     if(url.length > 4){
       logout();
@@ -243,11 +249,14 @@ function isLogin(){
 }
 
 var currentUser = {};
+var permission = false;
 if(isLogin()){
-  checkMyStatus().then((res)=>{
+  checkMyStatus(permission).then((res)=>{
     getUserProfile(currentUser).then((res)=>{
-      initPortfolio(currentUser, INCOME);
-      initPortfolio(currentUser, COST);
+      if(permission){
+        initPortfolio(currentUser, INCOME);
+        initPortfolio(currentUser, COST);
+      }
     })
   });
   let date = new Date();
