@@ -115,13 +115,11 @@ type CostResolver interface {
 	Owner(ctx context.Context, obj *models.Cost) (*models.User, error)
 
 	Vote(ctx context.Context, obj *models.Cost) ([]*models.User, error)
-	Privacy(ctx context.Context, obj *models.Cost) (models.Privacy, error)
 }
 type IncomeResolver interface {
 	Owner(ctx context.Context, obj *models.Income) (*models.User, error)
 
 	Vote(ctx context.Context, obj *models.Income) ([]*models.User, error)
-	Privacy(ctx context.Context, obj *models.Income) (models.Privacy, error)
 }
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input models.CreateUserInput) (*models.User, error)
@@ -1468,13 +1466,13 @@ func (ec *executionContext) _Cost_privacy(ctx context.Context, field graphql.Col
 		Object:   "Cost",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Cost().Privacy(rctx, obj)
+		return obj.Privacy, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1737,13 +1735,13 @@ func (ec *executionContext) _Income_privacy(ctx context.Context, field graphql.C
 		Object:   "Income",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Income().Privacy(rctx, obj)
+		return obj.Privacy, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4435,19 +4433,10 @@ func (ec *executionContext) _Cost(ctx context.Context, sel ast.SelectionSet, obj
 				return res
 			})
 		case "privacy":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Cost_privacy(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._Cost_privacy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4521,19 +4510,10 @@ func (ec *executionContext) _Income(ctx context.Context, sel ast.SelectionSet, o
 				return res
 			})
 		case "privacy":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Income_privacy(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._Income_privacy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
