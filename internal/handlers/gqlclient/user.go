@@ -193,36 +193,11 @@ func AddFriend(cfg *utils.ServerConfig) gin.HandlerFunc {
 		client := newClient(c, cfg)
 		/*
 			mutation ($id: ID!){
-				AddFriend(id: $id){
-					id
-					userId
-					email
-					nickName
-					createdAt
-					friends{
-						id
-					}
-					followers{
-						id
-					}
-				}
+				addFriend(id: $id)
 			}
 		*/
 		var mutation struct {
-			AddFriend struct {
-				Id        graphql.ID
-				UserId    graphql.String
-				Email     graphql.String
-				NickName  graphql.String
-				CreatedAt graphql.String
-				Friends   []struct {
-					Id graphql.ID
-				}
-				Followers []struct {
-					Id graphql.ID
-				}
-				Role graphql.String
-			} `graphql:"addFriend(id: $id)"`
+			AddFriend graphql.Boolean `graphql:"addFriend(id: $id)"`
 		}
 		id := c.Param("id")
 		variables := map[string]interface{}{
@@ -257,6 +232,7 @@ func GetUserIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Vote        []struct {
 					Id graphql.ID
 				}
+				Privacy graphql.String
 			} `graphql:"getUserIncome(id: $ID)"`
 		}
 		variables := map[string]interface{}{
@@ -290,6 +266,7 @@ func GetUserCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Vote        []struct {
 					Id graphql.ID
 				}
+				Privacy graphql.String
 			} `graphql:"getUserCost(id: $ID)"`
 		}
 		variables := map[string]interface{}{
@@ -328,6 +305,7 @@ func GetUserIncomeHistory(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Vote        []struct {
 					Id graphql.ID
 				}
+				Privacy graphql.String
 			} `graphql:"getUserIncomeHistory(id: $ID, range: $Range)"`
 		}
 		variables := map[string]interface{}{
@@ -368,6 +346,7 @@ func GetUserCostHistory(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Vote        []struct {
 					Id graphql.ID
 				}
+				Privacy graphql.String
 			} `graphql:"getUserCostHistory(id: $ID, range: $Range)"`
 		}
 		variables := map[string]interface{}{

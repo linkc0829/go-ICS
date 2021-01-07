@@ -31,6 +31,7 @@ func CreateCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 					vote{
 						id
 					}
+					privacy
 				}
 			}
 		*/
@@ -47,6 +48,7 @@ func CreateCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Vote        []struct {
 					Id graphql.ID
 				}
+				Privacy graphql.String
 			} `graphql:"createCost(input: $createCostInput)"`
 		}
 		createCostInput := models.CreateCostInput{}
@@ -101,6 +103,7 @@ func UpdateCost(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Vote        []struct {
 					Id graphql.ID
 				}
+				Privacy graphql.String
 			} `graphql:"updateCost(id: $id, input: $updateCostInput)"`
 		}
 		id := c.Param("id")

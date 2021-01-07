@@ -16,8 +16,6 @@ import (
 
 func (r *mutationResolver) CreateCost(ctx context.Context, input models.CreateCostInput) (*models.Cost, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-
-	cat := (models.PortfolioCategory)(input.Category)
 	newCost := dbModel.CostModel{
 		ID:          primitive.NewObjectID(),
 		Owner:       me.ID,
@@ -25,7 +23,8 @@ func (r *mutationResolver) CreateCost(ctx context.Context, input models.CreateCo
 		OccurDate:   input.OccurDate,
 		Description: input.Description,
 		Vote:        nil,
-		Category:    cat,
+		Category:    (models.PortfolioCategory)(input.Category),
+		Privacy:     input.Privacy,
 	}
 	//insert to db
 	_, err := r.DB.Cost.InsertOne(ctx, newCost)
@@ -67,6 +66,9 @@ func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input mode
 	}
 	if input.OccurDate != nil {
 		result.OccurDate = *input.OccurDate
+	}
+	if input.Privacy != nil {
+		result.Privacy = *input.Privacy
 	}
 
 	upd := bson.M{"$set": input}
@@ -117,9 +119,17 @@ func (r *mutationResolver) VoteCost(ctx context.Context, id string) (int, error)
 	if err := r.DB.Cost.FindOne(ctx, q).Decode(&cost); err != nil {
 		return -1, err
 	}
-
-	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) && me.ID != cost.Owner {
-		return -1, errors.New("permission denied")
+	owner := dbModel.UserModel{}
+	if err := r.DB.Cost.FindOne(ctx, bson.M{"_id": cost.Owner}).Decode(&owner); err != nil {
+		return -1, err
+	}
+	//deny private
+	if !isAdmin(ctx) && me.ID != cost.Owner && cost.Privacy == models.PrivacyPrivate {
+		return -1, errors.New("it's private, permission denied")
+	}
+	//deny non-friend
+	if !isAdmin(ctx) && !couldViewFriendContent(me, &owner) && me.ID != cost.Owner && cost.Privacy == models.PrivacyFriend {
+		return -1, errors.New("it's only for friend, permission denied")
 	}
 
 	//if already voted, revoke
@@ -164,5 +174,8 @@ func (r *costResolver) Owner(ctx context.Context, obj *models.Cost) (*models.Use
 }
 
 func (r *costResolver) Category(ctx context.Context, obj *models.Cost) (models.PortfolioCategory, error) {
+	panic("not implemented")
+}
+func (r *costResolver) Privacy(ctx context.Context, obj *models.Cost) (models.Privacy, error) {
 	panic("not implemented")
 }

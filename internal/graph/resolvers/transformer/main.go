@@ -22,6 +22,7 @@ func DBPortfolioToGQLPortfolio(db dbModel.PortfolioModel) gqlModel.Portfolio {
 			Description: m.Description,
 			OccurDate:   m.OccurDate,
 			Vote:        vote,
+			Privacy:     m.Privacy,
 		}
 		return gql
 
@@ -38,6 +39,7 @@ func DBPortfolioToGQLPortfolio(db dbModel.PortfolioModel) gqlModel.Portfolio {
 			Description: m.Description,
 			OccurDate:   m.OccurDate,
 			Vote:        vote,
+			Privacy:     m.Privacy,
 		}
 		return gql
 	}

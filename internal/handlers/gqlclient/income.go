@@ -47,6 +47,7 @@ func CreateIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Vote        []struct {
 					Id graphql.ID
 				}
+				Privacy graphql.String
 			} `graphql:"createIncome(input: $createIncomeInput)"`
 		}
 		createIncomeInput := models.CreateIncomeInput{}
@@ -86,6 +87,7 @@ func UpdateIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 					vote{
 						id
 					}
+					privacy
 				}
 			}
 		*/
@@ -102,6 +104,7 @@ func UpdateIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 				Vote        []struct {
 					Id graphql.ID
 				}
+				Privacy graphql.String
 			} `graphql:"updateIncome(id: $id, input: $updateIncomeInput)"`
 		}
 		id := c.Param("id")

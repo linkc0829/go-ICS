@@ -16,7 +16,7 @@ type Cost struct {
 	Description string            `json:"description"`
 	Vote        []string          `json:"vote"`
 	Category    PortfolioCategory `json:"category"`
-	Privacy     string            `json:"privacy"`
+	Privacy     Privacy           `json:"privacy"`
 }
 
 func (Cost) IsPortfolio() {}
@@ -26,7 +26,7 @@ type CreateCostInput struct {
 	OccurDate   time.Time    `bson:"occurDate,omitempty" json:"occurDate,omitempty"`
 	Category    CostCategory `bson:"category,omitempty" json:"category,omitempty"`
 	Description string       `bson:"description,omitempty" json:"description,omitempty"`
-	Privacy     string       `bson:"privacy,omitempty" json:"privacy,omitempty"`
+	Privacy     Privacy      `bson:"privacy,omitempty" json:"privacy,omitempty"`
 }
 
 type CreateIncomeInput struct {
@@ -34,7 +34,7 @@ type CreateIncomeInput struct {
 	OccurDate   time.Time      `bson:"occurDate,omitempty" json:"occurDate,omitempty"`
 	Category    IncomeCategory `bson:"category,omitempty" json:"category,omitempty"`
 	Description string         `bson:"description,omitempty" json:"description,omitempty"`
-	Privacy     string         `bson:"privacy,omitempty" json:"privacy,omitempty"`
+	Privacy     Privacy        `bson:"privacy,omitempty" json:"privacy,omitempty"`
 }
 
 type CreateUserInput struct {
@@ -51,7 +51,7 @@ type Income struct {
 	Description string            `json:"description"`
 	Vote        []string          `json:"vote"`
 	Category    PortfolioCategory `json:"category"`
-	Privacy     string            `json:"privacy"`
+	Privacy     Privacy           `json:"privacy"`
 }
 
 func (Income) IsPortfolio() {}
@@ -61,7 +61,7 @@ type UpdateCostInput struct {
 	OccurDate   *time.Time    `bson:"occurDate,omitempty" json:"occurDate,omitempty"`
 	Category    *CostCategory `bson:"category,omitempty" json:"category,omitempty"`
 	Description *string       `bson:"description,omitempty" json:"description,omitempty"`
-	Privacy     *string       `bson:"privacy,omitempty" json:"privacy,omitempty"`
+	Privacy     *Privacy      `bson:"privacy,omitempty" json:"privacy,omitempty"`
 }
 
 type UpdateIncomeInput struct {
@@ -69,7 +69,7 @@ type UpdateIncomeInput struct {
 	OccurDate   *time.Time      `bson:"occurDate,omitempty" json:"occurDate,omitempty"`
 	Category    *IncomeCategory `bson:"category,omitempty" json:"category,omitempty"`
 	Description *string         `bson:"description,omitempty" json:"description,omitempty"`
-	Privacy     *string         `bson:"privacy,omitempty" json:"privacy,omitempty"`
+	Privacy     *Privacy        `bson:"privacy,omitempty" json:"privacy,omitempty"`
 }
 
 type UpdateUserInput struct {

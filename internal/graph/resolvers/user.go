@@ -316,20 +316,11 @@ func isAdmin(ctx context.Context) bool {
 	return false
 }
 
-//could userA get userB's information?
+//could userA see userB's friend content?
 //or did userB add userA to friend?
-func couldView(ctx context.Context, DB *mongodb.MongoDB, userA string, userB string) bool {
-	if userA == userB {
-		return true
-	}
-
-	UserB, err := getDBUserByID(ctx, DB, userB)
-	if err != nil {
-		return false
-	}
-	UserA, _ := primitive.ObjectIDFromHex(userA)
-	for _, f := range UserB.Friends {
-		if UserA == f {
+func couldViewFriendContent(userA *dbModel.UserModel, userB *dbModel.UserModel) bool {
+	for _, f := range userB.Friends {
+		if userA.ID == f {
 			return true
 		}
 	}

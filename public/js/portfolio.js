@@ -74,24 +74,6 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
   .set('Authorization', tokenString)
   .send({'Query': query,})
   .then(function (res) {
-      
-      let myFollowers = res.body.data.me.followers;
-      for(let i = 0; i < myFollowers.length; i++){
-        if(id == myFollowers[i].id){
-          permission = true;
-        }
-      }
-      //watching my own profile, hide friend sector
-      if(res.body.data.me.id == id){
-        permission = true;
-      }
-      if(res.body.data.me.role != "ADMIN"){
-        permission = true;
-      }
-      if(!permission){
-        document.querySelector('#income-list').style.display = 'none';
-        document.querySelector('#cost-list').style.display = 'none';
-      }
       //check if being friend
       let out = res.body.data.me.friends;
       console.log(out);
@@ -140,6 +122,7 @@ async function getUserProfile(currentUser){
         followers{\
           id\
         }\
+        role\
       }\
     }';
 
@@ -155,6 +138,7 @@ async function getUserProfile(currentUser){
       currentUser.userId = out.userId;
       currentUser.nickName = out.nickName;
       currentUser.email = out.email;
+      currentUser.role = out.role;
       
       currentUser.friends = (out.friends == null ? []: [...out.friends]);
       currentUser.followers = (out.followers == null ? []: [...out.followers]);
@@ -253,10 +237,8 @@ var currentUser = {};
 if(isLogin()){
   checkMyStatus().then((res)=>{
     getUserProfile(currentUser).then((res)=>{
-      if(document.querySelector('#income-list').style.display != 'none'){
-        initPortfolio(currentUser, INCOME);
-        initPortfolio(currentUser, COST);
-      }
+      initPortfolio(currentUser, INCOME);
+      initPortfolio(currentUser, COST);
     })
   });
   let date = new Date();
@@ -264,6 +246,8 @@ if(isLogin()){
   let occurDate = date.getFullYear() + '-' + date_month + '-' + date.getDate();
   document.querySelector('#occurDate').min = occurDate;
 }
+
+
 
 const COST = 'COST';
 const INCOME = 'INCOME';

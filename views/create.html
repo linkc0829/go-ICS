@@ -12,10 +12,12 @@
         <div class="valid-feedback">Please enter a number.</div>
       </div>
       <div class="col-md-2">
-        <div class="form-check" style="padding-top: 25px;">
+        <div class="form-check" style="padding-top: 5px;">
           <p>Type:</p>
           <input type="radio" id="income" name="portfolio" value="income" checked style="padding-top: 30px;">
           <label for="income">Income</label>
+          <input type="radio" id="cost" name="portfolio" value="cost">
+          <label for="cost">Cost</label>
         </div>
       </div>
     </div>
@@ -44,8 +46,12 @@
       </div>
       <div class="col-md-2">
         <div class="form-check">
-          <input type="radio" id="cost" name="portfolio" value="cost">
-          <label for="cost">Cost</label>
+          <label for='category'>Privacy:</label>
+        <select name='category' id='privacy' class="custom-select">
+          <option value='PRIVATE' selected>Private</option>
+          <option value='FRIEND'>Friend</option>
+          <option value='PUBLIC'>Public</option>
+        </select>
         </div>
       </div>
     </div>

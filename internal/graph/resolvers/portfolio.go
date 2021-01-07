@@ -40,10 +40,6 @@ func (r *queryResolver) MyCost(ctx context.Context) ([]models.Portfolio, error) 
 //GetUserCost returns user id's cost
 func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Portfolio, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
-		return nil, errors.New("permission denied")
-	}
-
 	user, err := getDBUserByID(ctx, r.DB, id)
 	if err != nil {
 		return nil, err
@@ -63,7 +59,7 @@ func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Po
 	yy, mm, dd := time.Now().Date()
 	//if today has quired, return
 	if (qy == yy) && (qm == mm) && (qd == dd) {
-		return decodeFindResult(results), nil
+		return decodeAndFilterPrivacy(me, user, results), nil
 	}
 
 	//move expired cost to history if user hasn't queried today
@@ -99,16 +95,12 @@ func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Po
 	if err != nil {
 		return nil, err
 	}
-	return rets, nil
+	return privacyFilter(me, user, rets), nil
 }
 
 //GetUserIncome find user's income portfolio, sort them by date and move outdate entries to history
 func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.Portfolio, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
-		return nil, errors.New("permission denied")
-	}
-
 	user, err := getDBUserByID(ctx, r.DB, id)
 	if err != nil {
 		return nil, err
@@ -129,7 +121,7 @@ func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.
 
 	//if today has quired, return
 	if (qy == yy) && (qm == mm) && (qd == dd) {
-		return decodeFindResult(results), nil
+		return decodeAndFilterPrivacy(me, user, results), nil
 	}
 
 	//move expired cost to history if user hasn't queried today
@@ -165,16 +157,11 @@ func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.
 	if err != nil {
 		return nil, err
 	}
-
-	return rets, nil
+	return privacyFilter(me, user, rets), nil
 }
 
 func (r *queryResolver) GetUserIncomeHistory(ctx context.Context, id string, rangeArg int) ([]models.Portfolio, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
-		return nil, errors.New("permission denied")
-	}
-
 	user, err := getDBUserByID(ctx, r.DB, id)
 	if err != nil {
 		return nil, err
@@ -194,15 +181,12 @@ func (r *queryResolver) GetUserIncomeHistory(ctx context.Context, id string, ran
 	if err = cursor.All(ctx, &results); err != nil {
 		log.Fatal(err)
 	}
-	return decodeFindResult(results), nil
+	return decodeAndFilterPrivacy(me, user, results), nil
+
 }
 
 func (r *queryResolver) GetUserCostHistory(ctx context.Context, id string, rangeArg int) ([]models.Portfolio, error) {
 	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
-	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) {
-		return nil, errors.New("permission denied")
-	}
-
 	user, err := getDBUserByID(ctx, r.DB, id)
 	if err != nil {
 		return nil, err
@@ -222,10 +206,10 @@ func (r *queryResolver) GetUserCostHistory(ctx context.Context, id string, range
 	if err = cursor.All(ctx, &results); err != nil {
 		log.Fatal(err)
 	}
-	return decodeFindResult(results), nil
+	return decodeAndFilterPrivacy(me, user, results), nil
 }
 
-//helper function
+//helper functions
 
 func getDateRange(days int) (time.Time, time.Time) {
 
@@ -241,17 +225,59 @@ func getDateRange(days int) (time.Time, time.Time) {
 	return fromDate, toDate
 }
 
-func decodeFindResult(results []bson.M) []models.Portfolio {
+func decodeAndFilterPrivacy(me *dbModel.UserModel, owner *dbModel.UserModel, results []bson.M) []models.Portfolio {
 	hist := []models.Portfolio{}
 	for _, result := range results {
 		c := dbModel.CostModel{}
 		//encode mongodb result to JSON format, then decode
 		bsonBytes, _ := bson.Marshal(result)
 		bson.Unmarshal(bsonBytes, &c)
-
+		//filter by privacy
+		ok := true
+		if me.Role != string(models.RoleAdmin) && me.ID != c.Owner { //if not admin and lookup myown portfolio
+			//if friend, return friend content by filtering out private content
+			if couldViewFriendContent(me, owner) {
+				if c.Privacy == models.PrivacyPrivate {
+					ok = false
+				}
+				//not friend, only could see public content
+			} else {
+				if c.Privacy != models.PrivacyPublic {
+					ok = false
+				}
+			}
+		}
 		//convert DB User struct to GQL User struct
-		gqlCost := tf.DBPortfolioToGQLPortfolio(c)
-		hist = append(hist, gqlCost)
+		if ok {
+			gqlCost := tf.DBPortfolioToGQLPortfolio(c)
+			hist = append(hist, gqlCost)
+		}
 	}
 	return hist
+}
+
+func privacyFilter(me *dbModel.UserModel, owner *dbModel.UserModel, input []models.Portfolio) (result []models.Portfolio) {
+	//if admin or lookup myown portfolio
+	if me.Role == string(models.RoleAdmin) || me.ID == owner.ID {
+		return input
+	}
+	//if friend, return friend content by filtering out private content
+	if couldViewFriendContent(me, owner) {
+		for _, in := range input {
+			inCost, _ := in.(models.Cost)
+			if inCost.Privacy == models.PrivacyPrivate {
+				continue
+			}
+			result = append(result, in)
+		}
+	} else { //if not friend, return public content
+		for _, in := range input {
+			inCost, _ := in.(models.Cost)
+			if inCost.Privacy != models.PrivacyPublic {
+				continue
+			}
+			result = append(result, in)
+		}
+	}
+	return result
 }

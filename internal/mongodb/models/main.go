@@ -42,6 +42,7 @@ type IncomeModel struct {
 	Category    models.PortfolioCategory `bson:"category" json:"category,omitempty"`
 	Description string                   `bson:"description" json:"description,omitempty"`
 	Vote        []primitive.ObjectID     `bson:"vote" json:"vote,omitempty"`
+	Privacy     models.Privacy           `bson:"privacy" json:"privacy,omitempty"`
 }
 
 func (IncomeModel) IsPortfolio() {}
@@ -54,6 +55,7 @@ type CostModel struct {
 	Category    models.PortfolioCategory `bson:"category" json:"category,omitempty"`
 	Description string                   `bson:"description" json:"description,omitempty"`
 	Vote        []primitive.ObjectID     `bson:"vote" json:"vote,omitempty"`
+	Privacy     models.Privacy           `bson:"privacy" json:"privacy,omitempty"`
 }
 
 func (CostModel) IsPortfolio() {}

@@ -25,6 +25,7 @@ func (r *mutationResolver) CreateIncome(ctx context.Context, input models.Create
 		Description: input.Description,
 		Vote:        nil,
 		Category:    cat,
+		Privacy:     input.Privacy,
 	}
 	//insert to db
 	_, err := r.DB.Income.InsertOne(ctx, newIncome)
@@ -66,6 +67,9 @@ func (r *mutationResolver) UpdateIncome(ctx context.Context, id string, input mo
 	}
 	if input.OccurDate != nil {
 		result.OccurDate = *input.OccurDate
+	}
+	if input.Privacy != nil {
+		result.Privacy = *input.Privacy
 	}
 
 	upd := bson.M{"$set": input}
@@ -115,11 +119,18 @@ func (r *mutationResolver) VoteIncome(ctx context.Context, id string) (int, erro
 	if err := r.DB.Income.FindOne(ctx, q).Decode(&income); err != nil {
 		return -1, err
 	}
-
-	if !isAdmin(ctx) && !couldView(ctx, r.DB, me.ID.Hex(), id) && me.ID != income.Owner {
-		return -1, errors.New("permission denied")
+	owner := dbModel.UserModel{}
+	if err := r.DB.Cost.FindOne(ctx, bson.M{"_id": income.Owner}).Decode(&owner); err != nil {
+		return -1, err
 	}
-
+	//deny private
+	if !isAdmin(ctx) && me.ID != income.Owner && income.Privacy == models.PrivacyPrivate {
+		return -1, errors.New("it's private, permission denied")
+	}
+	//deny non-friend
+	if !isAdmin(ctx) && !couldViewFriendContent(me, &owner) && me.ID != income.Owner && income.Privacy == models.PrivacyFriend {
+		return -1, errors.New("it's only for friend, permission denied")
+	}
 	//if already voted, revoke
 	length := len(income.Vote)
 	for i, v := range income.Vote {
@@ -162,5 +173,8 @@ func (r *incomeResolver) Owner(ctx context.Context, obj *models.Income) (*models
 }
 
 func (r *incomeResolver) Category(ctx context.Context, obj *models.Income) (models.PortfolioCategory, error) {
+	panic("not implemented")
+}
+func (r *incomeResolver) Privacy(ctx context.Context, obj *models.Income) (models.Privacy, error) {
 	panic("not implemented")
 }
