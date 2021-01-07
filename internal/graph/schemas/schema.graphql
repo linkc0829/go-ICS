@@ -27,6 +27,13 @@ interface Portfolio{
   description: String!
   vote: [User]
   category: PortfolioCategory!
+  privacy: Privacy!
+}
+
+enum Privacy{
+  PUBLIC
+  FRIEND
+  PRIVATE
 }
 
 enum PortfolioCategory{
@@ -62,6 +69,7 @@ type Income implements Portfolio{
   category: PortfolioCategory!
   description: String!
   vote: [User]
+  privacy: Privacy!
 }
 
 type Cost implements Portfolio{
@@ -72,6 +80,7 @@ type Cost implements Portfolio{
   category: PortfolioCategory!
   description: String!
   vote: [User]
+  privacy: Privacy!
 }
 
 # Input Types
@@ -96,6 +105,7 @@ input UpdateIncomeInput{
   occurDate: Time
   category: IncomeCategory
   description: String
+  privacy: Privacy
 }
 
 input CreateIncomeInput{
@@ -103,6 +113,7 @@ input CreateIncomeInput{
   occurDate: Time!
   category: IncomeCategory!
   description: String!
+  privacy: Privacy!
 }
 
 input UpdateCostInput{
@@ -110,6 +121,7 @@ input UpdateCostInput{
   occurDate: Time
   category: CostCategory
   description: String
+  privacy: Privacy
 }
 
 input CreateCostInput{
@@ -117,6 +129,7 @@ input CreateCostInput{
   occurDate: Time!
   category: CostCategory!
   description: String!
+  privacy: Privacy!
 }
 
 # Define mutations here

@@ -48,13 +48,14 @@ if (JSON && JSON.stringify && JSON.parse) var Session = Session || (function() {
   
  })();
 
- async function checkMyStatus(permission){
+ async function checkMyStatus(){
   
   let tokenString = Session.get('token_type') + ' ' + Session.get('token');
   let url = window.location.href.split('/');
   let id = url[url.length-1];
+  let permission = false;
 
-  query = '{\
+  let query = '{\
       me{\
         id\
         friends{\
@@ -127,7 +128,7 @@ async function getUserProfile(currentUser){
   let url = window.location.href.split('/');
   let id = url[url.length-1];
   
-  query = '{\
+  let query = '{\
       getUser(id: "' + id + '"){\
         id\
         userId\
@@ -249,11 +250,10 @@ function isLogin(){
 }
 
 var currentUser = {};
-var permission = false;
 if(isLogin()){
-  checkMyStatus(permission).then((res)=>{
+  checkMyStatus().then((res)=>{
     getUserProfile(currentUser).then((res)=>{
-      if(permission){
+      if(document.querySelector('#income-list').style.display != 'none'){
         initPortfolio(currentUser, INCOME);
         initPortfolio(currentUser, COST);
       }
