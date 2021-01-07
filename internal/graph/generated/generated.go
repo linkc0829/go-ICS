@@ -55,6 +55,7 @@ type ComplexityRoot struct {
 		ID          func(childComplexity int) int
 		OccurDate   func(childComplexity int) int
 		Owner       func(childComplexity int) int
+		Privacy     func(childComplexity int) int
 		Vote        func(childComplexity int) int
 	}
 
@@ -65,6 +66,7 @@ type ComplexityRoot struct {
 		ID          func(childComplexity int) int
 		OccurDate   func(childComplexity int) int
 		Owner       func(childComplexity int) int
+		Privacy     func(childComplexity int) int
 		Vote        func(childComplexity int) int
 	}
 
@@ -113,11 +115,13 @@ type CostResolver interface {
 	Owner(ctx context.Context, obj *models.Cost) (*models.User, error)
 
 	Vote(ctx context.Context, obj *models.Cost) ([]*models.User, error)
+	Privacy(ctx context.Context, obj *models.Cost) (models.Privacy, error)
 }
 type IncomeResolver interface {
 	Owner(ctx context.Context, obj *models.Income) (*models.User, error)
 
 	Vote(ctx context.Context, obj *models.Income) ([]*models.User, error)
+	Privacy(ctx context.Context, obj *models.Income) (models.Privacy, error)
 }
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input models.CreateUserInput) (*models.User, error)
@@ -208,6 +212,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Cost.Owner(childComplexity), true
 
+	case "Cost.privacy":
+		if e.complexity.Cost.Privacy == nil {
+			break
+		}
+
+		return e.complexity.Cost.Privacy(childComplexity), true
+
 	case "Cost.vote":
 		if e.complexity.Cost.Vote == nil {
 			break
@@ -256,6 +267,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Income.Owner(childComplexity), true
+
+	case "Income.privacy":
+		if e.complexity.Income.Privacy == nil {
+			break
+		}
+
+		return e.complexity.Income.Privacy(childComplexity), true
 
 	case "Income.vote":
 		if e.complexity.Income.Vote == nil {
@@ -669,6 +687,13 @@ interface Portfolio{
   description: String!
   vote: [User]
   category: PortfolioCategory!
+  privacy: Privacy!
+}
+
+enum Privacy{
+  PUBLIC
+  FRIEND
+  PRIVATE
 }
 
 enum PortfolioCategory{
@@ -704,6 +729,7 @@ type Income implements Portfolio{
   category: PortfolioCategory!
   description: String!
   vote: [User]
+  privacy: Privacy!
 }
 
 type Cost implements Portfolio{
@@ -714,6 +740,7 @@ type Cost implements Portfolio{
   category: PortfolioCategory!
   description: String!
   vote: [User]
+  privacy: Privacy!
 }
 
 # Input Types
@@ -738,6 +765,7 @@ input UpdateIncomeInput{
   occurDate: Time
   category: IncomeCategory
   description: String
+  privacy: Privacy
 }
 
 input CreateIncomeInput{
@@ -745,6 +773,7 @@ input CreateIncomeInput{
   occurDate: Time!
   category: IncomeCategory!
   description: String!
+  privacy: Privacy!
 }
 
 input UpdateCostInput{
@@ -752,6 +781,7 @@ input UpdateCostInput{
   occurDate: Time
   category: CostCategory
   description: String
+  privacy: Privacy
 }
 
 input CreateCostInput{
@@ -759,6 +789,7 @@ input CreateCostInput{
   occurDate: Time!
   category: CostCategory!
   description: String!
+  privacy: Privacy!
 }
 
 # Define mutations here
@@ -1426,6 +1457,40 @@ func (ec *executionContext) _Cost_vote(ctx context.Context, field graphql.Collec
 	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Cost_privacy(ctx context.Context, field graphql.CollectedField, obj *models.Cost) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Cost",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Cost().Privacy(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(models.Privacy)
+	fc.Result = res
+	return ec.marshalNPrivacy2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPrivacy(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Income_id(ctx context.Context, field graphql.CollectedField, obj *models.Income) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1659,6 +1724,40 @@ func (ec *executionContext) _Income_vote(ctx context.Context, field graphql.Coll
 	res := resTmp.([]*models.User)
 	fc.Result = res
 	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Income_privacy(ctx context.Context, field graphql.CollectedField, obj *models.Income) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Income",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Income().Privacy(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(models.Privacy)
+	fc.Result = res
+	return ec.marshalNPrivacy2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPrivacy(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4001,6 +4100,14 @@ func (ec *executionContext) unmarshalInputCreateCostInput(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
+		case "privacy":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("privacy"))
+			it.Privacy, err = ec.unmarshalNPrivacy2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPrivacy(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -4042,6 +4149,14 @@ func (ec *executionContext) unmarshalInputCreateIncomeInput(ctx context.Context,
 
 			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("description"))
 			it.Description, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "privacy":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("privacy"))
+			it.Privacy, err = ec.unmarshalNPrivacy2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPrivacy(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4125,6 +4240,14 @@ func (ec *executionContext) unmarshalInputUpdateCostInput(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
+		case "privacy":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("privacy"))
+			it.Privacy, err = ec.unmarshalOPrivacy2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPrivacy(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -4166,6 +4289,14 @@ func (ec *executionContext) unmarshalInputUpdateIncomeInput(ctx context.Context,
 
 			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("description"))
 			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "privacy":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("privacy"))
+			it.Privacy, err = ec.unmarshalOPrivacy2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPrivacy(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4303,6 +4434,20 @@ func (ec *executionContext) _Cost(ctx context.Context, sel ast.SelectionSet, obj
 				res = ec._Cost_vote(ctx, field, obj)
 				return res
 			})
+		case "privacy":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Cost_privacy(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4373,6 +4518,20 @@ func (ec *executionContext) _Income(ctx context.Context, sel ast.SelectionSet, o
 					}
 				}()
 				res = ec._Income_vote(ctx, field, obj)
+				return res
+			})
+		case "privacy":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Income_privacy(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		default:
@@ -5127,6 +5286,16 @@ func (ec *executionContext) marshalNPortfolioCategory2githubᚗcomᚋlinkc0829�
 	return v
 }
 
+func (ec *executionContext) unmarshalNPrivacy2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPrivacy(ctx context.Context, v interface{}) (models.Privacy, error) {
+	var res models.Privacy
+	err := res.UnmarshalGQL(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPrivacy2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPrivacy(ctx context.Context, sel ast.SelectionSet, v models.Privacy) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNRole2githubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐRole(ctx context.Context, v interface{}) (models.Role, error) {
 	var res models.Role
 	err := res.UnmarshalGQL(v)
@@ -5538,6 +5707,22 @@ func (ec *executionContext) marshalOPortfolio2githubᚗcomᚋlinkc0829ᚋgoᚑic
 		return graphql.Null
 	}
 	return ec._Portfolio(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOPrivacy2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPrivacy(ctx context.Context, v interface{}) (*models.Privacy, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(models.Privacy)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOPrivacy2ᚖgithubᚗcomᚋlinkc0829ᚋgoᚑicsᚋinternalᚋgraphᚋmodelsᚐPrivacy(ctx context.Context, sel ast.SelectionSet, v *models.Privacy) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

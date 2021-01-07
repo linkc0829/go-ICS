@@ -6,7 +6,97 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
+
+type Portfolio interface {
+	IsPortfolio()
+}
+
+type Cost struct {
+	ID          string            `json:"id"`
+	Owner       *User             `json:"owner"`
+	Amount      int               `json:"amount"`
+	OccurDate   time.Time         `json:"occurDate"`
+	Category    PortfolioCategory `json:"category"`
+	Description string            `json:"description"`
+	Vote        []*User           `json:"vote"`
+	Privacy     Privacy           `json:"privacy"`
+}
+
+func (Cost) IsPortfolio() {}
+
+type CreateCostInput struct {
+	Amount      int          `json:"amount"`
+	OccurDate   time.Time    `json:"occurDate"`
+	Category    CostCategory `json:"category"`
+	Description string       `json:"description"`
+	Privacy     Privacy      `json:"privacy"`
+}
+
+type CreateIncomeInput struct {
+	Amount      int            `json:"amount"`
+	OccurDate   time.Time      `json:"occurDate"`
+	Category    IncomeCategory `json:"category"`
+	Description string         `json:"description"`
+	Privacy     Privacy        `json:"privacy"`
+}
+
+type CreateUserInput struct {
+	Email    string  `json:"email"`
+	UserID   string  `json:"userId"`
+	NickName *string `json:"nickName"`
+}
+
+type Income struct {
+	ID          string            `json:"id"`
+	Owner       *User             `json:"owner"`
+	Amount      int               `json:"amount"`
+	OccurDate   time.Time         `json:"occurDate"`
+	Category    PortfolioCategory `json:"category"`
+	Description string            `json:"description"`
+	Vote        []*User           `json:"vote"`
+	Privacy     Privacy           `json:"privacy"`
+}
+
+func (Income) IsPortfolio() {}
+
+type UpdateCostInput struct {
+	Amount      *int          `json:"amount"`
+	OccurDate   *time.Time    `json:"occurDate"`
+	Category    *CostCategory `json:"category"`
+	Description *string       `json:"description"`
+	Privacy     *Privacy      `json:"privacy"`
+}
+
+// occurDate format: 2020-12-26T12:14:36.986+00:00
+// occurDate should not before today
+type UpdateIncomeInput struct {
+	Amount      *int            `json:"amount"`
+	OccurDate   *time.Time      `json:"occurDate"`
+	Category    *IncomeCategory `json:"category"`
+	Description *string         `json:"description"`
+	Privacy     *Privacy        `json:"privacy"`
+}
+
+type UpdateUserInput struct {
+	Email    *string `json:"email"`
+	UserID   *string `json:"userId"`
+	NickName *string `json:"nickName"`
+}
+
+type User struct {
+	ID        string    `json:"id"`
+	Email     string    `json:"email"`
+	UserID    string    `json:"userId"`
+	NickName  *string   `json:"nickName"`
+	CreatedAt time.Time `json:"createdAt"`
+	// granted permission to friends to view portfolio
+	Friends []*User `json:"friends"`
+	// permission to view followers portfolio
+	Followers []*User `json:"followers"`
+	Role      Role    `json:"role"`
+}
 
 type CostCategory string
 
@@ -148,6 +238,49 @@ func (e *PortfolioCategory) UnmarshalGQL(v interface{}) error {
 }
 
 func (e PortfolioCategory) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type Privacy string
+
+const (
+	PrivacyPublic  Privacy = "PUBLIC"
+	PrivacyFriend  Privacy = "FRIEND"
+	PrivacyPrivate Privacy = "PRIVATE"
+)
+
+var AllPrivacy = []Privacy{
+	PrivacyPublic,
+	PrivacyFriend,
+	PrivacyPrivate,
+}
+
+func (e Privacy) IsValid() bool {
+	switch e {
+	case PrivacyPublic, PrivacyFriend, PrivacyPrivate:
+		return true
+	}
+	return false
+}
+
+func (e Privacy) String() string {
+	return string(e)
+}
+
+func (e *Privacy) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Privacy(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Privacy", str)
+	}
+	return nil
+}
+
+func (e Privacy) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
