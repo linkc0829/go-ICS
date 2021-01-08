@@ -171,10 +171,3 @@ func (r *incomeResolver) Owner(ctx context.Context, obj *models.Income) (*models
 	}
 	return owner[0], nil
 }
-
-func (r *incomeResolver) Category(ctx context.Context, obj *models.Income) (models.PortfolioCategory, error) {
-	panic("not implemented")
-}
-func (r *incomeResolver) Privacy(ctx context.Context, obj *models.Income) (models.Privacy, error) {
-	panic("not implemented")
-}

@@ -81,16 +81,17 @@ func CallBack(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
 		// 	"token":        accToken,
 		// 	"token_expiry": tokenExpiry,
 		// }
+		//set token
 		data := struct {
 			TokenType   string
 			Token       string
 			TokenExpiry time.Time
-			ID          string
+			Redirect    string
 		}{
 			Token:       accToken,
 			TokenType:   "Bearer",
 			TokenExpiry: tokenExpiry,
-			ID:          u.ID.Hex(),
+			Redirect:    "/profile/" + u.ID.Hex(),
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
 		c.HTML(http.StatusOK, "callback", data)

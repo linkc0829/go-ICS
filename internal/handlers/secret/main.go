@@ -97,12 +97,12 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 			TokenType   string
 			Token       string
 			TokenExpiry time.Time
-			ID          string
+			Redirect    string
 		}{
 			Token:       token,
 			TokenType:   "Bearer",
 			TokenExpiry: tokenExpiry,
-			ID:          newUser.ID.Hex(),
+			Redirect:    "/profile/" + newUser.ID.Hex(),
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
 		c.HTML(http.StatusOK, "callback", data)
@@ -151,12 +151,12 @@ func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc 
 			TokenType   string
 			Token       string
 			TokenExpiry time.Time
-			ID          string
+			Redirect    string
 		}{
 			Token:       token,
 			TokenType:   "Bearer",
 			TokenExpiry: tokenExpiry,
-			ID:          user.ID.Hex(),
+			Redirect:    "/profile/" + user.ID.Hex(),
 		}
 		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
 		c.HTML(http.StatusOK, "callback", data)

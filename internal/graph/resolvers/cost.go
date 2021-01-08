@@ -42,6 +42,7 @@ func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input mode
 	if err != nil {
 		return nil, err
 	}
+	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
 
 	q := bson.M{"_id": costID}
 	result := dbModel.CostModel{}
@@ -49,7 +50,6 @@ func (r *mutationResolver) UpdateCost(ctx context.Context, id string, input mode
 		return nil, err
 	}
 
-	me := ctx.Value(utils.ProjectContextKeys.UserCtxKey).(*dbModel.UserModel)
 	if !isAdmin(ctx) && me.ID != result.Owner {
 		return nil, errors.New("permission denied")
 	}
@@ -171,11 +171,4 @@ func (r *costResolver) Owner(ctx context.Context, obj *models.Cost) (*models.Use
 		return nil, err
 	}
 	return owner[0], nil
-}
-
-func (r *costResolver) Category(ctx context.Context, obj *models.Cost) (models.PortfolioCategory, error) {
-	panic("not implemented")
-}
-func (r *costResolver) Privacy(ctx context.Context, obj *models.Cost) (models.Privacy, error) {
-	panic("not implemented")
 }

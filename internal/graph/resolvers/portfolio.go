@@ -70,7 +70,7 @@ func (r *queryResolver) GetUserCost(ctx context.Context, id string) ([]models.Po
 		//encode mongodb result to JSON format, then decode
 		bsonBytes, _ := bson.Marshal(result)
 		bson.Unmarshal(bsonBytes, &c)
-		if c.OccurDate.Before(today) {
+		if c.OccurDate.Before(today) || c.OccurDate.Equal(today) {
 			//insert to history
 			_, err := r.DB.CostHistory.InsertOne(ctx, c)
 			if err != nil {
@@ -132,7 +132,7 @@ func (r *queryResolver) GetUserIncome(ctx context.Context, id string) ([]models.
 		//encode mongodb result to JSON format, then decode
 		bsonBytes, _ := bson.Marshal(result)
 		bson.Unmarshal(bsonBytes, &c)
-		if c.OccurDate.Before(today) {
+		if c.OccurDate.Before(today) || c.OccurDate.Equal(today) {
 			//insert to history
 			_, err := r.DB.IncomeHistory.InsertOne(ctx, c)
 			if err != nil {
@@ -197,6 +197,7 @@ func (r *queryResolver) GetUserCostHistory(ctx context.Context, id string, range
 		"$gte": fromDate,
 		"$lte": toDate,
 	}}
+
 	findopt := options.Find().SetSort(bson.M{"occurDate": 1})
 	cursor, err := r.DB.CostHistory.Find(ctx, q, findopt)
 	if err != nil {
@@ -234,7 +235,7 @@ func decodeAndFilterPrivacy(me *dbModel.UserModel, owner *dbModel.UserModel, res
 		bson.Unmarshal(bsonBytes, &c)
 		//filter by privacy
 		ok := true
-		if me.Role != string(models.RoleAdmin) && me.ID != c.Owner { //if not admin and lookup myown portfolio
+		if me.Role != string(models.RoleAdmin) && me.ID != c.Owner { //if not admin and not look at myown portfolio
 			//if friend, return friend content by filtering out private content
 			if couldViewFriendContent(me, owner) {
 				if c.Privacy == models.PrivacyPrivate {
