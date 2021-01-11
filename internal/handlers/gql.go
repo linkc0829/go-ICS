@@ -3,9 +3,9 @@ package handlers
 import (
 	"github.com/99designs/gqlgen/handler"
 	"github.com/gin-gonic/gin"
+	"github.com/linkc0829/go-ics/internal/db/mongodb"
 	gql "github.com/linkc0829/go-ics/internal/graph/generated"
 	"github.com/linkc0829/go-ics/internal/graph/resolvers"
-	"github.com/linkc0829/go-ics/internal/mongodb"
 
 	"log"
 )

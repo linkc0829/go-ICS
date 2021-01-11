@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/linkc0829/go-ics/internal/db/mongodb"
 	"github.com/linkc0829/go-ics/internal/handlers/secret"
-	"github.com/linkc0829/go-ics/internal/mongodb"
 	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/dgrijalva/jwt-go"

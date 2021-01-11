@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
+	dbModel "github.com/linkc0829/go-ics/internal/db/mongodb/models"
 	"github.com/linkc0829/go-ics/internal/graph/models"
 	tf "github.com/linkc0829/go-ics/internal/graph/resolvers/transformer"
-	dbModel "github.com/linkc0829/go-ics/internal/mongodb/models"
 	"github.com/linkc0829/go-ics/pkg/utils"
 
 	"go.mongodb.org/mongo-driver/bson"

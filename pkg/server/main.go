@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/linkc0829/go-ics/internal/db/mongodb"
 	"github.com/linkc0829/go-ics/internal/handlers"
-	"github.com/linkc0829/go-ics/internal/mongodb"
 	"github.com/linkc0829/go-ics/pkg/server/routes"
 	"github.com/linkc0829/go-ics/pkg/utils"
 )

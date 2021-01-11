@@ -4,9 +4,9 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/linkc0829/go-ics/internal/db/mongodb"
 	"github.com/linkc0829/go-ics/internal/handlers"
 	auth "github.com/linkc0829/go-ics/internal/handlers/auth/middleware"
-	"github.com/linkc0829/go-ics/internal/mongodb"
 	"github.com/linkc0829/go-ics/pkg/utils"
 )
 

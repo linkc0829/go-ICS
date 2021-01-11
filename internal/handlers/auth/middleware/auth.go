@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/linkc0829/go-ics/internal/mongodb"
+	"github.com/linkc0829/go-ics/internal/db/mongodb"
 	"github.com/linkc0829/go-ics/pkg/utils"
 
 	"github.com/gin-gonic/gin"

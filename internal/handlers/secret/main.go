@@ -9,8 +9,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/linkc0829/go-ics/internal/mongodb"
-	"github.com/linkc0829/go-ics/internal/mongodb/models"
+	"github.com/linkc0829/go-ics/internal/db/mongodb"
+	"github.com/linkc0829/go-ics/internal/db/mongodb/models"
 	"github.com/linkc0829/go-ics/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
 
