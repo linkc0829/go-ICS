@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let occurDate = document.querySelector('#occurDate')
         let cost = document.querySelector('#cost');
         let income = document.querySelector('#income');
+        let privacy = document.querySelector('#privacy');
         let category;
         
         description.addEventListener('keydown', function (ev) {
@@ -75,7 +76,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }, false);
   
         async function createPortfolio(type) {
-          isLogin();
           let target = '/api/v1/' + casePortfolioType(type, false);
           let data = {};
           data.description = description.value;
@@ -83,12 +83,14 @@ document.addEventListener('DOMContentLoaded', function () {
           data.category = category.value;
           let date = new Date(occurDate.value);
           data.occurDate = date.toISOString();
+          data.privacy = privacy.value;
+          console.log(data);
   
-          if(data.description == "" || amount == "" ||  data.category == "ZERO"){
+          if(data.description == "" || data.amount == "" ||  data.category == "ZERO"){
             alert('input incomplete');
             return;
           }
-          if(isNaN(amount)){
+          if(isNaN(data.amount)){
             alert('amount must be numbers');
             return;
           }

@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
+	_ "github.com/linkc0829/go-ics/internal/db/mongodb"
 	dbModel "github.com/linkc0829/go-ics/internal/db/mongodb/models"
 	"github.com/linkc0829/go-ics/internal/graph/models"
-	_ "github.com/linkc0829/go-ics/internal/mongodb"
 	"github.com/linkc0829/go-ics/pkg/utils"
 
 	tf "github.com/linkc0829/go-ics/internal/graph/resolvers/transformer"

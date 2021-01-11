@@ -2,11 +2,13 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/linkc0829/go-ics/internal/db/mongodb"
+	"github.com/linkc0829/go-ics/internal/handlers"
 	"github.com/linkc0829/go-ics/internal/handlers/gqlclient"
 	"github.com/linkc0829/go-ics/pkg/utils"
 )
 
-func RestAPI(cfg *utils.ServerConfig, r *gin.Engine) {
+func RestAPI(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB) {
 
 	g := r.Group(cfg.VersioningEndpoint("/user"))
 
@@ -31,5 +33,12 @@ func RestAPI(cfg *utils.ServerConfig, r *gin.Engine) {
 	co.PATCH(":id", gqlclient.UpdateCost(cfg))
 	co.DELETE(":id", gqlclient.DeleteCost(cfg))
 	co.PUT("vote/:id", gqlclient.VoteCost(cfg))
+
+	//user profile API
+	r.POST("/profile/:id", handlers.UserProfileHandler(cfg))
+	r.GET("/profile/:id", handlers.UserProfileHandler(cfg))
+	r.GET("/history/:id", handlers.UserHistoryHandler(cfg))
+	r.GET("/friends/:id", handlers.UserFriendsHandler(cfg, db))
+	r.GET("/followers/:id", handlers.UserFollowersHandler(cfg, db))
 
 }

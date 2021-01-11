@@ -24,7 +24,7 @@ type MongoDB struct {
 }
 
 //ConnectDB will build connection to MongoDB Atlas
-func ConnectDB(cfg *utils.ServerConfig) *MongoDB {
+func ConnectMongoDB(cfg *utils.ServerConfig) *MongoDB {
 
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(cfg.MongoDB.DSN))
 	if err != nil {
@@ -49,7 +49,7 @@ func ConnectDB(cfg *utils.ServerConfig) *MongoDB {
 }
 
 //CloseDB will dissconnect to MongoDB
-func CloseDB(db *MongoDB) {
+func CloseMongoDB(db *MongoDB) {
 	err := db.Session.Disconnect(context.Background())
 	if err != nil {
 		log.Fatal(err)

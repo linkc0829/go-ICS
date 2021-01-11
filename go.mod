@@ -7,6 +7,7 @@ require (
 	github.com/cmelgarejo/go-gql-server v0.0.0-20200628225422-cfb27ae0504a
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.6.3
+	github.com/jinzhu/gorm v1.9.16
 	github.com/joho/godotenv v1.3.0
 	github.com/machinebox/graphql v0.2.2
 	github.com/markbates/goth v1.66.1

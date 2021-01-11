@@ -3,7 +3,8 @@ package main
 import (
 	"strings"
 
-	"github.com/linkc0829/go-ics/internal/mongodb"
+	"github.com/linkc0829/go-ics/internal/db/mongodb"
+	"github.com/linkc0829/go-ics/internal/db/sqlitedb"
 	"github.com/linkc0829/go-ics/pkg/server"
 	"github.com/linkc0829/go-ics/pkg/utils"
 )
@@ -47,7 +48,11 @@ func main() {
 		},
 	}
 
-	db := mongodb.ConnectDB(serverconf)
-	defer mongodb.CloseDB(db)
-	server.Run(serverconf, db)
+	mongoDB := mongodb.ConnectMongoDB(serverconf)
+	defer mongodb.CloseMongoDB(mongoDB)
+
+	sqlite := sqlitedb.ConnectSqlite()
+	defer sqlitedb.CloseSqlite(sqlite)
+
+	server.Run(serverconf, mongoDB, sqlite)
 }
