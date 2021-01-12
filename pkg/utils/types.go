@@ -11,6 +11,7 @@ type ServerConfig struct {
 	JWT           JWTConfig
 	GraphQL       GQLConfig
 	MongoDB       MGDBConfig
+	Redis         RedisConfig
 	AuthProviders []AuthProvider
 }
 
@@ -32,6 +33,11 @@ type GQLConfig struct {
 // MGDBConfig defines the configuration for the MongoDB config
 type MGDBConfig struct {
 	DSN string
+}
+
+type RedisConfig struct {
+	EndPoint string
+	PWD      string
 }
 
 // AuthProvider defines the configuration for the Goth config

@@ -2,14 +2,14 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/linkc0829/go-ics/internal/db/mongodb"
 	"github.com/linkc0829/go-ics/internal/handlers"
 	"github.com/linkc0829/go-ics/internal/handlers/auth"
 	"github.com/linkc0829/go-ics/internal/handlers/secret"
 	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-ics/pkg/utils/datasource"
 )
 
-func Auth(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB) {
+func Auth(cfg *utils.ServerConfig, r *gin.Engine, db *datasource.DB) {
 
 	// OAuth handlers
 	g := r.Group(cfg.VersioningEndpoint("/auth"))

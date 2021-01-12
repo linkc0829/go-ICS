@@ -5,27 +5,27 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/garyburd/redigo/redis"
 	"github.com/gin-gonic/gin"
-	"github.com/linkc0829/go-ics/internal/db/mongodb"
 	"github.com/linkc0829/go-ics/internal/db/mongodb/models"
 	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-ics/pkg/utils/datasource"
 	"golang.org/x/crypto/bcrypt"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Claims JWT claims
 type Claims struct {
-	Email string `json:"email"`
+	ID string `json:"id"`
 	jwt.StandardClaims
 }
 
 type RefClaims struct {
-	ID string `json:"_id"`
 	jwt.StandardClaims
 }
 
@@ -44,7 +44,7 @@ func ErrorWriter(c *gin.Context, code int, err error) {
 	c.HTML(code, "layout", data)
 }
 
-func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
+func SignupHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//check if user exists
 		email := c.Request.FormValue("email")
@@ -53,7 +53,7 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 		provider := "ics"
 		password := c.Request.FormValue("password")
 
-		_, err := db.FindUserByJWT(email, provider, userID)
+		_, err := db.Mongo.FindUserByJWT(email, provider, userID)
 		if err == nil {
 			ErrorWriter(c, http.StatusBadRequest, errors.New("ics signup: user exists"))
 		}
@@ -77,17 +77,18 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 		}
 
 		//create access token and refresh token
-		token, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, newUser)
+		token, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, newUser.ID.Hex(), provider)
 		if err != nil {
 			ErrorWriter(c, http.StatusInternalServerError, err)
 		}
 
-		//add to db
-		newUser.RefreshToken = refreshToken
+		//add to redis
+		refExp, _ := strconv.Atoi(cfg.JWT.RefreshTokenExpire[:len(cfg.JWT.RefreshTokenExpire)-1])
+		db.Redis.Do("Set", newUser.ID.Hex(), refreshToken, "EX", refExp*3600)
 
 		//insert to db
 		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-		_, err = db.Users.InsertOne(ctx, newUser)
+		_, err = db.Mongo.Users.InsertOne(ctx, newUser)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 		}
@@ -110,14 +111,14 @@ func SignupHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc
 
 }
 
-func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
+func LoginHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		email := c.Request.FormValue("email")
 		userID := c.Request.FormValue("userID")
 		provider := "ics"
 		password := c.Request.FormValue("password")
 
-		user, err := db.FindUserByJWT(email, provider, userID)
+		user, err := db.Mongo.FindUserByJWT(email, provider, userID)
 
 		if err != nil {
 			err = errors.New("Login failed: " + err.Error())
@@ -132,19 +133,16 @@ func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc 
 		}
 
 		//create access token and refresh token
-		token, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, user)
+		token, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, user.ID.Hex(), provider)
 		if err != nil {
 			err = errors.New("Login failed: " + err.Error())
 			ErrorWriter(c, http.StatusInternalServerError, err)
 			return
 		}
 
-		//update DB
-		user.RefreshToken = refreshToken
-		q := bson.M{"_id": user.ID}
-		update := bson.M{"$set": user}
-		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-		_, err = db.Users.UpdateOne(ctx, q, update)
+		//update redis
+		refExp, _ := strconv.Atoi(cfg.JWT.RefreshTokenExpire[:len(cfg.JWT.RefreshTokenExpire)-1])
+		db.Redis.Do("Set", user.ID.Hex(), refreshToken, "EX", refExp*3600)
 
 		//set token
 		data := struct {
@@ -165,7 +163,7 @@ func LoginHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc 
 }
 
 //RefreshTokenHandler will verify refresh_token is valid or not, then issue new Tokens if valid
-func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
+func RefreshTokenHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenstring, err := c.Cookie("refresh_token")
 		if err != nil {
@@ -185,46 +183,41 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.Handl
 			ErrorWriter(c, http.StatusUnauthorized, err)
 			return
 		}
-
 		//check refresh token is expired or not
 		if token.Valid == false {
 			ErrorWriter(c, http.StatusUnauthorized, errors.New("token invalid"))
 			return
 		}
 		claims := token.Claims.(jwt.MapClaims)
-		ID, err := primitive.ObjectIDFromHex(claims["_id"].(string))
+		ID := claims["jti"].(string)
+		issuer := claims["iss"].(string)
 		if err != nil {
 			ErrorWriter(c, http.StatusUnauthorized, errors.New("invalid object id"))
 			return
 		}
-
-		//check if user exists
-		var result models.UserModel
-		q := bson.M{"_id": ID}
-		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-		if err = db.Users.FindOne(ctx, q).Decode(&result); err != nil {
+		//check redis for token
+		tokenFromRedis, err := redis.String(db.Redis.Do("GET", ID))
+		if err != nil {
 			ErrorWriter(c, http.StatusInternalServerError, err)
 			return
 		}
 
 		//check token match or not
-		if result.RefreshToken != tokenstring {
+		if tokenFromRedis != tokenstring {
 			ErrorWriter(c, http.StatusInternalServerError, errors.New("tokens doesn't match"))
 			return
 		}
 
 		//generate new token pair
-		accToken, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, &result)
+		accToken, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, ID, issuer)
 		if err != nil {
 			ErrorWriter(c, http.StatusInternalServerError, err)
 			return
 		}
 
-		//update DB
-		result.RefreshToken = refreshToken
-		update := bson.M{"$set": result}
-		ctx, _ = context.WithTimeout(context.Background(), 30*time.Second)
-		_, err = db.Users.UpdateOne(ctx, q, update)
+		//soft refresh
+		refExp, _ := strconv.Atoi(cfg.JWT.RefreshTokenExpire[:len(cfg.JWT.RefreshTokenExpire)-1])
+		db.Redis.Do("Set", ID, refreshToken, "EX", refExp*3600)
 
 		//set token
 		json := gin.H{
@@ -251,15 +244,14 @@ func checkPassword(pwdHash string, pwd string) bool {
 	return true
 }
 
-func CreateTokenPair(conf *utils.ServerConfig, user *models.UserModel) (string, time.Time, string, error) {
+func CreateTokenPair(conf *utils.ServerConfig, id string, issuer string) (string, time.Time, string, error) {
 	accExp, _ := time.ParseDuration(conf.JWT.AccessTokenExpire)
 	accExpireAt := time.Now().Add(accExp).UTC()
 
 	claims := Claims{
-		Email: user.Email,
+		ID: id,
 		StandardClaims: jwt.StandardClaims{
-			Id:        user.UserID,
-			Issuer:    user.Provider,
+			Issuer:    issuer,
 			IssuedAt:  time.Now().UTC().Unix(),
 			NotBefore: time.Now().UTC().Unix(),
 			ExpiresAt: accExpireAt.Unix(),
@@ -276,8 +268,9 @@ func CreateTokenPair(conf *utils.ServerConfig, user *models.UserModel) (string, 
 	//RefreshToken, https://bit.ly/3r7753B
 	refExp, _ := time.ParseDuration(conf.JWT.RefreshTokenExpire)
 	rToken := jwt.NewWithClaims(jwt.GetSigningMethod(conf.JWT.Algorithm), RefClaims{
-		ID: user.ID.Hex(),
 		StandardClaims: jwt.StandardClaims{
+			Id:        id,
+			Issuer:    issuer,
 			ExpiresAt: time.Now().Add(refExp).UTC().Unix(),
 		},
 	})

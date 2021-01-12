@@ -4,9 +4,11 @@ import (
 	"strings"
 
 	"github.com/linkc0829/go-ics/internal/db/mongodb"
+	"github.com/linkc0829/go-ics/internal/db/redisdb"
 	"github.com/linkc0829/go-ics/internal/db/sqlitedb"
 	"github.com/linkc0829/go-ics/pkg/server"
 	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-ics/pkg/utils/datasource"
 )
 
 func main() {
@@ -32,6 +34,10 @@ func main() {
 		MongoDB: utils.MGDBConfig{
 			DSN: utils.MustGet("MONGO_CONNECTION_DSN"),
 		},
+		Redis: utils.RedisConfig{
+			EndPoint: utils.MustGet("REDIS_ENDPOINT"),
+			PWD:      utils.MustGet("REDIS_PWD"),
+		},
 		AuthProviders: []utils.AuthProvider{
 			utils.AuthProvider{
 				Provider:  "google",
@@ -54,5 +60,14 @@ func main() {
 	sqlite := sqlitedb.ConnectSqlite()
 	defer sqlitedb.CloseSqlite(sqlite)
 
-	server.Run(serverconf, mongoDB, sqlite)
+	redis := redisdb.ConnectRedis(serverconf)
+	defer redisdb.CloseRedis(redis)
+
+	db := &datasource.DB{
+		Mongo:  mongoDB,
+		Sqlite: sqlite,
+		Redis:  redis,
+	}
+
+	server.Run(serverconf, db)
 }

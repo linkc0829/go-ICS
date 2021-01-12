@@ -1,13 +1,18 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/linkc0829/go-ics/internal/db/mongodb"
+	"github.com/linkc0829/go-ics/internal/db/mongodb/models"
 	"github.com/linkc0829/go-ics/pkg/utils"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/gin-gonic/gin"
 )
@@ -53,13 +58,16 @@ func Middleware(path string, cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.H
 						if claims, ok := t.Claims.(jwt.MapClaims); ok {
 							if claims["exp"] != nil {
 								issuer := claims["iss"].(string)
-								userid := claims["jti"].(string)
-								email := claims["email"].(string)
-								user, err := db.FindUserByJWT(email, issuer, userid)
-								if err != nil {
+								id := claims["id"].(string)
+								primID, _ := primitive.ObjectIDFromHex(id)
+
+								user := models.UserModel{}
+								q := bson.M{"_id": primID, "provider": issuer}
+								ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+								if err := db.Users.FindOne(ctx, q).Decode(&user); err != nil {
 									authError(c, ErrForbidden)
 								}
-								c.Request = addToContext(c, utils.ProjectContextKeys.UserCtxKey, user)
+								c.Request = addToContext(c, utils.ProjectContextKeys.UserCtxKey, &user)
 								c.Next()
 
 							} else {

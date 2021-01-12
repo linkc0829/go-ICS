@@ -1,17 +1,16 @@
 package auth
 
 import (
-	"context"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
-	"github.com/linkc0829/go-ics/internal/db/mongodb"
 	"github.com/linkc0829/go-ics/internal/handlers/secret"
-	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-ics/pkg/utils/datasource"
 
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
@@ -39,7 +38,7 @@ func Begin() gin.HandlerFunc {
 }
 
 // CallBack callback to complete auth provider flow
-func CallBack(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
+func CallBack(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// You have to add value context with provider name to get provider name in GetProviderName method
 		c.Request = AddProviderToContext(c, c.Param("provider"))
@@ -52,36 +51,27 @@ func CallBack(cfg *utils.ServerConfig, db *mongodb.MongoDB) gin.HandlerFunc {
 		}
 		log.Println("CallBack CompleteUserAuth")
 
-		u, err := db.FindUserByJWT(user.Email, user.Provider, user.UserID)
+		u, err := db.Mongo.FindUserByJWT(user.Email, user.Provider, user.UserID)
 		// logger.Infof("gothUser: %#v", user)
 		if err != nil {
-			if u, err = db.CreateUserFromGoth(&user); err != nil {
+			if u, err = db.Mongo.CreateUserFromGoth(&user); err != nil {
 				log.Println("[Auth.CallBack.UserLoggedIn.UpsertUserProfile.Error]: " + err.Error())
 				c.AbortWithError(http.StatusInternalServerError, err)
+				return
 			}
 		}
 
 		log.Println("[Auth.CallBack.UserLoggedIn]: ", u.ID)
-
 		//generate new token pair
-		accToken, tokenExpiry, refreshToken, err := secret.CreateTokenPair(cfg, u)
+		accToken, tokenExpiry, refreshToken, err := secret.CreateTokenPair(cfg, u.ID.Hex(), user.Provider)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
+		//update redis
+		refExp, _ := strconv.Atoi(cfg.JWT.RefreshTokenExpire[:len(cfg.JWT.RefreshTokenExpire)-1])
+		db.Redis.Do("Set", u.ID.Hex(), refreshToken, "EX", refExp*3600)
 
-		//update DB
-		q := bson.M{"_id": u.ID}
-		update := bson.M{"$set": bson.M{"refreshToken": refreshToken}}
-		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-		_, err = db.Users.UpdateOne(ctx, q, update)
-
-		//set token
-		// json := gin.H{
-		// 	"type":         "Bearer",
-		// 	"token":        accToken,
-		// 	"token_expiry": tokenExpiry,
-		// }
-		//set token
 		data := struct {
 			TokenType   string
 			Token       string
