@@ -21,7 +21,7 @@ func RegisterRoutes(cfg *utils.ServerConfig, r *gin.Engine, db *datasource.DB) {
 }
 
 //Run will steup the routes and start the server
-func Run(serverconf *utils.ServerConfig, db *datasource.DB) {
+func SetupServer(serverconf *utils.ServerConfig, db *datasource.DB) *gin.Engine {
 
 	r := gin.Default()
 
@@ -37,5 +37,7 @@ func Run(serverconf *utils.ServerConfig, db *datasource.DB) {
 	// Run the server
 	// Print out and exit(1) to the OS if the server cannot run
 	log.Fatal(r.Run(serverconf.ListenEndpoint()))
+
+	return r
 
 }

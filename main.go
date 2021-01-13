@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/linkc0829/go-ics/internal/db/mongodb"
@@ -11,9 +12,11 @@ import (
 	"github.com/linkc0829/go-ics/pkg/utils/datasource"
 )
 
-func main() {
+var serverconf *utils.ServerConfig
 
-	var serverconf = &utils.ServerConfig{
+func init() {
+
+	serverconf = &utils.ServerConfig{
 		Host:          utils.MustGet("SERVER_HOST"),
 		Port:          utils.MustGet("SERVER_PORT"),
 		URISchema:     utils.MustGet("SERVER_URI_SCHEMA"),
@@ -53,6 +56,9 @@ func main() {
 			},
 		},
 	}
+}
+
+func main() {
 
 	mongoDB := mongodb.ConnectMongoDB(serverconf)
 	defer mongodb.CloseMongoDB(mongoDB)
@@ -69,5 +75,24 @@ func main() {
 		Redis:  redis,
 	}
 
-	server.Run(serverconf, db)
+	server.SetupServer(serverconf, db).Run()
+}
+
+//helper function for testing
+func getServer() http.Handler {
+	mongoDB := mongodb.ConnectMongoDB(serverconf)
+	defer mongodb.CloseMongoDB(mongoDB)
+
+	sqlite := sqlitedb.ConnectSqlite()
+	defer sqlitedb.CloseSqlite(sqlite)
+
+	redis := redisdb.ConnectRedis(serverconf)
+	defer redisdb.CloseRedis(redis)
+
+	db := &datasource.DB{
+		Mongo:  mongoDB,
+		Sqlite: sqlite,
+		Redis:  redis,
+	}
+	return server.SetupServer(serverconf, db)
 }
