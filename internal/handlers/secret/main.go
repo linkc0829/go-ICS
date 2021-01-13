@@ -26,6 +26,7 @@ type Claims struct {
 }
 
 type RefClaims struct {
+	ID string `json:"id"`
 	jwt.StandardClaims
 }
 
@@ -189,7 +190,7 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.Handler
 			return
 		}
 		claims := token.Claims.(jwt.MapClaims)
-		ID := claims["jti"].(string)
+		ID := claims["id"].(string)
 		issuer := claims["iss"].(string)
 		if err != nil {
 			ErrorWriter(c, http.StatusUnauthorized, errors.New("invalid object id"))
@@ -251,6 +252,7 @@ func CreateTokenPair(conf *utils.ServerConfig, id string, issuer string) (string
 	claims := Claims{
 		ID: id,
 		StandardClaims: jwt.StandardClaims{
+			Id:        primitive.NewObjectID().Hex(),
 			Issuer:    issuer,
 			IssuedAt:  time.Now().UTC().Unix(),
 			NotBefore: time.Now().UTC().Unix(),
@@ -268,8 +270,9 @@ func CreateTokenPair(conf *utils.ServerConfig, id string, issuer string) (string
 	//RefreshToken, https://bit.ly/3r7753B
 	refExp, _ := time.ParseDuration(conf.JWT.RefreshTokenExpire)
 	rToken := jwt.NewWithClaims(jwt.GetSigningMethod(conf.JWT.Algorithm), RefClaims{
+		ID: id,
 		StandardClaims: jwt.StandardClaims{
-			Id:        id,
+			Id:        primitive.NewObjectID().Hex(),
 			Issuer:    issuer,
 			ExpiresAt: time.Now().Add(refExp).UTC().Unix(),
 		},

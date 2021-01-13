@@ -36,7 +36,7 @@ func SetupServer(serverconf *utils.ServerConfig, db *datasource.DB) *gin.Engine 
 
 	// Run the server
 	// Print out and exit(1) to the OS if the server cannot run
-	log.Fatal(r.Run(serverconf.ListenEndpoint()))
+	//log.Fatal(r.Run(serverconf.ListenEndpoint()))
 
 	return r
 
