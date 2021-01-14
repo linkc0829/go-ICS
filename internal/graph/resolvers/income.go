@@ -89,7 +89,7 @@ func (r *mutationResolver) DeleteIncome(ctx context.Context, id string) (bool, e
 	}
 	q := bson.M{"_id": primID}
 	result := dbModel.IncomeModel{}
-	if err := r.DB.Cost.FindOne(ctx, q).Decode(&result); err != nil {
+	if err := r.DB.Income.FindOne(ctx, q).Decode(&result); err != nil {
 		return false, err
 	}
 
@@ -120,7 +120,7 @@ func (r *mutationResolver) VoteIncome(ctx context.Context, id string) (int, erro
 		return -1, err
 	}
 	owner := dbModel.UserModel{}
-	if err := r.DB.Cost.FindOne(ctx, bson.M{"_id": income.Owner}).Decode(&owner); err != nil {
+	if err := r.DB.Income.FindOne(ctx, bson.M{"_id": income.Owner}).Decode(&owner); err != nil {
 		return -1, err
 	}
 	//deny private
