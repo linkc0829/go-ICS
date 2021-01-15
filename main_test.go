@@ -71,7 +71,7 @@ func init() {
 	costIDs = make(map[string]bool)
 }
 
-func TestRestAPI(t *testing.T) {
+func TestGraphQLAPI(t *testing.T) {
 
 	mongoDB := mongodb.ConnectMongoDB(serverconf)
 	defer mongodb.CloseMongoDB(mongoDB)
@@ -416,7 +416,7 @@ func TestRestAPI(t *testing.T) {
 				t.Errorf("Vote " + income.Description + " failed")
 			}
 
-			//second vote
+			//second vote should reset vote
 			resp, err = client.Do(req)
 			if err != nil {
 				t.Fatalf("Expected no error, got %v", err)

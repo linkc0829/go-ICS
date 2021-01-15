@@ -1,0 +1,15 @@
+workspace:
+    base: github.com
+    path: linkc0829/go-ics
+
+clone:
+    git:
+        image: plugins/git
+        depth: 50
+        tags: true
+
+pipeline:
+    testing:
+        image: golang:1.15
+        commands:
+            -go test -v .

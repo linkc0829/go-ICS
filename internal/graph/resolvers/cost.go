@@ -120,7 +120,7 @@ func (r *mutationResolver) VoteCost(ctx context.Context, id string) (int, error)
 		return -1, err
 	}
 	owner := dbModel.UserModel{}
-	if err := r.DB.Cost.FindOne(ctx, bson.M{"_id": cost.Owner}).Decode(&owner); err != nil {
+	if err := r.DB.Users.FindOne(ctx, bson.M{"_id": cost.Owner}).Decode(&owner); err != nil {
 		return -1, err
 	}
 	//deny private
