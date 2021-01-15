@@ -1,6 +1,5 @@
 workspace:
-    base: github.com
-    path: linkc0829/go-ics
+    path: /github.com/linkc0829/go-ics
 
 clone:
     git:
