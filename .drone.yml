@@ -12,3 +12,4 @@ pipeline:
         image: golang:1.15
         commands:
             - go test -v .
+            
