@@ -10,6 +10,7 @@ clone:
 pipeline:
     testing:
         image: golang:1.15
+        secrets: [MONGO_CONNECTION_DSN, REDIS_PWD]
         environment:
             - N_MODE=debug
             - SERVER_URI_SCHEMA=http://
@@ -20,8 +21,8 @@ pipeline:
             - GQL_SERVER_GRAPHQL_PATH=/graph
             - GQL_SERVER_GRAPHQL_PLAYGROUND_PATH=/playground
             - GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED=true
+            - REDIS_ENDPOINT=redis-14546.c1.asia-northeast1-1.gce.cloud.redislabs.com:14546
             - MONGO_CONNECTION_DSN=${mongo_connection_dsn}
-            - REDIS_PWD=${redis_pwd}
             - SESSION_SECRET={supersecret}
             - AUTH_API_KEY_HEADER=x-api-key
             - AUTH_JWT_SECRET={JWTsecret}
@@ -30,3 +31,7 @@ pipeline:
             - AUTH_JWT_REFRESHTOKEN_EXPIRE=72h
         commands: 
             - go test -v .
+    
+    build_linux64:
+        image: golang:1.15
+
