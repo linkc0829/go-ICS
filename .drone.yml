@@ -30,5 +30,5 @@ pipeline:
             - AUTH_JWT_SIGNING_ALGORITHM: HS512
             - AUTH_JWT_ACCESSTOKEN_EXPIRE: 1h
             - AUTH_JWT_REFRESHTOKEN_EXPIRE: 72h
-        commands:
+        commands: 
             - go test -v .
