@@ -29,9 +29,17 @@ pipeline:
             - AUTH_JWT_SIGNING_ALGORITHM=HS512
             - AUTH_JWT_ACCESSTOKEN_EXPIRE=1h
             - AUTH_JWT_REFRESHTOKEN_EXPIRE=72h
+            # Google Config
+            - PROVIDER_GOOGLE_KEY={yourappkey.apps.googleusercontent.com}
+            - PROVIDER_GOOGLE_SECRET={googlesecret}
+            - PROVIDER_GOOGLE_SCOPES=email,profile,openid
+            # Auth0 Config
+            - PROVIDER_AUTH0_KEY=wTo1ueSBrl4LL0tuaDJDHpj0pRec1abK
+            - PROVIDER_AUTH0_SECRET=gxSOvW_wq07fFCZTwbtfFdhU3SuDw08KnKRXstuKJ-fP40pJfhE0y34YcKEQkqWj
+            - PROVIDER_AUTH0_SECRET=gxSOvW_wq07fFCZTwbtfFdhU3SuDw08KnKRXstuKJ-fP40pJfhE0y34YcKEQkqWj
+            - PROVIDER_AUTH0_DOMAIN=dev-3qsby8xq.us.auth0.com
+            - PROVIDER_AUTH0_SCOPES=email,profile,openid
         commands: 
             - go test -v .
-    
-    build_linux64:
-        image: golang:1.15
+
 
