@@ -20,10 +20,8 @@ pipeline:
             GQL_SERVER_GRAPHQL_PATH=/graph
             GQL_SERVER_GRAPHQL_PLAYGROUND_PATH=/playground
             GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED=true
-            MONGO_CONNECTION_DSN: 
-                from_secret: mongo_connection_dsn
-            REDIS_PWD: 
-                from_secret: redis_pwd
+            MONGO_CONNECTION_DSN=${mongo_connection_dsn}
+            REDIS_PWD=${redis_pwd}
             SESSION_SECRET={supersecret}
             AUTH_API_KEY_HEADER=x-api-key
             AUTH_JWT_SECRET={JWTsecret}
