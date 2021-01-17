@@ -143,7 +143,7 @@ func TestGraphQLAPI(t *testing.T) {
 	}
 	for _, tt := range createIncomeInputs {
 		createIncomeInput := tt
-		t.Run(createIncomeInput.Description, func(t *testing.T) {
+		t.Run("create_"+createIncomeInput.Description, func(t *testing.T) {
 			//t.Parallel()
 			query := `mutation ($createIncomeInput: CreateIncomeInput!){
 				createIncome(input: $createIncomeInput){
@@ -213,6 +213,8 @@ func TestGraphQLAPI(t *testing.T) {
 				Privacy:     models.Privacy(out.Data.CreateIncome.Privacy),
 				OccurDate:   out.Data.CreateIncome.OccurDate,
 			}
+			log.Println(outCheck)
+			log.Println(createIncomeInput)
 			if outCheck != createIncomeInput {
 				t.Errorf("input output mismatch")
 			}
@@ -495,36 +497,6 @@ func TestGraphQLAPI(t *testing.T) {
 			}
 		})
 	}
-
-	// content, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	t.Fatalf("Expected no error, got %v", err)
-	// }
-	// fmt.Println(string(content))
-
-	// client := &http.Client{}
-	// req, _ = http.NewRequest("POST", ts.URL+"/api/v1/auth/ics/signup", reader)
-
-	// res, err := client.Get(ts.URL + "/api/v1/auth/ics/refresh_token")
-	// if err != nil {
-	// 	t.Fatalf("Expected no error, got %v", err)
-	// }
-	// if res.StatusCode != 200 {
-	// 	t.Fatalf("Expected status code 200, got %v", res.StatusCode)
-	// }
-
-	// token = struct{
-	// 	token string
-	// 	token_expiry string
-	// 	token_type string
-	// }{
-	// 	token: res.Body.token,
-	// 	token_expiry: res.Body.token_expiry,
-
-	// }
-}
-
-func TestGraphAPI(t *testing.T) {
 
 }
 
