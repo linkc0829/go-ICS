@@ -144,7 +144,7 @@ func TestGraphQLAPI(t *testing.T) {
 	for _, tt := range createIncomeInputs {
 		createIncomeInput := tt
 		t.Run("create_"+createIncomeInput.Description, func(t *testing.T) {
-			t.Parallel()
+			//t.Parallel()
 			query := `mutation ($createIncomeInput: CreateIncomeInput!){
 				createIncome(input: $createIncomeInput){
 					id
