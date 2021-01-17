@@ -10,25 +10,5 @@ clone:
 pipeline:
     testing:
         image: golang:1.15
-        environment:
-            - N_MODE: debug
-            - SERVER_URI_SCHEMA: http://
-            - SERVER_HOST: localhost
-            - SERVER_PORT: 8080
-            - SERVER_PATH_VERSION: v1
-            - SERVER_STATIC_PATH: public/
-            - GQL_SERVER_GRAPHQL_PATH: /graph
-            - GQL_SERVER_GRAPHQL_PLAYGROUND_PATH: /playground
-            - GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED: true
-            - MONGO_CONNECTION_DSN: 
-                from_secret: mongo_connection_dsn
-            - REDIS_PWD: 
-                from_secret: redis_pwd
-            - SESSION_SECRET: {supersecret}
-            - AUTH_API_KEY_HEADER: x-api-key
-            - AUTH_JWT_SECRET: {JWTsecret}
-            - AUTH_JWT_SIGNING_ALGORITHM: HS512
-            - AUTH_JWT_ACCESSTOKEN_EXPIRE: 1h
-            - AUTH_JWT_REFRESHTOKEN_EXPIRE: 72h
         commands: 
             - go test -v .
