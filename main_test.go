@@ -60,7 +60,7 @@ func init() {
 
 		createCostInput := models.CreateCostInput{
 			Amount:      1111 * (i + 1),
-			OccurDate:   time.Now().Add(add),
+			OccurDate:   time.Now().Add(add).Truncate(time.Second),
 			Category:    models.CostCategoryInvestment,
 			Description: "Cost no." + strconv.Itoa(i),
 			Privacy:     models.PrivacyFriend,
@@ -211,7 +211,7 @@ func TestGraphQLAPI(t *testing.T) {
 				Category:    models.IncomeCategory(out.Data.CreateIncome.Category),
 				Description: out.Data.CreateIncome.Description,
 				Privacy:     models.Privacy(out.Data.CreateIncome.Privacy),
-				OccurDate:   out.Data.CreateIncome.OccurDate,
+				OccurDate:   out.Data.CreateIncome.OccurDate.Truncate(time.Second),
 			}
 			log.Println(outCheck)
 			log.Println(createIncomeInput)
