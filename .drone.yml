@@ -10,6 +10,7 @@ clone:
 pipeline:
     testing:
         image: golang:1.15
+        environment:
+            from_secret: env
         commands:
             - go test -v .
-            
