@@ -31,7 +31,7 @@ var (
 	myCosts            []portfolio
 	incomeIDs          map[string]bool
 	costIDs            map[string]bool
-	N                  int = 10
+	N                  int = 1
 )
 
 type portfolio struct {
