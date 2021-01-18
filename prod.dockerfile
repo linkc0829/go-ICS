@@ -13,7 +13,11 @@ FROM ci AS build-env
 
 RUN go mod download
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix \
+RUN sudo apt-get install g++-arm-linux-gnueabi
+RUN sudo apt-get install gcc-arm-linux-gnueabi
+
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=arm CC=arm-linux-gnueabi-gcc \
+    go build -a -installsuffix \
     cgo -ldflags '-extldflags "-static"' -o server ./cmd/ics/
 
 FROM alpine AS prod
