@@ -57,11 +57,13 @@ func SignupHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 		_, err := db.Mongo.FindUserByJWT(email, provider, userID)
 		if err == nil {
 			ErrorWriter(c, http.StatusBadRequest, errors.New("ics signup: user exists"))
+			return
 		}
 		//encript password
 		password, err = encriptPassword(password)
 		if err != nil {
 			ErrorWriter(c, http.StatusInternalServerError, errors.New("ics signup: password encripted failed, server error."))
+			return
 		}
 
 		newUser := &models.UserModel{
@@ -81,6 +83,7 @@ func SignupHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 		token, tokenExpiry, refreshToken, err := CreateTokenPair(cfg, newUser.ID.Hex(), provider)
 		if err != nil {
 			ErrorWriter(c, http.StatusInternalServerError, err)
+			return
 		}
 
 		//add to redis
@@ -92,6 +95,7 @@ func SignupHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 		_, err = db.Mongo.Users.InsertOne(ctx, newUser)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
 
 		//set token

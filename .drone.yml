@@ -10,19 +10,22 @@ clone:
 pipeline:
     testing:
         image: golang:1.15
-        secrets: [MONGO_CONNECTION_DSN, REDIS_PWD]
+        secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD]
         environment:
-            - N_MODE=debug
+            #Web config
+            - GIN_MODE=debug
             - SERVER_URI_SCHEMA=http://
             - SERVER_HOST=localhost
             - SERVER_PORT=8080
             - SERVER_PATH_VERSION=v1
             - SERVER_STATIC_PATH=public/
+            #GraphQL Server config
             - GQL_SERVER_GRAPHQL_PATH=/graph
             - GQL_SERVER_GRAPHQL_PLAYGROUND_PATH=/playground
             - GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED=true
+            #Redis Config
             - REDIS_ENDPOINT=redis-14546.c1.asia-northeast1-1.gce.cloud.redislabs.com:14546
-            - MONGO_CONNECTION_DSN=${mongo_connection_dsn}
+            # Auth config (Goth, JWT, etc)
             - SESSION_SECRET={supersecret}
             - AUTH_API_KEY_HEADER=x-api-key
             - AUTH_JWT_SECRET={JWTsecret}
