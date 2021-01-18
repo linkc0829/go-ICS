@@ -2,6 +2,8 @@ module github.com/linkc0829/go-ics
 
 go 1.15
 
+replace gopkg.in/urfave/cli.v2 => github.com/urfave/cli/v2 v2.1.1
+
 require (
 	9fans.net/go v0.0.2 // indirect
 	github.com/99designs/gqlgen v0.12.0
