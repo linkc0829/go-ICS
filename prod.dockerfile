@@ -20,7 +20,6 @@ FROM alpine AS prod
 RUN apk --no-cache add ca-certificates
 
 COPY --from=build-env build/server ./ics/
-COPY ./views ./views
-COPY ./public ./public
+COPY . ./
 
 CMD ["./ics/server"]
