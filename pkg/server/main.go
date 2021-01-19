@@ -32,6 +32,7 @@ func SetupServer(serverconf *utils.ServerConfig, db *datasource.DB) *gin.Engine 
 	// Inform the user where the server is listening
 	r.LoadHTMLGlob("views/*")
 	r.Static(serverconf.StaticPath, "./public")
+	r.StaticFile("/favicon.ico", "./favicon.ico")
 
 	// HTTPS
 	// To generate a development cert and key, run the following from your *nix terminal:
