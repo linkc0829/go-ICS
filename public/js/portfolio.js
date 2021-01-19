@@ -70,7 +70,6 @@ async function initProfile(jwt){
   .set('Authorization', tokenString)
   .send({'Query': query,})
   .then(function (res) {
-      console.log(res.body)
       let out = res.body.data.me.friends;
       //init addFriend button
       if(res.body.data.me.id != id){
@@ -101,14 +100,17 @@ async function initProfile(jwt){
       document.querySelector('#myFriends').href = '/friends/' + myID;
       document.querySelector('#myFollowers').href = '/followers/' + myID;
 
-      if(url[3] == 'profile'){
+      if(url[3] == 'profile' || url[3] == 'history'){
         getUserProfile(currentUser);
       }
 
       let date = new Date();
       let date_month = date.getMonth()+1;
       let occurDate = date.getFullYear() + '-' + date_month + '-' + date.getDate();
-      document.querySelector('#occurDate').min = occurDate;
+
+      if(url[3] != 'history'){
+        document.querySelector('#occurDate').min = occurDate;
+      }
 
       document.querySelector('#login').style.display = 'none';
       document.querySelector('#signup').style.display = 'none';
@@ -280,19 +282,19 @@ function isLogin(){
 
 var currentUser = {};
 var url = window.location.href.split('/');
+var last = url[url.length-1];
 //when open new window, try to get new access token
 if(typeof(jwt.token) == 'undefined' && typeof(jwt.token_type) == 'undefined'){
   initProfile(jwt);
 }
 else {
   isLogin();
-  let last = url[url.length-1];
   if(last.length == 24){
     getUserProfile(currentUser);
   }
 }
 
-if(url[3] == ''){
+if(last.length != 24){
   document.querySelector('#profile').style.display = 'none';
   document.querySelector('#history').style.display = 'none';
   document.querySelector('#addFriend').style.display = 'none';
@@ -334,9 +336,6 @@ function reloadHistory(range){
   initHistory(currentUser, COST, range);
   disableUpdate();
 }
-
-
-
 
 function casePortfolioType(type, upper){
   if(type == COST){

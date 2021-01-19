@@ -11,6 +11,9 @@
     Session.set('token', document.querySelector('#token').innerText);
     Session.set('token_type', document.querySelector('#token_type').innerText);
     Session.set('token_expiry', document.querySelector('#token_expiry').innerText);
+    let url = document.querySelector('#redirect').innerText.split('/');
+    let id = url[url.length-1];
+    Session.set('myID', id);
     let redirect = document.querySelector('#redirect').innerText
     window.location.replace(redirect);
 </script>

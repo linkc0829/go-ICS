@@ -51,7 +51,7 @@ type AuthProvider struct {
 
 //ListenEndpoint returns the endpoint string
 func (s *ServerConfig) ListenEndpoint() string {
-	if s.Port == "80" {
+	if s.Port == "80" || s.Port == "443" {
 		return s.Host
 	}
 	return s.Host + ":" + s.Port
