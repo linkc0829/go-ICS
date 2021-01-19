@@ -115,7 +115,7 @@ func TestGraphQLAPI(t *testing.T) {
 	}
 
 	r := server.SetupServer(serverconf, db)
-	ts := httptest.NewServer(r)
+	ts := httptest.NewTLSServer(r)
 	defer ts.Close()
 
 	log.Println("Test on: ", ts.URL)

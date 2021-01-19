@@ -70,7 +70,7 @@ async function initProfile(jwt){
   .set('Authorization', tokenString)
   .send({'Query': query,})
   .then(function (res) {
-      
+      console.log(res.body)
       let out = res.body.data.me.friends;
       //init addFriend button
       if(res.body.data.me.id != id){
@@ -286,7 +286,8 @@ if(typeof(jwt.token) == 'undefined' && typeof(jwt.token_type) == 'undefined'){
 }
 else {
   isLogin();
-  if(url[3] != ''){
+  let last = url[url.length-1];
+  if(last.length == 24){
     getUserProfile(currentUser);
   }
 }

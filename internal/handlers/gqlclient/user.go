@@ -216,7 +216,6 @@ func AddFriend(cfg *utils.ServerConfig) gin.HandlerFunc {
 //GetUserIncome handle request GET /user/:id/income/
 func GetUserIncome(cfg *utils.ServerConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		client := newClient(c, cfg)
 		ID := c.Param("id")
 		var query struct {

@@ -110,7 +110,11 @@ func SignupHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 			TokenExpiry: tokenExpiry,
 			Redirect:    "/profile/" + newUser.ID.Hex(),
 		}
-		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
+		security := false
+		if utils.MustGet("SERVER_URI_SCHEMA") == "https://" {
+			security = true
+		}
+		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", security, true)
 		c.HTML(http.StatusOK, "callback", data)
 	}
 
@@ -161,7 +165,11 @@ func LoginHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 			TokenExpiry: tokenExpiry,
 			Redirect:    "/profile/" + user.ID.Hex(),
 		}
-		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
+		security := false
+		if utils.MustGet("SERVER_URI_SCHEMA") == "https://" {
+			security = true
+		}
+		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", security, true)
 		c.HTML(http.StatusOK, "callback", data)
 
 	}
@@ -230,7 +238,11 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.Handler
 			"token":        accToken,
 			"token_expiry": tokenExpiry.Local(),
 		}
-		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", false, true)
+		security := false
+		if utils.MustGet("SERVER_URI_SCHEMA") == "https://" {
+			security = true
+		}
+		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", security, true)
 		c.JSON(http.StatusOK, json)
 
 	}

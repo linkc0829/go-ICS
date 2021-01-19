@@ -1,8 +1,11 @@
 package gqlclient
 
 import (
+	"context"
 	"errors"
 	"net/http"
+
+	"crypto/tls"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linkc0829/go-ics/pkg/utils"
@@ -17,7 +20,14 @@ func newClient(c *gin.Context, cfg *utils.ServerConfig) *graphql.Client {
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: accessToken},
 	)
-	httpClient := oauth2.NewClient(c, src)
+	//Skip verify SSL certificate
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	sslcli := &http.Client{Transport: tr}
+	ctx := context.WithValue(c, oauth2.HTTPClient, sslcli)
+
+	httpClient := oauth2.NewClient(ctx, src)
 
 	gqlServerPath := cfg.SchemaVersioningEndpoint(cfg.GraphQL.Path)
 	return graphql.NewClient(gqlServerPath, httpClient)

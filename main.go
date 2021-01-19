@@ -75,7 +75,7 @@ func main() {
 		Redis:  redis,
 	}
 
-	server.SetupServer(serverconf, db).Run()
+	server.SetupServer(serverconf, db).RunTLS(":8080", "cert.pem", "key.pem")
 }
 
 //helper function for testing
