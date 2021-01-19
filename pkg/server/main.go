@@ -51,8 +51,8 @@ func SetupServer(serverconf *utils.ServerConfig, db *datasource.DB) *gin.Engine 
 func TlsHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		secureMiddleware := secure.New(secure.Options{
-			SSLRedirect: true,
-			SSLHost:     "localhost:8080",
+			//SSLRedirect: true,
+			SSLHost: "localhost:8080",
 		})
 		err := secureMiddleware.Process(c.Writer, c.Request)
 
