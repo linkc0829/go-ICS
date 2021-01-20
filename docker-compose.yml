@@ -1,0 +1,34 @@
+version: "3.7"
+
+service: 
+  ics:
+    container_name: ics
+    build: .
+    env_file: 
+      - .env
+    ports:
+      - "8080:8080"
+      
+  mongo:
+    container_name: mongodb
+    image: mongo:4.4
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./internal/db/mongodb/data:/data/mongo
+    env_file:
+      - .env
+
+  redis:
+    container_name: redisdb
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes: 
+      - ./internal/db/redisdb/data:/data/redis
+    env_file:
+      - .env
+    command: redis-server --appendonly yes --requirepass $REDIS_PWD
+
+  
