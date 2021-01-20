@@ -1,9 +1,11 @@
 version: "3.7"
 
-service: 
+services: 
   ics:
     container_name: ics
-    build: .
+    build: 
+      context: .
+      dockerfile: docker/prod.dockerfile
     env_file: 
       - .env
     ports:
