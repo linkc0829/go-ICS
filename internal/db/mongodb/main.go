@@ -28,8 +28,9 @@ func ConnectMongoDB(cfg *utils.ServerConfig) *MongoDB {
 
 	mongo_admin := utils.MustGet("MONGO_ADMIN_USERNAME")
 	mongo_admin_pwd := utils.MustGet("MONGO_ADMIN_PASSWORD")
+	mongo_host := utils.MustGet("MONGO_HOST")
 
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://"+mongo_admin+":"+mongo_admin_pwd+"@mongo/test?authSource=admin"))
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://"+mongo_admin+":"+mongo_admin_pwd+"@"+mongo_host+"/test?authSource=admin"))
 	if err != nil {
 		log.Fatal(err)
 	}
