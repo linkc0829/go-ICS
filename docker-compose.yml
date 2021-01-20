@@ -6,8 +6,6 @@ services:
     build: 
       context: .
       dockerfile: docker/prod.dockerfile
-    volumns:
-      - ./:./ics
     env_file: 
       - .env
     ports:
