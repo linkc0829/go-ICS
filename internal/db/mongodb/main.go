@@ -26,7 +26,7 @@ type MongoDB struct {
 //ConnectDB will build connection to MongoDB Atlas
 func ConnectMongoDB(cfg *utils.ServerConfig) *MongoDB {
 
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(cfg.MongoDB.DSN))
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://admin:123456@mongo/test"))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -8,7 +8,7 @@ import (
 )
 
 func ConnectRedis(cfg *utils.ServerConfig) redis.Conn {
-	conn, err := redis.Dial("tcp", cfg.Redis.EndPoint, redis.DialPassword(cfg.Redis.PWD))
+	conn, err := redis.Dial("tcp", "redis", redis.DialPassword(cfg.Redis.PWD))
 	if err != nil {
 		log.Fatal(err)
 	}
