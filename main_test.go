@@ -149,6 +149,7 @@ func TestGraphQLAPI(t *testing.T) {
 		test := &dbModel.UserModel{}
 		mongoDB.Users.FindOne(ctx, bson.M{"_id": result}).Decode(test)
 		log.Println(test)
+		log.Println(admin)
 
 	})
 
