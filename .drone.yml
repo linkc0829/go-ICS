@@ -70,7 +70,7 @@ steps:
   commands: 
   - make test
 
-- name: build_linux_amd64
+- name: build_image
   image: golang:1.15-alpine
   environment:
     SESSION_SECRET:
@@ -92,31 +92,7 @@ steps:
   commands:
   - apk update && apk upgrade && apk add --no-cache git && rm -rf /var/cache/apk/*
   - apk add make
-  - make build_linux_amd64
-
-- name: build_linux_i386
-  image: golang:1.15-alpine
-  environment:
-    SESSION_SECRET:
-        from_secret: SESSION_SECRET
-    AUTH_JWT_SECRET:
-        from_secret: AUTH_JWT_SECRET
-    MONGO_CONNECTION_DSN:
-      from_secret: MONGO_CONNECTION_DSN
-    MONGO_INITDB_ROOT_USERNAME: 
-        from_secret: MONGO_INITDB_ROOT_USERNAME
-    MONGO_INITDB_ROOT_PASSWORD: 
-        from_secret: MONGO_INITDB_ROOT_PASSWORD
-    REDIS_PWD: 
-        from_secret: REDIS_PWD
-    PROVIDER_AUTH0_KEY:
-        from_secret: PROVIDER_AUTH0_KEY
-    PROVIDER_AUTH0_SECRET:
-        from_secret: PROVIDER_AUTH0_SECRET
-  commands:
-  - apk update && apk upgrade && apk add --no-cache git && rm -rf /var/cache/apk/*
-  - apk add gcc g++ make
-  - make build_linux_i386
+  - make build_image
 
 services:
 - name: mongo
