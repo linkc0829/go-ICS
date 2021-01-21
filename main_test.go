@@ -141,11 +141,12 @@ func TestGraphQLAPI(t *testing.T) {
 			Role:            dbModel.ADMIN,
 		}
 		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-		_, err := mongoDB.Users.InsertOne(ctx, newUser)
+		result, err := mongoDB.Users.InsertOne(ctx, newUser)
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
-		log.Println(newUser)
+
+		log.Println(result)
 
 	})
 
