@@ -71,7 +71,7 @@ steps:
   - make test
 
 - name: build_linux_amd64
-  image: golang:1.15
+  image: golang:1.15-alpine
   environment:
     SESSION_SECRET:
         from_secret: SESSION_SECRET
@@ -93,7 +93,7 @@ steps:
   - make build_linux_amd64
 
 - name: build_linux_i386
-  image: golang:1.15
+  image: golang:1.15-alpine
   environment:
     SESSION_SECRET:
         from_secret: SESSION_SECRET
