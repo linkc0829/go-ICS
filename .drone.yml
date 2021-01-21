@@ -126,6 +126,8 @@ services:
         from_secret: MONGO_INITDB_ROOT_USERNAME
     MONGO_INITDB_ROOT_PASSWORD: 
         from_secret: MONGO_INITDB_ROOT_PASSWORD
+  commands:
+  - sh scripts/mongoCreateAdmin.sh
 
 - name: redis
   image: redis:alpine
