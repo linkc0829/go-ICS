@@ -25,8 +25,7 @@ environment:
     GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED: true
     #Mongo Config
     MONGO_CONNECTION_DSN:
-      from_secret: MONGO_CONNECTION_DSN
-    
+      from_secret: mongo_connection_dsn
     #Redis Config
     REDIS_ENDPOINT: redis-14546.c1.asia-northeast1-1.gce.cloud.redislabs.com:14546
     # Auth config (Goth, JWT, etc)
