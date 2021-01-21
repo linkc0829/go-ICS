@@ -3,7 +3,7 @@ FROM golang:1.15-alpine as base
 
 FROM base AS ci
 
-RUN apk update && apk upgrade && apk add --no-cache git
+RUN apk update && apk upgrade && apk add --no-cache git && rm -rf /var/cache/apk/*
 RUN mkdir /build
 ADD . /build/
 WORKDIR /build

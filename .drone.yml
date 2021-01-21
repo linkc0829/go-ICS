@@ -68,11 +68,10 @@ steps:
     PROVIDER_AUTH0_SECRET:
         from_secret: PROVIDER_AUTH0_SECRET
   commands: 
-  - go test -v .
+  - make test
 
 - name: build_linux_amd64
   image: golang:1.15
-  group: build
   environment:
     SESSION_SECRET:
         from_secret: SESSION_SECRET
@@ -95,7 +94,6 @@ steps:
 
 - name: build_linux_i386
   image: golang:1.15
-  group: build
   environment:
     SESSION_SECRET:
         from_secret: SESSION_SECRET
