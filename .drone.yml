@@ -127,7 +127,7 @@ services:
     MONGO_INITDB_ROOT_PASSWORD: 
         from_secret: MONGO_INITDB_ROOT_PASSWORD
   commands:
-  - sh scripts/mongoCreateAdmin.sh
+  - mongo --eval "var user = '$MONGO_INITDB_ROOT_USERNAME', pwd = '$MONGO_INITDB_ROOT_PASSWORD'" scripts/createAdmin.js
 
 - name: redis
   image: redis:alpine
