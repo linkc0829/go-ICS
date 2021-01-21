@@ -1,3 +1,7 @@
+kind: pipeline
+type: docker
+name: icsharing
+
 workspace:
     path: /github.com/linkc0829/go-ics
 
@@ -6,12 +10,6 @@ clone:
         image: plugins/git
         depth: 50
         tags: true
-
----
-
-kind: pipeline
-type: docker
-name: icsharing
 
 environment:
     #Web config
