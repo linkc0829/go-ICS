@@ -45,14 +45,14 @@ pipeline:
             - go test -v .
 
     build_linux_amd64:
-    image: golang:1.15
-    group: build
-    commands:
-      - make build_linux_amd64
+        image: golang:1.15
+        group: build
+        commands:
+        - make build_linux_amd64
 
-  build_linux_i386:
-    image: golang:1.15
-    group: build
-    commands:
-      - make build_linux_i386
+    build_linux_i386:
+        image: golang:1.15
+        group: build
+        commands:
+        - make build_linux_i386
 
