@@ -21,6 +21,7 @@ import (
 	"github.com/linkc0829/go-ics/internal/graph/models"
 	"github.com/linkc0829/go-ics/pkg/server"
 	"github.com/linkc0829/go-ics/pkg/utils/datasource"
+	"golang.org/x/crypto/bcrypt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -129,10 +130,18 @@ func TestGraphQLAPI(t *testing.T) {
 	client := ts.Client()
 
 	t.Run("create admin user", func(t *testing.T) {
+		hashPWD, err := bcrypt.GenerateFromPassword([]byte(admin.PWD), 10)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		pwd := string(hashPWD)
+		id := primitive.NewObjectID()
+		admin.ID = id.Hex()
+
 		newUser := &dbModel.UserModel{
-			ID:              primitive.NewObjectID(),
+			ID:              id,
 			UserID:          admin.UserID,
-			Password:        &admin.PWD,
+			Password:        &pwd,
 			Email:           admin.Email,
 			NickName:        &admin.UserID,
 			CreatedAt:       time.Now(),
@@ -142,14 +151,12 @@ func TestGraphQLAPI(t *testing.T) {
 			Role:            dbModel.ADMIN,
 		}
 		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-		result, err := mongoDB.Users.InsertOne(ctx, newUser)
+		_, err = mongoDB.Users.InsertOne(ctx, newUser)
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 		test := &dbModel.UserModel{}
-		mongoDB.Users.FindOne(ctx, bson.M{"_id": result}).Decode(test)
-		log.Println(test)
-		log.Println(admin)
+		mongoDB.Users.FindOne(ctx, bson.M{"_id": newUser.ID}).Decode(test)
 
 	})
 
@@ -1029,6 +1036,54 @@ func TestGraphQLAPI(t *testing.T) {
 		}
 		if out.Data.DeleteUser == false {
 			t.Errorf("Delete " + testUser.UserID + " failed")
+		}
+		//delete test admin
+		variables = map[string]interface{}{
+			"id": admin.ID,
+		}
+		send = struct {
+			Query     string                 `json:"query"`
+			Variables map[string]interface{} `json:"variables"`
+		}{
+			Query:     query,
+			Variables: variables,
+		}
+		sendJson, err = json.Marshal(send)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+
+		req, err = http.NewRequest("POST", ts.URL+"/api/v1/graph", bytes.NewBuffer(sendJson))
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		tokenString = tokenJson.Type + " " + tokenJson.Token
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", tokenString)
+		req.Header.Set("accept", "json")
+
+		resp, err = client.Do(req)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if resp.StatusCode != 200 {
+			t.Fatalf("Expected status code 200, got %v", resp.StatusCode)
+		}
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		out = struct {
+			Data struct {
+				DeleteUser bool
+			}
+		}{}
+		err = json.Unmarshal(body, &out)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if out.Data.DeleteUser == false {
+			t.Errorf("Delete " + admin.UserID + " failed")
 		}
 
 	})
