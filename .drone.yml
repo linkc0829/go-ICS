@@ -112,7 +112,7 @@ steps:
     PROVIDER_AUTH0_SECRET:
         from_secret: PROVIDER_AUTH0_SECRET
   commands:
-  - sudo apt-get install gcc-multilib g++-multilib
+  - apt-get install gcc-multilib g++-multilib
   - make build_linux_i386
 
 services:
