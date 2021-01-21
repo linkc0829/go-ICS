@@ -43,7 +43,7 @@ steps:
   image: golang:1.15
   secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
   environment:
-  - DEMO_MODE=on
+    DEMO_MODE: on
   commands: 
   - go test -v .
 
@@ -52,7 +52,7 @@ steps:
   group: build
   secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
   environment:
-  - DEMO_MODE=off
+    DEMO_MODE: off
   commands:
   - make build_linux_amd64
 
@@ -61,7 +61,7 @@ steps:
   group: build
   secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
   environment:
-  - DEMO_MODE=off
+    DEMO_MODE: off
   commands:
   - make build_linux_i386
 
