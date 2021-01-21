@@ -31,6 +31,6 @@ services:
       - ./data/db/redis:/data/redis
     env_file:
       - .env
-    command: redis-server --appendonly yes --requirepass ${REDIS_PWD}
+    command: redis-server --appendonly yes --requirepass $REDIS_PWD
 
   
