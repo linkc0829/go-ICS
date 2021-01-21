@@ -3,7 +3,7 @@ type: docker
 name: icsharing
 
 workspace:
-    path: /github.com/linkc0829/go-ics
+    path: /icsharing
 
 clone:
     git:
@@ -14,6 +14,7 @@ clone:
 environment:
     #Web config
     GIN_MODE: debug
+    DEMO_MODE: off
     SERVER_URI_SCHEMA: http://
     SERVER_HOST: localhost
     SERVER_PORT: 8080
@@ -24,10 +25,11 @@ environment:
     GQL_SERVER_GRAPHQL_PLAYGROUND_PATH: /playground
     GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED: true
     #Mongo Config
-    MONGO_INITDB_ROOT_USERNAME: root
-    MONGO_INITDB_ROOT_PASSWORD: mLHNGEAYfk6jMHTz
+    MONGO_HOST: mongo:27017    
+    MONGO_INITDB_DATABASE: users
     #Redis Config
     REDIS_ENDPOINT: redis-14546.c1.asia-northeast1-1.gce.cloud.redislabs.com:14546
+    REDIS_HOST: redis:6379
     # Auth config (Goth, JWT, etc)
     AUTH_API_KEY_HEADER: x-api-key
     AUTH_JWT_SIGNING_ALGORITHM: HS512
@@ -44,29 +46,79 @@ environment:
 steps:
 - name: testing
   image: golang:1.15
-  secrets: [REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
   environment:
-    DEMO_MODE: on
-    MONGO_CONNECTION_DSN:
-      from_secret: MONGO_CONNECTION_DSN
+    ADMIN_USERID:
+        from_secret: ADMIN_USERID
+    ADMIN_EMAIL:
+        from_secret: ADMIN_EMAIL
+    ADMIN_PWD:
+        from_secret: ADMIN_PWD
+    SESSION_SECRET:
+        from_secret: SESSION_SECRET
+    AUTH_JWT_SECRET:
+        from_secret: AUTH_JWT_SECRET
+    MONGO_INITDB_ROOT_USERNAME: 
+        from_secret: MONGO_INITDB_ROOT_USERNAME
+    MONGO_INITDB_ROOT_PASSWORD: 
+        from_secret: MONGO_INITDB_ROOT_PASSWORD
+    REDIS_PWD: 
+        from_secret: REDIS_PWD
+    PROVIDER_AUTH0_KEY:
+        from_secret: PROVIDER_AUTH0_KEY
+    PROVIDER_AUTH0_SECRET:
+        from_secret: PROVIDER_AUTH0_SECRET
   commands: 
   - go test -v .
 
 - name: build_linux_amd64
   image: golang:1.15
   group: build
-  secrets: [REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
   environment:
-    DEMO_MODE: off
+    SESSION_SECRET:
+        from_secret: SESSION_SECRET
+    AUTH_JWT_SECRET:
+        from_secret: AUTH_JWT_SECRET
+    MONGO_CONNECTION_DSN:
+      from_secret: MONGO_CONNECTION_DSN
+    MONGO_INITDB_ROOT_USERNAME: 
+        from_secret: MONGO_INITDB_ROOT_USERNAME
+    MONGO_INITDB_ROOT_PASSWORD: 
+        from_secret: MONGO_INITDB_ROOT_PASSWORD
+    REDIS_PWD: 
+        from_secret: REDIS_PWD
+    PROVIDER_AUTH0_KEY:
+        from_secret: PROVIDER_AUTH0_KEY
+    PROVIDER_AUTH0_SECRET:
+        from_secret: PROVIDER_AUTH0_SECRET
   commands:
   - make build_linux_amd64
 
 - name: build_linux_i386
   image: golang:1.15
   group: build
-  secrets: [REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
   environment:
-    DEMO_MODE: off
+    SESSION_SECRET:
+        from_secret: SESSION_SECRET
+    AUTH_JWT_SECRET:
+        from_secret: AUTH_JWT_SECRET
+    MONGO_CONNECTION_DSN:
+      from_secret: MONGO_CONNECTION_DSN
+    MONGO_INITDB_ROOT_USERNAME: 
+        from_secret: MONGO_INITDB_ROOT_USERNAME
+    MONGO_INITDB_ROOT_PASSWORD: 
+        from_secret: MONGO_INITDB_ROOT_PASSWORD
+    REDIS_PWD: 
+        from_secret: REDIS_PWD
+    PROVIDER_AUTH0_KEY:
+        from_secret: PROVIDER_AUTH0_KEY
+    PROVIDER_AUTH0_SECRET:
+        from_secret: PROVIDER_AUTH0_SECRET
   commands:
   - make build_linux_i386
 
+services:
+- name: mongo
+  image: mongo:4.4
+
+- name: redis
+  image: redis:alpine
