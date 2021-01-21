@@ -15,6 +15,19 @@ import (
 var serverconf *utils.ServerConfig
 
 func init() {
+	demo := utils.MustGet("DEMO_MODE")
+
+	mongoRoot := utils.MustGet("MONGO_INITDB_ROOT_USERNAME")
+	mongoRootPWD := utils.MustGet("MONGO_INITDB_ROOT_PASSWORD")
+	mongoHost := utils.MustGet("MONGO_HOST")
+	connectDB := utils.MustGet("MONGO_INITDB_DATABASE")
+	mongoDSN := "mongodb://" + mongoRoot + ":" + mongoRootPWD + "@" + mongoHost + "/" + connectDB + "?authSource=admin"
+	redisEndpoint := utils.MustGet("REDIS_HOST")
+
+	if demo == "on" {
+		mongoDSN = utils.MustGet("MONGO_CONNECTION_DSN")
+		redisEndpoint = utils.MustGet("REDIS_ENDPOINT")
+	}
 
 	serverconf = &utils.ServerConfig{
 		Host:          utils.MustGet("SERVER_HOST"),
@@ -35,10 +48,10 @@ func init() {
 			IsPlaygroundEnabled: utils.MustGetBool("GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED"),
 		},
 		MongoDB: utils.MGDBConfig{
-			DSN: utils.MustGet("MONGO_CONNECTION_DSN"),
+			DSN: mongoDSN,
 		},
 		Redis: utils.RedisConfig{
-			EndPoint: utils.MustGet("REDIS_ENDPOINT"),
+			EndPoint: redisEndpoint,
 			PWD:      utils.MustGet("REDIS_PWD"),
 		},
 		AuthProviders: []utils.AuthProvider{
@@ -75,7 +88,7 @@ func main() {
 		Redis:  redis,
 	}
 
-	server.SetupServer(serverconf, db).Run()
+	server.SetupServer(serverconf, db).RunTLS(":8080", "cert.pem", "key.pem")
 }
 
 //helper function for testing

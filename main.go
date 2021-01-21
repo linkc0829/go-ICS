@@ -16,15 +16,17 @@ var serverconf *utils.ServerConfig
 
 func init() {
 	demo := utils.MustGet("DEMO_MODE")
-	mongoDSN := utils.MustGet("MONGO_CONNECTION_DSN")
-	redisEndpoint := utils.MustGet("REDIS_ENDPOINT")
+
+	mongoRoot := utils.MustGet("MONGO_INITDB_ROOT_USERNAME")
+	mongoRootPWD := utils.MustGet("MONGO_INITDB_ROOT_PASSWORD")
+	mongoHost := utils.MustGet("MONGO_HOST")
+	connectDB := utils.MustGet("MONGO_INITDB_DATABASE")
+	mongoDSN := "mongodb://" + mongoRoot + ":" + mongoRootPWD + "@" + mongoHost + "/" + connectDB + "?authSource=admin"
+	redisEndpoint := utils.MustGet("REDIS_HOST")
+
 	if demo == "on" {
-		mongoRoot := utils.MustGet("MONGO_INITDB_ROOT_USERNAME")
-		mongoRootPWD := utils.MustGet("MONGO_INITDB_ROOT_PASSWORD")
-		mongoHost := utils.MustGet("MONGO_HOST")
-		connectDB := utils.MustGet("MONGO_INITDB_DATABASE")
-		mongoDSN = "mongodb://" + mongoRoot + ":" + mongoRootPWD + "@" + mongoHost + "/" + connectDB + "?authSource=admin"
-		redisEndpoint = utils.MustGet("REDIS_HOST")
+		mongoDSN = utils.MustGet("MONGO_CONNECTION_DSN")
+		redisEndpoint = utils.MustGet("REDIS_ENDPOINT")
 	}
 
 	serverconf = &utils.ServerConfig{
