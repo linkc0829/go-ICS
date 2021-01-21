@@ -101,12 +101,14 @@ func TestGraphQLAPI(t *testing.T) {
 
 	mongoDB := mongodb.ConnectMongoDB(serverconf)
 	defer mongodb.CloseMongoDB(mongoDB)
+	log.Println("Mongo connected")
 
 	sqlite := sqlitedb.ConnectSqlite()
 	defer sqlitedb.CloseSqlite(sqlite)
 
 	redis := redisdb.ConnectRedis(serverconf)
 	defer redisdb.CloseRedis(redis)
+	log.Println("Redis connected")
 
 	db := &datasource.DB{
 		Mongo:  mongoDB,

@@ -119,6 +119,18 @@ steps:
 services:
 - name: mongo
   image: mongo:4.4
+  environment:
+    MONGO_CONNECTION_DSN:
+      from_secret: MONGO_CONNECTION_DSN
+    MONGO_INITDB_ROOT_USERNAME: 
+        from_secret: MONGO_INITDB_ROOT_USERNAME
+    MONGO_INITDB_ROOT_PASSWORD: 
+        from_secret: MONGO_INITDB_ROOT_PASSWORD
 
 - name: redis
   image: redis:alpine
+  environment:
+    REDIS_PWD: 
+        from_secret: REDIS_PWD
+  command: 
+  - redis-server --appendonly yes --requirepass $REDIS_PWD
