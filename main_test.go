@@ -20,7 +20,6 @@ import (
 	"github.com/linkc0829/go-ics/internal/db/sqlitedb"
 	"github.com/linkc0829/go-ics/internal/graph/models"
 	"github.com/linkc0829/go-ics/pkg/server"
-	"github.com/linkc0829/go-ics/pkg/utils"
 	"github.com/linkc0829/go-ics/pkg/utils/datasource"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -95,9 +94,9 @@ func init() {
 	testUser.Email = "test999@gmail.com"
 	testUser.PWD = "123456"
 
-	admin.UserID = utils.MustGet("ADMIN_USERID")
-	admin.Email = utils.MustGet("ADMIN_EMAIL")
-	admin.PWD = utils.MustGet("ADMIN_PWD")
+	admin.UserID = "admin_test"
+	admin.Email = "admin_test@icsharing.com"
+	admin.PWD = "123456"
 
 }
 
