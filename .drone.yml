@@ -23,6 +23,9 @@ environment:
     GQL_SERVER_GRAPHQL_PATH: /graph
     GQL_SERVER_GRAPHQL_PLAYGROUND_PATH: /playground
     GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED: true
+    #Mongo Config
+    MONGO_CONNECTION_DSN:
+        from_secret: MONGO_CONNECTION_DSN
     #Redis Config
     REDIS_ENDPOINT: redis-14546.c1.asia-northeast1-1.gce.cloud.redislabs.com:14546
     # Auth config (Goth, JWT, etc)
@@ -41,7 +44,7 @@ environment:
 steps:
 - name: testing
   image: golang:1.15
-  secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
+  secrets: [, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
   environment:
     DEMO_MODE: on
   commands: 
