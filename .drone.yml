@@ -11,9 +11,9 @@ secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD,
 
 environment:
     #Web config
-    - GIN_MODE=debug
-    - SERVER_URI_SCHEMA=http://
-    - SERVER_HOST=localhost
+    GIN_MODE: debug
+    SERVER_URI_SCHEMA: http://
+    SERVER_HOST: localhost
     - SERVER_PORT=8080
     - SERVER_PATH_VERSION=v1
     - SERVER_STATIC_PATH=public/
