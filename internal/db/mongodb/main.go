@@ -26,13 +26,7 @@ type MongoDB struct {
 //ConnectDB will build connection to MongoDB Atlas
 func ConnectMongoDB(cfg *utils.ServerConfig) *MongoDB {
 
-	mongoRoot := utils.MustGet("MONGO_INITDB_ROOT_USERNAME")
-	mongoRootPWD := utils.MustGet("MONGO_INITDB_ROOT_PASSWORD")
-	mongoHost := utils.MustGet("MONGO_HOST")
-	connectDB := utils.MustGet("MONGO_INITDB_DATABASE")
-	connectURI := "mongodb://" + mongoRoot + ":" + mongoRootPWD + "@" + mongoHost + "/" + connectDB + "?authSource=admin"
-
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(connectURI))
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(cfg.MongoDB.DSN))
 	if err != nil {
 		log.Fatal(err)
 	}

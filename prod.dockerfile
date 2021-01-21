@@ -14,12 +14,12 @@ FROM ci AS build-env
 RUN go mod download
 
 RUN apk add gcc g++
-RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o server ./cmd/ics/
+RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o server ./cmd/icsharing/
 
 FROM alpine AS prod
 RUN apk --no-cache add ca-certificates
 
-COPY --from=build-env build/server ./ics/
+COPY --from=build-env build/server ./icsharing/
 COPY . ./
 
-CMD ["./ics/server"]
+CMD ["./icsharing/server"]

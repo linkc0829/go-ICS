@@ -7,41 +7,52 @@ clone:
         depth: 50
         tags: true
 
+secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, 
+        AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
+
+environment:
+    #Web config
+    - GIN_MODE=debug
+    - DEMO_MODE=on
+    - SERVER_URI_SCHEMA=http://
+    - SERVER_HOST=localhost
+    - SERVER_PORT=8080
+    - SERVER_PATH_VERSION=v1
+    - SERVER_STATIC_PATH=public/
+    #GraphQL Server config 
+    - GQL_SERVER_GRAPHQL_PATH=/graph
+    - GQL_SERVER_GRAPHQL_PLAYGROUND_PATH=/playground
+    - GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED=true
+    #Redis Config
+    - REDIS_ENDPOINT=redis-14546.c1.asia-northeast1-1.gce.cloud.redislabs.com:14546
+    # Auth config (Goth, JWT, etc)
+    - AUTH_API_KEY_HEADER=x-api-key
+    - AUTH_JWT_SIGNING_ALGORITHM=HS512
+    - AUTH_JWT_ACCESSTOKEN_EXPIRE=1h
+    - AUTH_JWT_REFRESHTOKEN_EXPIRE=72h
+    # Google Config
+    - PROVIDER_GOOGLE_KEY={yourappkey.apps.googleusercontent.com}
+    - PROVIDER_GOOGLE_SECRET={googlesecret}
+    - PROVIDER_GOOGLE_SCOPES=email,profile,openid
+    # Auth0 Config
+    - PROVIDER_AUTH0_DOMAIN=dev-3qsby8xq.us.auth0.com
+    - PROVIDER_AUTH0_SCOPES=email,profile,openid
+
 pipeline:
     testing:
         image: golang:1.15
-        secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD]
-        environment:
-            #Web config
-            - GIN_MODE=debug
-            - SERVER_URI_SCHEMA=http://
-            - SERVER_HOST=localhost
-            - SERVER_PORT=8080
-            - SERVER_PATH_VERSION=v1
-            - SERVER_STATIC_PATH=public/
-            #GraphQL Server config 
-            - GQL_SERVER_GRAPHQL_PATH=/graph
-            - GQL_SERVER_GRAPHQL_PLAYGROUND_PATH=/playground
-            - GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED=true
-            #Redis Config
-            - REDIS_ENDPOINT=redis-14546.c1.asia-northeast1-1.gce.cloud.redislabs.com:14546
-            # Auth config (Goth, JWT, etc)
-            - SESSION_SECRET={supersecret}
-            - AUTH_API_KEY_HEADER=x-api-key
-            - AUTH_JWT_SECRET={JWTsecret}
-            - AUTH_JWT_SIGNING_ALGORITHM=HS512
-            - AUTH_JWT_ACCESSTOKEN_EXPIRE=1h
-            - AUTH_JWT_REFRESHTOKEN_EXPIRE=72h
-            # Google Config
-            - PROVIDER_GOOGLE_KEY={yourappkey.apps.googleusercontent.com}
-            - PROVIDER_GOOGLE_SECRET={googlesecret}
-            - PROVIDER_GOOGLE_SCOPES=email,profile,openid
-            # Auth0 Config
-            - PROVIDER_AUTH0_KEY=wTo1ueSBrl4LL0tuaDJDHpj0pRec1abK
-            - PROVIDER_AUTH0_SECRET=gxSOvW_wq07fFCZTwbtfFdhU3SuDw08KnKRXstuKJ-fP40pJfhE0y34YcKEQkqWj
-            - PROVIDER_AUTH0_DOMAIN=dev-3qsby8xq.us.auth0.com
-            - PROVIDER_AUTH0_SCOPES=email,profile,openid
         commands: 
             - go test -v .
 
+    build_linux_amd64:
+    image: golang:1.15
+    group: build
+    commands:
+      - make build_linux_amd64
+
+  build_linux_i386:
+    image: golang:1.15
+    group: build
+    commands:
+      - make build_linux_i386
 
