@@ -132,5 +132,7 @@ services:
   environment:
     REDIS_PWD: 
         from_secret: REDIS_PWD
+  ports:
+  - 6379
   command: 
-  - redis-server --appendonly yes --requirepass $${REDIS_PWD}
+  - redis-server --appendonly yes --requirepass "$REDIS_PWD"
