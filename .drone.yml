@@ -14,27 +14,27 @@ environment:
     GIN_MODE: debug
     SERVER_URI_SCHEMA: http://
     SERVER_HOST: localhost
-    - SERVER_PORT=8080
-    - SERVER_PATH_VERSION=v1
-    - SERVER_STATIC_PATH=public/
+    SERVER_PORT: 8080
+    SERVER_PATH_VERSION: v1
+    SERVER_STATIC_PATH: public/
     #GraphQL Server config 
-    - GQL_SERVER_GRAPHQL_PATH=/graph
-    - GQL_SERVER_GRAPHQL_PLAYGROUND_PATH=/playground
-    - GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED=true
+    GQL_SERVER_GRAPHQL_PATH: /graph
+    GQL_SERVER_GRAPHQL_PLAYGROUND_PATH: /playground
+    GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED: true
     #Redis Config
-    - REDIS_ENDPOINT=redis-14546.c1.asia-northeast1-1.gce.cloud.redislabs.com:14546
+    REDIS_ENDPOINT: redis-14546.c1.asia-northeast1-1.gce.cloud.redislabs.com:14546
     # Auth config (Goth, JWT, etc)
-    - AUTH_API_KEY_HEADER=x-api-key
-    - AUTH_JWT_SIGNING_ALGORITHM=HS512
-    - AUTH_JWT_ACCESSTOKEN_EXPIRE=1h
-    - AUTH_JWT_REFRESHTOKEN_EXPIRE=72h
+    AUTH_API_KEY_HEADER: x-api-key
+    AUTH_JWT_SIGNING_ALGORITHM: HS512
+    AUTH_JWT_ACCESSTOKEN_EXPIRE: 1h
+    AUTH_JWT_REFRESHTOKEN_EXPIRE: 72h
     # Google Config
-    - PROVIDER_GOOGLE_KEY={yourappkey.apps.googleusercontent.com}
-    - PROVIDER_GOOGLE_SECRET={googlesecret}
-    - PROVIDER_GOOGLE_SCOPES=email,profile,openid
+    PROVIDER_GOOGLE_KEY: {yourappkey.apps.googleusercontent.com}
+    PROVIDER_GOOGLE_SECRET: {googlesecret}
+    PROVIDER_GOOGLE_SCOPES: email,profile,openid
     # Auth0 Config
-    - PROVIDER_AUTH0_DOMAIN=dev-3qsby8xq.us.auth0.com
-    - PROVIDER_AUTH0_SCOPES=email,profile,openid
+    PROVIDER_AUTH0_DOMAIN: dev-3qsby8xq.us.auth0.com
+    PROVIDER_AUTH0_SCOPES: email,profile,openid
 
 pipeline:
     testing:
