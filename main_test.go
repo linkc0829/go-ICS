@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -14,12 +15,15 @@ import (
 	"time"
 
 	"github.com/linkc0829/go-ics/internal/db/mongodb"
+	dbModel "github.com/linkc0829/go-ics/internal/db/mongodb/models"
 	"github.com/linkc0829/go-ics/internal/db/redisdb"
 	"github.com/linkc0829/go-ics/internal/db/sqlitedb"
 	"github.com/linkc0829/go-ics/internal/graph/models"
 	"github.com/linkc0829/go-ics/pkg/server"
 	"github.com/linkc0829/go-ics/pkg/utils"
 	"github.com/linkc0829/go-ics/pkg/utils/datasource"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var (
@@ -123,6 +127,28 @@ func TestGraphQLAPI(t *testing.T) {
 	log.Println("Test on: ", ts.URL)
 
 	client := ts.Client()
+
+	t.Run("create admin user", func(t *testing.T) {
+		newUser := &dbModel.UserModel{
+			ID:              primitive.NewObjectID(),
+			UserID:          admin.UserID,
+			Password:        &admin.PWD,
+			Email:           admin.Email,
+			NickName:        &admin.UserID,
+			CreatedAt:       time.Now(),
+			LastIncomeQuery: time.Now(),
+			LastCostQuery:   time.Now(),
+			Provider:        "ics",
+			Role:            dbModel.ADMIN,
+		}
+
+		_, err := mongoDB.Users.InsertOne(context.TODO(), newUser)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+
+	})
+
 	var refresh_token *http.Cookie
 	tokenJson := &token{}
 
