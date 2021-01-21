@@ -22,6 +22,7 @@ import (
 	"github.com/linkc0829/go-ics/pkg/server"
 	"github.com/linkc0829/go-ics/pkg/utils/datasource"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -145,8 +146,9 @@ func TestGraphQLAPI(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
-
-		log.Println(result)
+		test := &dbModel.UserModel{}
+		mongoDB.Users.FindOne(ctx, bson.M{"_id": result}).Decode(test)
+		log.Println(test)
 
 	})
 
