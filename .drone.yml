@@ -39,29 +39,29 @@ environment:
     PROVIDER_AUTH0_SCOPES: email,profile,openid
 
 steps:
-    - name: testing
-        image: golang:1.15
-        secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
-        environment:
-            - DEMO_MODE=on
-        commands: 
-            - go test -v .
+- name: testing
+    image: golang:1.15
+    secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
+    environment:
+    - DEMO_MODE=on
+    commands: 
+    - go test -v .
 
-    - name: build_linux_amd64
-        image: golang:1.15
-        group: build
-        secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
-        environment:
-            - DEMO_MODE=off
-        commands:
-            - make build_linux_amd64
+- name: build_linux_amd64
+    image: golang:1.15
+    group: build
+    secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
+    environment:
+    - DEMO_MODE=off
+    commands:
+    - make build_linux_amd64
 
-    - name: build_linux_i386
-        image: golang:1.15
-        group: build
-        secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
-        environment:
-            - DEMO_MODE=off
-        commands:
-            - make build_linux_i386
+- name: build_linux_i386
+    image: golang:1.15
+    group: build
+    secrets: [MONGO_CONNECTION_DSN, REDIS_PWD, ADMIN_USERID, ADMIN_EMAIL, ADMIN_PWD, SESSION_SECRET, AUTH_JWT_SECRET, PROVIDER_AUTH0_KEY, PROVIDER_AUTH0_SECRET]
+    environment:
+    - DEMO_MODE=off
+    commands:
+    - make build_linux_i386
 
