@@ -90,6 +90,8 @@ steps:
     PROVIDER_AUTH0_SECRET:
         from_secret: PROVIDER_AUTH0_SECRET
   commands:
+  - apk update && apk upgrade && apk add --no-cache git && rm -rf /var/cache/apk/*
+  - apk add make
   - make build_linux_amd64
 
 - name: build_linux_i386
@@ -112,7 +114,8 @@ steps:
     PROVIDER_AUTH0_SECRET:
         from_secret: PROVIDER_AUTH0_SECRET
   commands:
-  - apk add gcc g++
+  - apk update && apk upgrade && apk add --no-cache git && rm -rf /var/cache/apk/*
+  - apk add gcc g++ make
   - make build_linux_i386
 
 services:
