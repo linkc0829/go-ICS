@@ -31,8 +31,8 @@ environment:
     AUTH_JWT_ACCESSTOKEN_EXPIRE: 1h
     AUTH_JWT_REFRESHTOKEN_EXPIRE: 72h
     # Google Config
-    PROVIDER_GOOGLE_KEY: {yourappkey.apps.googleusercontent.com}
-    PROVIDER_GOOGLE_SECRET: {googlesecret}
+    PROVIDER_GOOGLE_KEY: yourappkey.apps.googleusercontent.com
+    PROVIDER_GOOGLE_SECRET: googlesecret
     PROVIDER_GOOGLE_SCOPES: email,profile,openid
     # Auth0 Config
     PROVIDER_AUTH0_DOMAIN: dev-3qsby8xq.us.auth0.com
