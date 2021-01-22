@@ -37,7 +37,7 @@ func SetupServer(serverconf *utils.ServerConfig, db *datasource.DB) *gin.Engine 
 	// HTTPS
 	// To generate a development cert and key, run the following from your *nix terminal:
 	// go run $GOROOT/src/crypto/tls/generate_cert.go --host="localhost"
-	r.Use(TlsHandler())
+	r.Use(TlsHandler(serverconf))
 
 	log.Println("Running @ " + serverconf.ListenEndpoint())
 
@@ -49,11 +49,11 @@ func SetupServer(serverconf *utils.ServerConfig, db *datasource.DB) *gin.Engine 
 
 }
 
-func TlsHandler() gin.HandlerFunc {
+func TlsHandler(cfg *utils.ServerConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		secureMiddleware := secure.New(secure.Options{
-			//SSLRedirect: true,
-			SSLHost: "localhost:8080",
+			SSLRedirect: true,
+			SSLHost:     cfg.Host + ":" + cfg.Port,
 		})
 		err := secureMiddleware.Process(c.Writer, c.Request)
 
