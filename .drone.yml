@@ -95,17 +95,17 @@ steps:
   - make build_alpine
 
 - name: publish_image
-    image: plugins/docker
-    pull: true
-    settings:
-        username:
-            from_secret: docker_username
-        password: 
-            from_secret: docker_password
-        repo: linkc0829/go-icsharing
-        dockerfile: docker/prod.dockerfile
-        auto_tag: true
-        auto_tag_suffix: alpine
+  image: plugins/docker
+  pull: true
+  settings:
+    username:
+        from_secret: docker_username
+    password: 
+        from_secret: docker_password
+    repo: linkc0829/go-icsharing
+    dockerfile: docker/prod.dockerfile
+    auto_tag: true
+    auto_tag_suffix: alpine
 
 services:
 - name: mongo
