@@ -102,7 +102,6 @@ steps:
     password: 
         from_secret: docker_password
     dockerfile: docker/prod.dockerfile
-    auto_tag: true
     auto_tag_suffix: alpine
 
 services:
