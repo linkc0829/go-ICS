@@ -15,9 +15,9 @@ environment:
     #Web config
     GIN_MODE: debug
     DEMO_MODE: off
-    SERVER_URI_SCHEMA: http://
+    SERVER_URI_SCHEMA: https://
     SERVER_HOST: localhost
-    SERVER_PORT: 8080
+    SERVER_PORT: 443
     SERVER_PATH_VERSION: v1
     SERVER_STATIC_PATH: public/
     #GraphQL Server config 
@@ -70,7 +70,7 @@ steps:
   commands: 
   - make test
 
-- name: build_image
+- name: build_alpine
   image: golang:1.15-alpine
   environment:
     SESSION_SECRET:
@@ -91,8 +91,21 @@ steps:
         from_secret: PROVIDER_AUTH0_SECRET
   commands:
   - apk update && apk upgrade && apk add --no-cache git
-  - apk add gcc g++
-  - CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o server ./cmd/icsharing/
+  - apk add gcc g++ make
+  - make build_alpine
+
+- name: publish_image
+    image: plugins/docker
+    pull: true
+    settings:
+        username:
+            from_secret: docker_username
+        password: 
+            from_secret: docker_password
+        repo: linkc0829/go-icsharing
+        dockerfile: docker/prod.dockerfile
+        auto_tag: true
+        auto_tag_suffix: alpine
 
 services:
 - name: mongo
@@ -104,15 +117,11 @@ services:
         from_secret: MONGO_INITDB_ROOT_USERNAME
     MONGO_INITDB_ROOT_PASSWORD: 
         from_secret: MONGO_INITDB_ROOT_PASSWORD
-  #commands:
-  #- mongo --eval "var user = '$MONGO_INITDB_ROOT_USERNAME', pwd = '$MONGO_INITDB_ROOT_PASSWORD'" scripts/createAdmin.js
 
 - name: redis
   image: redis:alpine
   environment:
     REDIS_PWD: 
         from_secret: REDIS_PWD
-  ports:
-  - 6379
   commands: 
   - redis-server --appendonly yes --requirepass "$REDIS_PWD"
