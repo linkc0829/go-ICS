@@ -94,15 +94,13 @@ steps:
   - apk add gcc g++ make
   - make build_alpine
 
-- name: publish_image
+- name: publish_alpine
   image: plugins/docker
-  pull: true
   settings:
-    username:
-        from_secret: docker_username
+    repo: linkc0829/go-icsharing
+    username: linkc0829
     password: 
         from_secret: docker_password
-    repo: linkc0829/go-icsharing
     dockerfile: docker/prod.dockerfile
     auto_tag: true
     auto_tag_suffix: alpine
