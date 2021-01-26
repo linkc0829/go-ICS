@@ -97,7 +97,8 @@ steps:
         from_secret: heroku_username
     password:
         from_secret: heroku_password
-    tags: registry.heroku.com/icsharing/web 
+    repo: registry.heroku.com/icsharing/web 
+    tags: 
 
 - name: build_alpine
   image: golang:1.15-alpine
