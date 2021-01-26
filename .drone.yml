@@ -15,6 +15,7 @@ environment:
     #Web config
     GIN_MODE: debug
     DEMO_MODE: off
+    ISHEROKU: false
     SERVER_URI_SCHEMA: https://
     SERVER_HOST: localhost
     SERVER_PORT: 443
