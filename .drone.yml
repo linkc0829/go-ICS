@@ -47,23 +47,6 @@ steps:
 - name: deploy_heroku
   image: plugins/docker
   environment:
-    DEMO_MODE: on
-    SESSION_SECRET:
-        from_secret: SESSION_SECRET
-    AUTH_JWT_SECRET:
-        from_secret: AUTH_JWT_SECRET
-    MONGO_CONNECTION_DSN:
-      from_secret: MONGO_CONNECTION_DSN
-    MONGO_INITDB_ROOT_USERNAME: 
-        from_secret: MONGO_INITDB_ROOT_USERNAME
-    MONGO_INITDB_ROOT_PASSWORD: 
-        from_secret: MONGO_INITDB_ROOT_PASSWORD
-    REDIS_PWD: 
-        from_secret: REDIS_PWD
-    PROVIDER_AUTH0_KEY:
-        from_secret: PROVIDER_AUTH0_KEY
-    PROVIDER_AUTH0_SECRET:
-        from_secret: PROVIDER_AUTH0_SECRET
   settings:
     registry: registry.heroku.com
     dockerfile: docker/prod.dockerfile
@@ -71,7 +54,7 @@ steps:
         from_secret: heroku_username
     password:
         from_secret: heroku_password
-    repo: registry.heroku.com/gp-icsharing/web 
+    repo: registry.heroku.com/icsharing/web 
 
 
 - name: testing
