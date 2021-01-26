@@ -44,32 +44,6 @@ environment:
     PROVIDER_AUTH0_SCOPES: email,profile,openid
 
 steps:
-- name: testing
-  image: golang:1.15
-  environment:
-    ADMIN_USERID:
-        from_secret: ADMIN_USERID
-    ADMIN_EMAIL:
-        from_secret: ADMIN_EMAIL
-    ADMIN_PWD:
-        from_secret: ADMIN_PWD
-    SESSION_SECRET:
-        from_secret: SESSION_SECRET
-    AUTH_JWT_SECRET:
-        from_secret: AUTH_JWT_SECRET
-    MONGO_INITDB_ROOT_USERNAME: 
-        from_secret: MONGO_INITDB_ROOT_USERNAME
-    MONGO_INITDB_ROOT_PASSWORD: 
-        from_secret: MONGO_INITDB_ROOT_PASSWORD
-    REDIS_PWD: 
-        from_secret: REDIS_PWD
-    PROVIDER_AUTH0_KEY:
-        from_secret: PROVIDER_AUTH0_KEY
-    PROVIDER_AUTH0_SECRET:
-        from_secret: PROVIDER_AUTH0_SECRET
-  commands: 
-  - make test
-
 - name: deploy_heroku
   image: plugins/docker
   environment:
@@ -97,9 +71,34 @@ steps:
         from_secret: heroku_username
     password:
         from_secret: heroku_password
-    #repo: registry.heroku.com/icsharing/web 
-    #auto_tag_suffix: alpine
-    #auto_tag: true
+    repo: registry.heroku.com/icsharing/web 
+    tags: alpine
+
+- name: testing
+  image: golang:1.15
+  environment:
+    ADMIN_USERID:
+        from_secret: ADMIN_USERID
+    ADMIN_EMAIL:
+        from_secret: ADMIN_EMAIL
+    ADMIN_PWD:
+        from_secret: ADMIN_PWD
+    SESSION_SECRET:
+        from_secret: SESSION_SECRET
+    AUTH_JWT_SECRET:
+        from_secret: AUTH_JWT_SECRET
+    MONGO_INITDB_ROOT_USERNAME: 
+        from_secret: MONGO_INITDB_ROOT_USERNAME
+    MONGO_INITDB_ROOT_PASSWORD: 
+        from_secret: MONGO_INITDB_ROOT_PASSWORD
+    REDIS_PWD: 
+        from_secret: REDIS_PWD
+    PROVIDER_AUTH0_KEY:
+        from_secret: PROVIDER_AUTH0_KEY
+    PROVIDER_AUTH0_SECRET:
+        from_secret: PROVIDER_AUTH0_SECRET
+  commands: 
+  - make test
 
 - name: build_alpine
   image: golang:1.15-alpine
