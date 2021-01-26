@@ -23,6 +23,12 @@ func init() {
 	connectDB := utils.MustGet("MONGO_INITDB_DATABASE")
 	mongoDSN := "mongodb://" + mongoRoot + ":" + mongoRootPWD + "@" + mongoHost + "/" + connectDB + "?authSource=admin"
 	redisEndpoint := utils.MustGet("REDIS_HOST")
+	port := utils.MustGet("SERVER_PORT")
+	heroku := utils.MustGet("ISHERUKU")
+	//heroku network setting
+	if heroku == "true" {
+		port = utils.MustGet("PORT")
+	}
 
 	if demo == "on" {
 		mongoDSN = utils.MustGet("MONGO_CONNECTION_DSN")
@@ -31,7 +37,7 @@ func init() {
 
 	serverconf = &utils.ServerConfig{
 		Host:          utils.MustGet("SERVER_HOST"),
-		Port:          utils.MustGet("SERVER_PORT"),
+		Port:          port,
 		URISchema:     utils.MustGet("SERVER_URI_SCHEMA"),
 		ApiVer:        utils.MustGet("SERVER_PATH_VERSION"),
 		SessionSecret: utils.MustGet("SESSION_SECRET"),
