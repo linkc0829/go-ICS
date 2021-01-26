@@ -69,7 +69,7 @@ steps:
         from_secret: PROVIDER_AUTH0_SECRET
   commands: 
   - make test
-  
+
 - name: deploy_heroku
   image: plugins/docker
   environment:
@@ -96,6 +96,7 @@ steps:
         from_secret: heroku_username
     password:
         from_secret: heroku_password
+    tags: latest
     auto_tag_suffix: alpine
 
 - name: build_alpine
