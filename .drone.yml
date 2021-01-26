@@ -104,6 +104,17 @@ steps:
     dockerfile: docker/prod.dockerfile
     auto_tag_suffix: alpine
 
+- name: deploy_heroku
+  image: plugins/docker
+  settings:
+    registry: registry.heroku.com
+    username:
+        from_secret: heroku_username
+    email: 
+        from_secret: heroku_email
+    password:
+        from_secret: heroku_password
+
 services:
 - name: mongo
   image: mongo:4.4
