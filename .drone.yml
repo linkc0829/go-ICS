@@ -118,7 +118,7 @@ steps:
     username: linkc0829
     password: 
         from_secret: docker_password
-    #dockerfile: docker/prod.dockerfile
+    dockerfile: docker/prod.dockerfile
     auto_tag_suffix: alpine
 
 - name: deploy_heroku
@@ -142,7 +142,7 @@ steps:
         from_secret: PROVIDER_AUTH0_SECRET
   settings:
     registry: registry.heroku.com
-    #dockerfile: docker/prod.dockerfile
+    dockerfile: docker/prod.dockerfile
     username:
         from_secret: heroku_username
     password:
