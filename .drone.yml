@@ -47,7 +47,7 @@ steps:
 - name: deploy_heroku
   image: plugins/docker
   environment:
-    DEMO_MODE: off
+    DEMO_MODE: on
     SESSION_SECRET:
         from_secret: SESSION_SECRET
     AUTH_JWT_SECRET:
@@ -71,8 +71,8 @@ steps:
         from_secret: heroku_username
     password:
         from_secret: heroku_password
-    repo: registry.heroku.com/icsharing/web 
-    tags: alpine
+    repo: registry.heroku.com/gp-icsharing/web 
+
 
 - name: testing
   image: golang:1.15
