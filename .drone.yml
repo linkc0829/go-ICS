@@ -98,7 +98,8 @@ steps:
     password:
         from_secret: heroku_password
     repo: registry.heroku.com/icsharing/web 
-    tags: registry.heroku.com/icsharing/web 
+    auto_tag_suffix: alpine
+    auto_tag: true
 
 - name: build_alpine
   image: golang:1.15-alpine
