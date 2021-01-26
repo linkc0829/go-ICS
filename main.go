@@ -1,6 +1,7 @@
 package main
 
 import (
+	"logs"
 	"net/http"
 	"strings"
 
@@ -28,6 +29,7 @@ func init() {
 	//heroku network setting
 	if heroku == "true" {
 		port = utils.MustGet("PORT")
+		logs.Println("Deploy in Heroku")
 	}
 
 	if demo == "on" {
