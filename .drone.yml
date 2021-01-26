@@ -39,7 +39,7 @@ environment:
     PROVIDER_GOOGLE_KEY: yourappkey.apps.googleusercontent.com
     PROVIDER_GOOGLE_SECRET: googlesecret
     PROVIDER_GOOGLE_SCOPES: email,profile,openid
-    # Auth0 Config
+    # Auth0 Confi
     PROVIDER_AUTH0_DOMAIN: dev-3qsby8xq.us.auth0.com
     PROVIDER_AUTH0_SCOPES: email,profile,openid
 
