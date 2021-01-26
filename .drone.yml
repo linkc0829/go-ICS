@@ -69,6 +69,34 @@ steps:
         from_secret: PROVIDER_AUTH0_SECRET
   commands: 
   - make test
+  
+- name: deploy_heroku
+  image: plugins/docker
+  environment:
+    SESSION_SECRET:
+        from_secret: SESSION_SECRET
+    AUTH_JWT_SECRET:
+        from_secret: AUTH_JWT_SECRET
+    MONGO_CONNECTION_DSN:
+      from_secret: MONGO_CONNECTION_DSN
+    MONGO_INITDB_ROOT_USERNAME: 
+        from_secret: MONGO_INITDB_ROOT_USERNAME
+    MONGO_INITDB_ROOT_PASSWORD: 
+        from_secret: MONGO_INITDB_ROOT_PASSWORD
+    REDIS_PWD: 
+        from_secret: REDIS_PWD
+    PROVIDER_AUTH0_KEY:
+        from_secret: PROVIDER_AUTH0_KEY
+    PROVIDER_AUTH0_SECRET:
+        from_secret: PROVIDER_AUTH0_SECRET
+  settings:
+    registry: registry.heroku.com
+    dockerfile: docker/prod.dockerfile
+    username:
+        from_secret: heroku_username
+    password:
+        from_secret: heroku_password
+    auto_tag_suffix: alpine
 
 - name: build_alpine
   image: golang:1.15-alpine
@@ -120,33 +148,6 @@ steps:
         from_secret: docker_password
     dockerfile: docker/prod.dockerfile
     auto_tag_suffix: alpine
-
-- name: deploy_heroku
-  image: plugins/docker
-  environment:
-    SESSION_SECRET:
-        from_secret: SESSION_SECRET
-    AUTH_JWT_SECRET:
-        from_secret: AUTH_JWT_SECRET
-    MONGO_CONNECTION_DSN:
-      from_secret: MONGO_CONNECTION_DSN
-    MONGO_INITDB_ROOT_USERNAME: 
-        from_secret: MONGO_INITDB_ROOT_USERNAME
-    MONGO_INITDB_ROOT_PASSWORD: 
-        from_secret: MONGO_INITDB_ROOT_PASSWORD
-    REDIS_PWD: 
-        from_secret: REDIS_PWD
-    PROVIDER_AUTH0_KEY:
-        from_secret: PROVIDER_AUTH0_KEY
-    PROVIDER_AUTH0_SECRET:
-        from_secret: PROVIDER_AUTH0_SECRET
-  settings:
-    registry: registry.heroku.com
-    dockerfile: docker/prod.dockerfile
-    username:
-        from_secret: heroku_username
-    password:
-        from_secret: heroku_password
 
 services:
 - name: mongo
