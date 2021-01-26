@@ -73,6 +73,7 @@ steps:
 - name: deploy_heroku
   image: plugins/docker
   environment:
+    DEMO_MODE: off
     SESSION_SECRET:
         from_secret: SESSION_SECRET
     AUTH_JWT_SECRET:
