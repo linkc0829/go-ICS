@@ -122,11 +122,15 @@ func TestGraphQLAPI(t *testing.T) {
 	}
 
 	r := server.SetupServer(serverconf, db)
-	ts := httptest.NewTLSServer(r)
+	var ts *httptest.Server
+	if serverconf.URISchema == "https://" {
+		ts = httptest.NewTLSServer(r)
+	} else {
+		ts = httptest.NewServer(r)
+	}
 	defer ts.Close()
 
 	log.Println("Test on: ", ts.URL)
-
 	client := ts.Client()
 
 	t.Run("create admin user", func(t *testing.T) {

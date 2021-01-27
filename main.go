@@ -11,6 +11,7 @@ import (
 	"github.com/linkc0829/go-icsharing/pkg/server"
 	"github.com/linkc0829/go-icsharing/pkg/utils"
 	"github.com/linkc0829/go-icsharing/pkg/utils/datasource"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 var serverconf *utils.ServerConfig
@@ -96,7 +97,12 @@ func main() {
 		Redis:  redis,
 	}
 
-	server.SetupServer(serverconf, db).RunTLS(":"+serverconf.Port, "cert.pem", "key.pem")
+	if serverconf.URISchema == "https://" {
+		r := server.SetupServer(serverconf, db)
+		log.Fatal(http.Serve(autocert.NewListener("icsharing.com", "www.icsharing.com"), r))
+	} else {
+		log.Fatal(server.SetupServer(serverconf, db).Run())
+	}
 }
 
 //helper function for testing
