@@ -16,7 +16,6 @@ environment:
     GIN_MODE: debug
     DEMO_MODE: off
     ISHEROKU: false
-    SERVER_URI_SCHEMA: http://
     SERVER_HOST: localhost
     SERVER_PORT: 8080
     SERVER_PATH_VERSION: v1
@@ -45,9 +44,37 @@ environment:
     PROVIDER_AUTH0_SCOPES: email,profile,openid
 
 steps:
-- name: testing
+- name: http-testing
   image: golang:1.15
   environment:
+    SERVER_URI_SCHEMA: http://
+    ADMIN_USERID:
+        from_secret: ADMIN_USERID
+    ADMIN_EMAIL:
+        from_secret: ADMIN_EMAIL
+    ADMIN_PWD:
+        from_secret: ADMIN_PWD
+    SESSION_SECRET:
+        from_secret: SESSION_SECRET
+    AUTH_JWT_SECRET:
+        from_secret: AUTH_JWT_SECRET
+    MONGO_INITDB_ROOT_USERNAME: 
+        from_secret: MONGO_INITDB_ROOT_USERNAME
+    MONGO_INITDB_ROOT_PASSWORD: 
+        from_secret: MONGO_INITDB_ROOT_PASSWORD
+    REDIS_PWD: 
+        from_secret: REDIS_PWD
+    PROVIDER_AUTH0_KEY:
+        from_secret: PROVIDER_AUTH0_KEY
+    PROVIDER_AUTH0_SECRET:
+        from_secret: PROVIDER_AUTH0_SECRET
+  commands: 
+  - make test
+
+  - name: https-testing
+  image: golang:1.15
+  environment:
+    SERVER_URI_SCHEMA: https://
     ADMIN_USERID:
         from_secret: ADMIN_USERID
     ADMIN_EMAIL:
