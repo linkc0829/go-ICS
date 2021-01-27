@@ -25,7 +25,7 @@ func init() {
 	mongoDSN := "mongodb://" + mongoRoot + ":" + mongoRootPWD + "@" + mongoHost + "/" + connectDB + "?authSource=admin"
 	redisEndpoint := utils.MustGet("REDIS_HOST")
 	port := utils.MustGet("SERVER_PORT")
-	heroku := utils.MustGet("ISHERUKU")
+	heroku := utils.MustGet("ISHEROKU")
 	//heroku network setting
 	if heroku == "true" {
 		port = utils.MustGet("PORT")

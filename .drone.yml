@@ -45,19 +45,6 @@ environment:
     PROVIDER_AUTH0_SCOPES: email,profile,openid
 
 steps:
-- name: deploy_heroku
-  image: plugins/docker
-  environment:
-  settings:
-    registry: registry.heroku.com
-    dockerfile: docker/prod.dockerfile
-    username:
-        from_secret: heroku_username
-    password:
-        from_secret: heroku_password
-    repo: registry.heroku.com/icsharing/web 
-
-
 - name: testing
   image: golang:1.15
   environment:
@@ -86,23 +73,6 @@ steps:
 
 - name: build_alpine
   image: golang:1.15-alpine
-  environment:
-    SESSION_SECRET:
-        from_secret: SESSION_SECRET
-    AUTH_JWT_SECRET:
-        from_secret: AUTH_JWT_SECRET
-    MONGO_CONNECTION_DSN:
-      from_secret: MONGO_CONNECTION_DSN
-    MONGO_INITDB_ROOT_USERNAME: 
-        from_secret: MONGO_INITDB_ROOT_USERNAME
-    MONGO_INITDB_ROOT_PASSWORD: 
-        from_secret: MONGO_INITDB_ROOT_PASSWORD
-    REDIS_PWD: 
-        from_secret: REDIS_PWD
-    PROVIDER_AUTH0_KEY:
-        from_secret: PROVIDER_AUTH0_KEY
-    PROVIDER_AUTH0_SECRET:
-        from_secret: PROVIDER_AUTH0_SECRET
   commands:
   - apk update && apk upgrade && apk add --no-cache git
   - apk add gcc g++ make
@@ -110,23 +80,6 @@ steps:
 
 - name: publish_alpine
   image: plugins/docker
-  environment:
-    SESSION_SECRET:
-        from_secret: SESSION_SECRET
-    AUTH_JWT_SECRET:
-        from_secret: AUTH_JWT_SECRET
-    MONGO_CONNECTION_DSN:
-      from_secret: MONGO_CONNECTION_DSN
-    MONGO_INITDB_ROOT_USERNAME: 
-        from_secret: MONGO_INITDB_ROOT_USERNAME
-    MONGO_INITDB_ROOT_PASSWORD: 
-        from_secret: MONGO_INITDB_ROOT_PASSWORD
-    REDIS_PWD: 
-        from_secret: REDIS_PWD
-    PROVIDER_AUTH0_KEY:
-        from_secret: PROVIDER_AUTH0_KEY
-    PROVIDER_AUTH0_SECRET:
-        from_secret: PROVIDER_AUTH0_SECRET
   settings:
     repo: linkc0829/go-icsharing
     username: linkc0829
@@ -134,6 +87,18 @@ steps:
         from_secret: docker_password
     dockerfile: docker/prod.dockerfile
     auto_tag_suffix: alpine
+
+- name: deploy_heroku
+  image: plugins/docker
+  environment:
+  settings:
+    registry: registry.heroku.com
+    dockerfile: docker/prod.dockerfile
+    username:
+        from_secret: heroku_username
+    password:
+        from_secret: heroku_password
+    repo: registry.heroku.com/icsharing/web 
 
 services:
 - name: mongo
