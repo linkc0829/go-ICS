@@ -20,15 +20,19 @@ func newClient(c *gin.Context, cfg *utils.ServerConfig) *graphql.Client {
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: accessToken},
 	)
-	//Skip verify SSL certificate
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	httpClient := oauth2.NewClient(c, src)
+
+	//Skip verify SSL certificate if using SSL connection
+	var tr *http.Transport
+	if cfg.URISchema == "https://" {
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		sslcli := &http.Client{Transport: tr}
+		ctx := context.WithValue(c, oauth2.HTTPClient, sslcli)
+
+		httpClient = oauth2.NewClient(ctx, src)
 	}
-	sslcli := &http.Client{Transport: tr}
-	ctx := context.WithValue(c, oauth2.HTTPClient, sslcli)
-
-	httpClient := oauth2.NewClient(ctx, src)
-
 	gqlServerPath := cfg.SchemaVersioningEndpoint(cfg.GraphQL.Path)
 	return graphql.NewClient(gqlServerPath, httpClient)
 }
