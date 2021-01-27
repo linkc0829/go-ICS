@@ -2,11 +2,11 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/linkc0829/go-ics/internal/handlers"
-	"github.com/linkc0829/go-ics/internal/handlers/auth"
-	"github.com/linkc0829/go-ics/internal/handlers/secret"
-	"github.com/linkc0829/go-ics/pkg/utils"
-	"github.com/linkc0829/go-ics/pkg/utils/datasource"
+	"github.com/linkc0829/go-icsharing/internal/handlers"
+	"github.com/linkc0829/go-icsharing/internal/handlers/auth"
+	"github.com/linkc0829/go-icsharing/internal/handlers/secret"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
+	"github.com/linkc0829/go-icsharing/pkg/utils/datasource"
 )
 
 func Auth(cfg *utils.ServerConfig, r *gin.Engine, db *datasource.DB) {

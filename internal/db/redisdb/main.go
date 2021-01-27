@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/garyburd/redigo/redis"
-	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 )
 
 func ConnectRedis(cfg *utils.ServerConfig) redis.Conn {

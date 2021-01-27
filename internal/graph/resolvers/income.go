@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	dbModel "github.com/linkc0829/go-ics/internal/db/mongodb/models"
-	"github.com/linkc0829/go-ics/internal/graph/models"
-	tf "github.com/linkc0829/go-ics/internal/graph/resolvers/transformer"
-	"github.com/linkc0829/go-ics/pkg/utils"
+	dbModel "github.com/linkc0829/go-icsharing/internal/db/mongodb/models"
+	"github.com/linkc0829/go-icsharing/internal/graph/models"
+	tf "github.com/linkc0829/go-icsharing/internal/graph/resolvers/transformer"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

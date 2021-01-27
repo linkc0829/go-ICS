@@ -4,9 +4,9 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/linkc0829/go-ics/pkg/server/routes"
-	"github.com/linkc0829/go-ics/pkg/utils"
-	"github.com/linkc0829/go-ics/pkg/utils/datasource"
+	"github.com/linkc0829/go-icsharing/pkg/server/routes"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
+	"github.com/linkc0829/go-icsharing/pkg/utils/datasource"
 	"github.com/unrolled/secure"
 )
 

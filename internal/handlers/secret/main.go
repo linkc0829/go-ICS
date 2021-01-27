@@ -11,9 +11,9 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/garyburd/redigo/redis"
 	"github.com/gin-gonic/gin"
-	"github.com/linkc0829/go-ics/internal/db/mongodb/models"
-	"github.com/linkc0829/go-ics/pkg/utils"
-	"github.com/linkc0829/go-ics/pkg/utils/datasource"
+	"github.com/linkc0829/go-icsharing/internal/db/mongodb/models"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
+	"github.com/linkc0829/go-icsharing/pkg/utils/datasource"
 	"golang.org/x/crypto/bcrypt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"

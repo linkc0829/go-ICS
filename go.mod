@@ -3,7 +3,6 @@ module github.com/linkc0829/go-icsharing
 go 1.15
 
 replace gopkg.in/urfave/cli.v2 => github.com/urfave/cli/v2 v2.1.1
-replace github.com/linkc0829/go-ics => github.com/linkc0829/go-icsharing
 
 require (
 	9fans.net/go v0.0.2 // indirect

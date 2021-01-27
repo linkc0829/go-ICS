@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/linkc0829/go-ics/internal/db/mongodb"
-	dbModel "github.com/linkc0829/go-ics/internal/db/mongodb/models"
-	"github.com/linkc0829/go-ics/internal/graph/models"
-	"github.com/linkc0829/go-ics/pkg/utils"
+	_ "github.com/linkc0829/go-icsharing/internal/db/mongodb"
+	dbModel "github.com/linkc0829/go-icsharing/internal/db/mongodb/models"
+	"github.com/linkc0829/go-icsharing/internal/graph/models"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 
-	tf "github.com/linkc0829/go-ics/internal/graph/resolvers/transformer"
+	tf "github.com/linkc0829/go-icsharing/internal/graph/resolvers/transformer"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

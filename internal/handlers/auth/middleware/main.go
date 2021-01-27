@@ -6,7 +6,7 @@ import (
     "net/http"
     "strings"
 
-    "github.com/linkc0829/go-ics/pkg/utils"
+    "github.com/linkc0829/go-icsharing/pkg/utils"
     "github.com/dgrijalva/jwt-go"
 
     "github.com/gin-gonic/gin"

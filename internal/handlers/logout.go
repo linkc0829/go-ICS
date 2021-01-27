@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
 
-	"github.com/linkc0829/go-ics/internal/handlers/auth"
-	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-icsharing/internal/handlers/auth"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 )
 
 //LogoutHandler will set header token expire and redirect to free trial page

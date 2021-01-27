@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/auth0"
 	"github.com/markbates/goth/providers/google"

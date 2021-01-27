@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/linkc0829/go-ics/internal/handlers"
-	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-icsharing/internal/handlers"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 )
 
 func UserProfolio(cfg *utils.ServerConfig, r *gin.Engine) {

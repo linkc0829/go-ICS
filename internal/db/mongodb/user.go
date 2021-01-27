@@ -11,8 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	//"github.com/linkc0829/go-ics/pkg/utils"
-	"github.com/linkc0829/go-ics/internal/db/mongodb/models"
+	//"github.com/linkc0829/go-icsharing/pkg/utils"
+	"github.com/linkc0829/go-icsharing/internal/db/mongodb/models"
 )
 
 //FindUserByAPIKey will find user related to the APIKey

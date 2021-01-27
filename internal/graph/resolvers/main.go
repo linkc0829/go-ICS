@@ -3,9 +3,9 @@ package resolvers
 import (
 	"context"
 
-	"github.com/linkc0829/go-ics/internal/db/mongodb"
-	"github.com/linkc0829/go-ics/internal/graph/generated"
-	"github.com/linkc0829/go-ics/internal/graph/models"
+	"github.com/linkc0829/go-icsharing/internal/db/mongodb"
+	"github.com/linkc0829/go-icsharing/internal/graph/generated"
+	"github.com/linkc0829/go-icsharing/internal/graph/models"
 )
 
 //Resolver contains db element

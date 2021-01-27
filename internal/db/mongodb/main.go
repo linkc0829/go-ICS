@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

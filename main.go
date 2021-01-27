@@ -1,16 +1,16 @@
 package main
 
 import (
-	"logs"
+	"log"
 	"net/http"
 	"strings"
 
-	"github.com/linkc0829/go-ics/internal/db/mongodb"
-	"github.com/linkc0829/go-ics/internal/db/redisdb"
-	"github.com/linkc0829/go-ics/internal/db/sqlitedb"
-	"github.com/linkc0829/go-ics/pkg/server"
-	"github.com/linkc0829/go-ics/pkg/utils"
-	"github.com/linkc0829/go-ics/pkg/utils/datasource"
+	"github.com/linkc0829/go-icsharing/internal/db/mongodb"
+	"github.com/linkc0829/go-icsharing/internal/db/redisdb"
+	"github.com/linkc0829/go-icsharing/internal/db/sqlitedb"
+	"github.com/linkc0829/go-icsharing/pkg/server"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
+	"github.com/linkc0829/go-icsharing/pkg/utils/datasource"
 )
 
 var serverconf *utils.ServerConfig
@@ -29,7 +29,7 @@ func init() {
 	//heroku network setting
 	if heroku == "true" {
 		port = utils.MustGet("PORT")
-		logs.Println("Deploy in Heroku")
+		log.Println("Deploy in Heroku")
 	}
 
 	if demo == "on" {

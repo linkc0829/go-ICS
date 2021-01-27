@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"github.com/linkc0829/go-ics/internal/handlers"
-	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-icsharing/internal/handlers"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 )
 
 func FreeTrial(cfg *utils.ServerConfig, r *gin.Engine, sqlite *gorm.DB) {

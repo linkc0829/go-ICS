@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shurcooL/graphql"
 
-	"github.com/linkc0829/go-ics/internal/graph/models"
-	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-icsharing/internal/graph/models"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 )
 
 //GetUser handle request GET /user/:id

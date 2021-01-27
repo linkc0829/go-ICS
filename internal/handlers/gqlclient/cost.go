@@ -6,12 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shurcooL/graphql"
 
-	"github.com/linkc0829/go-ics/internal/graph/models"
-	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-icsharing/internal/graph/models"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 )
 
 //"encoding/json"
-//"github.com/linkc0829/go-ics/internal/graph/models"
+//"github.com/linkc0829/go-icsharing/internal/graph/models"
 
 //CreateCost handle request POST /cost
 func CreateCost(cfg *utils.ServerConfig) gin.HandlerFunc {

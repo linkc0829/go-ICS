@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/linkc0829/go-ics/internal/handlers/secret"
+	"github.com/linkc0829/go-icsharing/internal/handlers/secret"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/linkc0829/go-ics/pkg/utils"
-	"github.com/linkc0829/go-ics/pkg/utils/datasource"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
+	"github.com/linkc0829/go-icsharing/pkg/utils/datasource"
 
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"

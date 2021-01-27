@@ -2,10 +2,10 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/linkc0829/go-ics/internal/db/mongodb"
-	"github.com/linkc0829/go-ics/internal/handlers"
-	"github.com/linkc0829/go-ics/internal/handlers/gqlclient"
-	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-icsharing/internal/db/mongodb"
+	"github.com/linkc0829/go-icsharing/internal/handlers"
+	"github.com/linkc0829/go-icsharing/internal/handlers/gqlclient"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 )
 
 func RestAPI(cfg *utils.ServerConfig, r *gin.Engine, db *mongodb.MongoDB) {

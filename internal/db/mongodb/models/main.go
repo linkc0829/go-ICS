@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/linkc0829/go-ics/internal/graph/models"
+	"github.com/linkc0829/go-icsharing/internal/graph/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

@@ -9,8 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"github.com/linkc0829/go-ics/internal/db/sqlitedb"
-	"github.com/linkc0829/go-ics/pkg/utils"
+	"github.com/linkc0829/go-icsharing/internal/db/sqlitedb"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
 )
 
 func FreeTrialHandler() gin.HandlerFunc {

@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/linkc0829/go-ics/internal/db/mongodb"
-	"github.com/linkc0829/go-ics/internal/db/redisdb"
-	"github.com/linkc0829/go-ics/internal/db/sqlitedb"
-	"github.com/linkc0829/go-ics/pkg/server"
-	"github.com/linkc0829/go-ics/pkg/utils"
-	"github.com/linkc0829/go-ics/pkg/utils/datasource"
+	"github.com/linkc0829/go-icsharing/internal/db/mongodb"
+	"github.com/linkc0829/go-icsharing/internal/db/redisdb"
+	"github.com/linkc0829/go-icsharing/internal/db/sqlitedb"
+	"github.com/linkc0829/go-icsharing/pkg/server"
+	"github.com/linkc0829/go-icsharing/pkg/utils"
+	"github.com/linkc0829/go-icsharing/pkg/utils/datasource"
 )
 
 var serverconf *utils.ServerConfig
