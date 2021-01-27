@@ -8,6 +8,7 @@ type ServerConfig struct {
 	ApiVer        string
 	StaticPath    string
 	SessionSecret string
+	CookiesDomain string
 	JWT           JWTConfig
 	GraphQL       GQLConfig
 	MongoDB       MGDBConfig

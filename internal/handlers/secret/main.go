@@ -111,11 +111,11 @@ func SignupHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 			Redirect:    "/profile/" + newUser.ID.Hex(),
 		}
 		security := false
-		if utils.MustGet("SERVER_URI_SCHEMA") == "https://" {
+		if cfg.URISchema == "https://" {
 			security = true
 		}
-		host := utils.MustGet("SERVER_HOST")
-		c.SetCookie("refresh_token", refreshToken, 0, "/", host, security, true)
+		domain := cfg.CookiesDomain
+		c.SetCookie("refresh_token", refreshToken, 0, "/", domain, security, true)
 		c.HTML(http.StatusOK, "callback", data)
 	}
 
@@ -167,11 +167,11 @@ func LoginHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 			Redirect:    "/profile/" + user.ID.Hex(),
 		}
 		security := false
-		if utils.MustGet("SERVER_URI_SCHEMA") == "https://" {
+		if cfg.URISchema == "https://" {
 			security = true
 		}
-		host := utils.MustGet("SERVER_HOST")
-		c.SetCookie("refresh_token", refreshToken, 0, "/", host, security, true)
+		domain := cfg.CookiesDomain
+		c.SetCookie("refresh_token", refreshToken, 0, "/", domain, security, true)
 		c.HTML(http.StatusOK, "callback", data)
 
 	}
@@ -241,13 +241,12 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.Handler
 			"token_expiry": tokenExpiry.Local(),
 		}
 		security := false
-		if utils.MustGet("SERVER_URI_SCHEMA") == "https://" {
+		if cfg.URISchema == "https://" {
 			security = true
 		}
-		host := utils.MustGet("SERVER_HOST")
-		c.SetCookie("refresh_token", refreshToken, 0, "/", host, security, true)
+		domain := cfg.CookiesDomain
+		c.SetCookie("refresh_token", refreshToken, 0, "/", domain, security, true)
 		c.JSON(http.StatusOK, json)
-
 	}
 }
 
