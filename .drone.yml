@@ -71,7 +71,7 @@ steps:
   commands: 
   - make test
 
-  - name: https-testing
+- name: https-testing
   image: golang:1.15
   environment:
     SERVER_URI_SCHEMA: https://
@@ -97,6 +97,7 @@ steps:
         from_secret: PROVIDER_AUTH0_SECRET
   commands: 
   - make test
+
 
 - name: build_alpine
   image: golang:1.15-alpine
