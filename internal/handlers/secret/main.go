@@ -114,7 +114,8 @@ func SignupHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 		if utils.MustGet("SERVER_URI_SCHEMA") == "https://" {
 			security = true
 		}
-		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", security, true)
+		host := utils.MustGet("SERVER_HOST")
+		c.SetCookie("refresh_token", refreshToken, 0, "/", host, security, true)
 		c.HTML(http.StatusOK, "callback", data)
 	}
 
@@ -169,7 +170,8 @@ func LoginHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.HandlerFunc {
 		if utils.MustGet("SERVER_URI_SCHEMA") == "https://" {
 			security = true
 		}
-		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", security, true)
+		host := utils.MustGet("SERVER_HOST")
+		c.SetCookie("refresh_token", refreshToken, 0, "/", host, security, true)
 		c.HTML(http.StatusOK, "callback", data)
 
 	}
@@ -242,7 +244,8 @@ func RefreshTokenHandler(cfg *utils.ServerConfig, db *datasource.DB) gin.Handler
 		if utils.MustGet("SERVER_URI_SCHEMA") == "https://" {
 			security = true
 		}
-		c.SetCookie("refresh_token", refreshToken, 0, "/", "localhost", security, true)
+		host := utils.MustGet("SERVER_HOST")
+		c.SetCookie("refresh_token", refreshToken, 0, "/", host, security, true)
 		c.JSON(http.StatusOK, json)
 
 	}
