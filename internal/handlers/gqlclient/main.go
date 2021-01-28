@@ -30,6 +30,9 @@ func newClient(c *gin.Context, cfg *utils.ServerConfig) *graphql.Client {
 	// 	httpClient = oauth2.NewClient(ctx, src)
 	// }
 	gqlServerPath := cfg.SchemaVersioningEndpoint(cfg.GraphQL.Path)
+	if cfg.URISchema == "https://" {
+		gqlServerPath = cfg.RealSchemaVersioningEndpoint(cfg.GraphQL.Path)
+	}
 	return graphql.NewClient(gqlServerPath, httpClient)
 }
 

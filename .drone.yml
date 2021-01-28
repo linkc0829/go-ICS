@@ -133,7 +133,7 @@ steps:
   image: plugins/gcr
   settings:
     repo: asia.gcr.io/red-atlas-303101/icsharing
-    tags: latest
+    dockerfile: docker/prod.dockerfile
     json_key:
       from_secret: google_credentials
 

@@ -70,3 +70,7 @@ func (s *ServerConfig) SchemaVersioningEndpoint(path string) string {
 	}
 	return s.URISchema + s.Host + ":" + s.Port + "/api/" + s.ApiVer + path
 }
+
+func (s *ServerConfig) RealSchemaVersioningEndpoint(path string) string {
+	return s.URISchema + s.CookiesDomain + "/api/" + s.ApiVer + path
+}
