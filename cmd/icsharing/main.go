@@ -102,7 +102,7 @@ func main() {
 		r := server.SetupServer(serverconf, db)
 		log.Fatal(http.Serve(autocert.NewListener("icsharing.com", "www.icsharing.com"), r))
 	} else {
-		log.Fatal(server.SetupServer(serverconf, db).Run())
+		log.Fatal(server.SetupServer(serverconf, db).Run(serverconf.Host + ":" + serverconf.Port))
 	}
 }
 
