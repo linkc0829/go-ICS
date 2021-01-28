@@ -234,6 +234,7 @@ function disableUpdate(type){
   for(let i = 0; i < children.length; i++){
     children[i].querySelector('#delete').remove();
     children[i].querySelector('#update').remove();
+    children[i].querySelector('#vote').remove();
   }
 }
 
@@ -300,7 +301,8 @@ if(last.length != 24){
   document.querySelector('#addFriend').style.display = 'none';
 }
 if(url[3] == 'history'){
-  disableUpdate();
+  disableUpdate(INCOME);
+  disableUpdate(COST);
 }
 
 //load user portfolio, for init or reload
