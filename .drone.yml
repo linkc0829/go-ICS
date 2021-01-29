@@ -132,6 +132,7 @@ steps:
 - name: publish_gcp
   image: plugins/gcr
   settings:
+    registry: asia.gcr.io
     repo: red-atlas-303101/icsharing
     dockerfile: docker/prod.dockerfile
     json_key:
