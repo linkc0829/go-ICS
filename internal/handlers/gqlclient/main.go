@@ -1,6 +1,8 @@
 package gqlclient
 
 import (
+	"context"
+	"crypto/tls"
 	"errors"
 	"net/http"
 
@@ -18,21 +20,20 @@ func newClient(c *gin.Context, cfg *utils.ServerConfig) *graphql.Client {
 		&oauth2.Token{AccessToken: accessToken},
 	)
 	httpClient := oauth2.NewClient(c, src)
+	gqlServerPath := cfg.SchemaVersioningEndpoint(cfg.GraphQL.Path)
 
 	//Skip verify SSL certificate if using SSL connection
-	// if cfg.URISchema == "https://" {
-	// 	tr := &http.Transport{
-	// 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	// 	}
-	// 	sslcli := &http.Client{Transport: tr}
-	// 	ctx := context.WithValue(c, oauth2.HTTPClient, sslcli)
-
-	// 	httpClient = oauth2.NewClient(ctx, src)
-	// }
-	gqlServerPath := cfg.SchemaVersioningEndpoint(cfg.GraphQL.Path)
 	if cfg.URISchema == "https://" {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		sslcli := &http.Client{Transport: tr}
+		ctx := context.WithValue(c, oauth2.HTTPClient, sslcli)
+
+		httpClient = oauth2.NewClient(ctx, src)
 		gqlServerPath = cfg.RealSchemaVersioningEndpoint(cfg.GraphQL.Path)
 	}
+
 	return graphql.NewClient(gqlServerPath, httpClient)
 }
 
