@@ -41,6 +41,7 @@ You can also build environment with Docker(see followings)
 
 ### Deploy to GCP Compute Engine
 https://icsharing.com/
+* could have invalid certificate if renewal limits exceed, switch to staging environment and using [Fake LE Intermediate X1](https://letsencrypt.org/certs/fakeleintermediatex1.pem)
 
 
 ### Deploy to GCP Cloud Run
@@ -49,6 +50,12 @@ https://icsharing-amyzrpzc2q-de.a.run.app/
 
 ### Deploy to Heroku
 https://icsharing.herokuapp.com/
+
+
+### Demo Account
+* Username: test567
+* email: test567@gmail.com
+* password: 123456
 
 
 ### CI/CD with drone
