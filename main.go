@@ -11,6 +11,7 @@ import (
 	"github.com/linkc0829/go-icsharing/pkg/server"
 	"github.com/linkc0829/go-icsharing/pkg/utils"
 	"github.com/linkc0829/go-icsharing/pkg/utils/datasource"
+	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
 )
 
@@ -100,7 +101,20 @@ func main() {
 
 	if serverconf.URISchema == "https://" {
 		r := server.SetupServer(serverconf, db)
-		log.Fatal(http.Serve(autocert.NewListener("icsharing.com", "www.icsharing.com"), r))
+		//using staging environment
+		//https://community.letsencrypt.org/t/golang-autocert-staging-environment/128912/3
+		m := &autocert.Manager{
+			Client: &acme.Client{
+				DirectoryURL: "https://acme-staging-v02.api.letsencrypt.org/directory",
+			},
+			Cache:      autocert.DirCache("secret-dir"),
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist("icsharing.com", "www.icsharing.com"),
+		}
+		log.Fatal(http.Serve(m.Listener(), r))
+
+		//use above if exceed renewal limits
+		//log.Fatal(http.Serve(autocert.NewListener("icsharing.com", "www.icsharing.com"), r))
 	} else {
 		log.Fatal(server.SetupServer(serverconf, db).Run(serverconf.Host + ":" + serverconf.Port))
 	}

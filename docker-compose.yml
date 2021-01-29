@@ -9,7 +9,8 @@ services:
     env_file: 
       - .env
     ports:
-      - "8080:8080"
+      - "443:443"
+    
       
   mongo:
     container_name: mongodb
