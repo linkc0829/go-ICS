@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if(type == COST){
                   addPortfolio(type, res.body.CreateCost);
                 }
-                else{
+                else if(type == INCOME){
                   addPortfolio(type, res.body.CreateIncome);
                 }
             })
