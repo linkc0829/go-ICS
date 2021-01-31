@@ -87,13 +87,13 @@ https://icsharing.herokuapp.com/
 ### 後端使用技術
 1. [Gin-gonic](https://github.com/gin-gonic/gin): 使用Gin作為web框架
 2. [gqlgen](https://github.com/99designs/gqlgen): 使用gqlgen套件架設GraphQL Server端
-3. [jwt-go](github.com/dgrijalva/jwt-go): 使用JSON Web Token做使用者認證，在middleware檢查權限，發放access token(存在momory)與refresh token(存在cookies)，並實作soft refresh
-4. [Goth](github.com/markbates/goth): 使用Goth的套件提供OAuth2使用者認證
-5. [MongoDB](go.mongodb.org/mongo-driver): 儲存使用者資料與收入支出資料，並利用Goroutine實作Job Queue進行資料同步最佳化，方便擴展部屬
-6. [GORM](github.com/jinzhu/gorm): 使用GORM在memory建立sqlite，作為軟體試用介面的資料庫
+3. [jwt-go](https://github.com/dgrijalva/jwt-go): 使用JSON Web Token做使用者認證，在middleware檢查權限，發放access token(存在momory)與refresh token(存在cookies)，並實作soft refresh
+4. [Goth](https://github.com/markbates/goth): 使用Goth的套件提供OAuth2使用者認證
+5. [MongoDB](https://go.mongodb.org/mongo-driver): 儲存使用者資料與收入支出資料，並利用Goroutine實作Job Queue進行資料同步最佳化，方便擴展部屬
+6. [GORM](https://github.com/jinzhu/gorm): 使用GORM在memory建立sqlite，作為軟體試用介面的資料庫
 7. [Redigo](https://github.com/gomodule/redigo): 使用套件作為Redis Client，存取Redis中的refresh token
-8. [graphql](github.com/shurcooL/graphql): 架設GraphQL Client端，提供restful API
-9. [autocert](golang.org/x/crypto/acme/autocert): 自動跟Let's Encrypt要求SSL憑證，建立HTTPS server
+8. [graphql](https://github.com/shurcooL/graphql): 架設GraphQL Client端，提供restful API
+9. [autocert](https://golang.org/x/crypto/acme/autocert): 自動跟Let's Encrypt要求SSL憑證，建立HTTPS server
 
 
 ### Restful + GraphQL 的API
