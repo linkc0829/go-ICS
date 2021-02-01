@@ -441,6 +441,7 @@ async function initPortfolio(user, type){
 
 /* Add a Portfolio item. */
 function addPortfolio(res, type) {
+  if(type != COST && type != INCOME) return;
   let id = res.Id;
   let description = res.Description;
   let amount = res.Amount;

@@ -31,7 +31,7 @@ func init() {
 	//heroku network setting
 	if heroku == "true" {
 		port = utils.MustGet("PORT")
-		log.Println("Deploy in Heroku")
+		log.Println("Deploy in Heroku, port: " + port)
 	}
 
 	if demo == "on" {
