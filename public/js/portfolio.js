@@ -300,10 +300,10 @@ if(last.length != 24){
   document.querySelector('#history').style.display = 'none';
   document.querySelector('#addFriend').style.display = 'none';
 }
-if(url[3] == 'history'){
-  disableUpdate(INCOME);
-  disableUpdate(COST);
-}
+// if(url[3] == 'history'){
+//   disableUpdate(INCOME);
+//   disableUpdate(COST);
+// }
 
 //load user portfolio, for init or reload
 async function initHistory(user, type, range){
@@ -325,7 +325,8 @@ async function initHistory(user, type, range){
           }
           for (let i = 0; i < portfolio.length; i++) {
             addPortfolio(portfolio[i], type);
-        }
+          }
+          disableUpdate(type);
       })
       .catch(function (err) {
         alert(err);
@@ -336,7 +337,7 @@ function reloadHistory(range){
   isLogin();
   initHistory(currentUser, INCOME, range);
   initHistory(currentUser, COST, range);
-  disableUpdate();
+  //disableUpdate();
 }
 
 function casePortfolioType(type, upper){
