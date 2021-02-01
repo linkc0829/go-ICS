@@ -118,7 +118,7 @@ func main() {
 		//use above if exceed renewal limits
 		//log.Fatal(http.Serve(autocert.NewListener("icsharing.com", "www.icsharing.com"), r))
 	} else {
-		log.Fatal(server.SetupServer(serverconf, db).Run(serverconf.Host + ":" + serverconf.Port))
+		log.Fatal(server.SetupServer(serverconf, db).Run(":" + serverconf.Port))
 	}
 }
 

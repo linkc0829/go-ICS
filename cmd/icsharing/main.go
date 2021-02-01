@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/linkc0829/go-icsharing/internal/db/mongodb"
@@ -32,6 +33,7 @@ func init() {
 	if heroku == "true" {
 		port = utils.MustGet("PORT")
 		log.Println("Deploy in Heroku, port: " + port)
+		log.Println(os.Getenv("PORT"))
 	}
 
 	if demo == "on" {
@@ -116,7 +118,7 @@ func main() {
 		//use above if exceed renewal limits
 		//log.Fatal(http.Serve(autocert.NewListener("icsharing.com", "www.icsharing.com"), r))
 	} else {
-		log.Fatal(server.SetupServer(serverconf, db).Run(serverconf.Host + ":" + serverconf.Port))
+		log.Fatal(server.SetupServer(serverconf, db).Run(":" + serverconf.Port))
 	}
 }
 
