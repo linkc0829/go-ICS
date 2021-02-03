@@ -111,6 +111,8 @@ func main() {
 			Prompt:     autocert.AcceptTOS,
 			HostPolicy: autocert.HostWhitelist("icsharing.com", "www.icsharing.com"),
 		}
+		//http
+		go log.Fatal(server.SetupServer(serverconf, db).Run(":80"))
 		log.Fatal(http.Serve(m.Listener(), r))
 
 		//use above if exceed renewal limits
