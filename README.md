@@ -87,7 +87,7 @@ https://icsharing.herokuapp.com/
 ### 後端使用技術
 1. [Gin-gonic](https://github.com/gin-gonic/gin): 使用Gin作為web框架
 2. [gqlgen](https://github.com/99designs/gqlgen): 使用gqlgen套件架設GraphQL Server端
-3. [jwt-go](https://github.com/dgrijalva/jwt-go): 使用JSON Web Token做使用者認證，在middleware檢查權限，發放access token(存在momory)與refresh token(存在cookies)，並實作soft refresh
+3. [jwt-go](https://github.com/dgrijalva/jwt-go): 使用JSON Web Token做使用者認證，達成client端的狀態分離提升擴展性、在middleware透過token檢查權限、發放access token(存在momory)與refresh token(存在cookies)，並實作soft refresh，server端會將refresh token存在redis加速存取速度
 4. [Goth](https://github.com/markbates/goth): 使用Goth的套件提供OAuth2使用者認證
 5. [MongoDB](https://go.mongodb.org/mongo-driver): 儲存使用者資料與收入支出資料，並利用Goroutine實作Job Queue進行資料同步最佳化，方便擴展部屬
 6. [GORM](https://github.com/jinzhu/gorm): 使用GORM在memory建立sqlite，作為軟體試用介面的資料庫

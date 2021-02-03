@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/linkc0829/go-icsharing/internal/db/mongodb"
@@ -33,7 +32,6 @@ func init() {
 	if heroku == "true" {
 		port = utils.MustGet("PORT")
 		log.Println("Deploy in Heroku, port: " + port)
-		log.Println(os.Getenv("PORT"))
 	}
 
 	if demo == "on" {
