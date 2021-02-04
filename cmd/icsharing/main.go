@@ -14,7 +14,6 @@ import (
 	"github.com/linkc0829/go-icsharing/pkg/utils/datasource"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
 )
 
@@ -111,20 +110,20 @@ func main() {
 		r := server.SetupServer(serverconf, db)
 		//using staging environment
 		//https://community.letsencrypt.org/t/golang-autocert-staging-environment/128912/3
-		m := &autocert.Manager{
-			Client: &acme.Client{
-				DirectoryURL: "https://acme-staging-v02.api.letsencrypt.org/directory",
-			},
-			Cache:      autocert.DirCache("secret-dir"),
-			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist("icsharing.com", "www.icsharing.com"),
-		}
+		// m := &autocert.Manager{
+		// 	Client: &acme.Client{
+		// 		DirectoryURL: "https://acme-staging-v02.api.letsencrypt.org/directory",
+		// 	},
+		// 	Cache:      autocert.DirCache("secret-dir"),
+		// 	Prompt:     autocert.AcceptTOS,
+		// 	HostPolicy: autocert.HostWhitelist("icsharing.com", "www.icsharing.com"),
+		// }
 		//http
 		go r.Run(":80")
-		log.Fatal(http.Serve(m.Listener(), r))
+		//log.Fatal(http.Serve(m.Listener(), r))
 
 		//use above if exceed renewal limits
-		//log.Fatal(http.Serve(autocert.NewListener("icsharing.com", "www.icsharing.com"), r))
+		log.Fatal(http.Serve(autocert.NewListener("icsharing.com", "www.icsharing.com"), r))
 	} else {
 		log.Fatal(server.SetupServer(serverconf, db).Run(":" + serverconf.Port))
 	}
