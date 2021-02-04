@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"strings"
@@ -12,8 +11,6 @@ import (
 	"github.com/linkc0829/go-icsharing/pkg/server"
 	"github.com/linkc0829/go-icsharing/pkg/utils"
 	"github.com/linkc0829/go-icsharing/pkg/utils/datasource"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/acme/autocert"
 )
 
@@ -101,13 +98,8 @@ func main() {
 		Redis:  redis,
 	}
 
-	go func() {
-		id := primitive.NewObjectID()
-		mongoDB.Users.InsertOne(context.TODO(), bson.M{"_id": id, "userid": "testgoroutine"})
-	}()
-
+	r := server.SetupServer(serverconf, db)
 	if serverconf.URISchema == "https://" {
-		r := server.SetupServer(serverconf, db)
 		//using staging environment
 		//https://community.letsencrypt.org/t/golang-autocert-staging-environment/128912/3
 		// m := &autocert.Manager{
@@ -125,7 +117,7 @@ func main() {
 		//use above if exceed renewal limits
 		log.Fatal(http.Serve(autocert.NewListener("icsharing.com", "www.icsharing.com"), r))
 	} else {
-		log.Fatal(server.SetupServer(serverconf, db).Run(":" + serverconf.Port))
+		log.Fatal(r.Run(":" + serverconf.Port))
 	}
 }
 
