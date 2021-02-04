@@ -81,7 +81,7 @@ https://icsharing.herokuapp.com/
 3. 登入/註冊/登出: 除了可在app上註冊使用者帳戶，也可連結google/facebook等帳戶登入
 4. 社交功能: 可以加別人為好友(friend)，表示願意分享收入支出給朋友觀看，同時您的名字也會出現在對方的追隨者(follower)清單
 5. 權限管理: 可以將收入支出設定PUBLIC(供所有人觀看)，FRIEND(僅供朋友觀看)，PRIVATE(僅自己能看)
-6. 附單元測試，效能測試
+6. 附API整合測試
 
 
 ### 後端使用技術
