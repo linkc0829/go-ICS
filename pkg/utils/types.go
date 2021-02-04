@@ -52,9 +52,9 @@ type AuthProvider struct {
 
 //ListenEndpoint returns the endpoint string
 func (s *ServerConfig) ListenEndpoint() string {
-	if s.Port == "80" || s.Port == "443" {
-		return s.Host
-	}
+	// if s.Port == "80" || s.Port == "443" {
+	// 	return s.Host
+	// }
 	return s.Host + ":" + s.Port
 }
 
@@ -65,9 +65,9 @@ func (s *ServerConfig) VersioningEndpoint(path string) string {
 
 //SchemaVersioningEndpoint return the complete URI path
 func (s *ServerConfig) SchemaVersioningEndpoint(path string) string {
-	if s.Port == "80" {
-		return s.URISchema + s.Host + "/" + s.ApiVer + path
-	}
+	// if s.Port == "80" {
+	// 	return s.URISchema + s.Host + "/" + s.ApiVer + path
+	// }
 	return s.URISchema + s.Host + ":" + s.Port + "/api/" + s.ApiVer + path
 }
 

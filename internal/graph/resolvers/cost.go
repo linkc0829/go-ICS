@@ -3,13 +3,18 @@ package resolvers
 import (
 	"context"
 	"errors"
+	"math/rand"
+	"sync"
+	"time"
 
+	"github.com/linkc0829/go-icsharing/internal/db/mongodb"
 	dbModel "github.com/linkc0829/go-icsharing/internal/db/mongodb/models"
 	"github.com/linkc0829/go-icsharing/internal/graph/models"
 	"github.com/linkc0829/go-icsharing/pkg/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	tf "github.com/linkc0829/go-icsharing/internal/graph/resolvers/transformer"
 )
@@ -154,7 +159,28 @@ func (r *mutationResolver) VoteCost(ctx context.Context, id string) (int, error)
 	upd := bson.M{"$set": bson.M{"vote": cost.Vote}}
 	_, err = r.DB.Cost.UpdateOne(ctx, q, upd)
 	if err != nil {
-		return -1, err
+		if err == mongo.ErrNoDocuments {
+			//update fail, go to optimistic concurrency control for mongoTransaction
+			wg := sync.WaitGroup{}
+			wg.Add(1)
+			go func(wg *sync.WaitGroup) {
+				rand.Seed(time.Now().UTC().UnixNano())
+				channelNumber := rand.Intn(10)
+				result := make(chan []primitive.ObjectID)
+				mongodb.CostChan[channelNumber] <- mongodb.CostData{
+					Cost:   cost,
+					Voter:  me.ID,
+					Result: &result,
+				}
+				select {
+				case cost.Vote = <-result:
+					wg.Done()
+				}
+			}(&wg)
+			wg.Wait()
+		} else {
+			return -1, err
+		}
 	}
 	return len(cost.Vote), nil
 }

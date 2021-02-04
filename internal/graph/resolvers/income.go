@@ -3,7 +3,11 @@ package resolvers
 import (
 	"context"
 	"errors"
+	"math/rand"
+	"sync"
+	"time"
 
+	"github.com/linkc0829/go-icsharing/internal/db/mongodb"
 	dbModel "github.com/linkc0829/go-icsharing/internal/db/mongodb/models"
 	"github.com/linkc0829/go-icsharing/internal/graph/models"
 	tf "github.com/linkc0829/go-icsharing/internal/graph/resolvers/transformer"
@@ -11,6 +15,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (r *mutationResolver) CreateIncome(ctx context.Context, input models.CreateIncomeInput) (*models.Income, error) {
@@ -150,10 +155,32 @@ func (r *mutationResolver) VoteIncome(ctx context.Context, id string) (int, erro
 	}
 
 	//update DB
-	upd := bson.M{"$set": bson.M{"vote": income.Vote}}
+	q = bson.M{"_id": incomeID, "voteVer": income.VoteVer}
+	upd := bson.M{"$set": bson.M{"vote": income.Vote, "voteVer": income.VoteVer + 1}}
 	_, err = r.DB.Income.UpdateOne(ctx, q, upd)
 	if err != nil {
-		return -1, err
+		if err == mongo.ErrNoDocuments {
+			//update fail, go to optimistic concurrency control for mongoTransaction
+			wg := sync.WaitGroup{}
+			wg.Add(1)
+			go func(wg *sync.WaitGroup) {
+				rand.Seed(time.Now().UTC().UnixNano())
+				channelNumber := rand.Intn(10)
+				result := make(chan []primitive.ObjectID)
+				mongodb.IncomeChan[channelNumber] <- mongodb.IncomeData{
+					Income: income,
+					Voter:  me.ID,
+					Result: &result,
+				}
+				select {
+				case income.Vote = <-result:
+					wg.Done()
+				}
+			}(&wg)
+			wg.Wait()
+		} else {
+			return -1, err
+		}
 	}
 	return len(income.Vote), nil
 }

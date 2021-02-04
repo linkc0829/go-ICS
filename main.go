@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strings"
@@ -11,6 +12,8 @@ import (
 	"github.com/linkc0829/go-icsharing/pkg/server"
 	"github.com/linkc0829/go-icsharing/pkg/utils"
 	"github.com/linkc0829/go-icsharing/pkg/utils/datasource"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
 )
@@ -99,6 +102,11 @@ func main() {
 		Redis:  redis,
 	}
 
+	go func() {
+		id := primitive.NewObjectID()
+		mongoDB.Users.InsertOne(context.TODO(), bson.M{"_id": id, "userid": "testgoroutine"})
+	}()
+
 	if serverconf.URISchema == "https://" {
 		r := server.SetupServer(serverconf, db)
 		//using staging environment
@@ -112,7 +120,7 @@ func main() {
 			HostPolicy: autocert.HostWhitelist("icsharing.com", "www.icsharing.com"),
 		}
 		//http
-		go log.Fatal(server.SetupServer(serverconf, db).Run(":80"))
+		go server.SetupServer(serverconf, db).Run(":80")
 		log.Fatal(http.Serve(m.Listener(), r))
 
 		//use above if exceed renewal limits
