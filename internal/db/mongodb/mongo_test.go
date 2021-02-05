@@ -16,9 +16,21 @@ import (
 
 func TestConnectMongoDB(t *testing.T) {
 	runs := 50
+
+	mongoRoot := utils.MustGet("MONGO_INITDB_ROOT_USERNAME")
+	mongoRootPWD := utils.MustGet("MONGO_INITDB_ROOT_PASSWORD")
+	mongoHost := utils.MustGet("MONGO_HOST")
+	connectDB := utils.MustGet("MONGO_INITDB_DATABASE")
+	mongoDSN := "mongodb://" + mongoRoot + ":" + mongoRootPWD + "@" + mongoHost + "/" + connectDB + "?authSource=admin"
+
+	demo := utils.MustGet("DEMO_MODE")
+	if demo == "on" {
+		mongoDSN = utils.MustGet("MONGO_CONNECTION_DSN")
+	}
+
 	conf := &utils.ServerConfig{
 		MongoDB: utils.MGDBConfig{
-			DSN: utils.MustGet("MONGO_CONNECTION_DSN"),
+			DSN: mongoDSN,
 		},
 	}
 	db := ConnectMongoDB(conf)

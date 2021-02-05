@@ -29,7 +29,6 @@ environment:
     MONGO_HOST: mongo:27017    
     MONGO_INITDB_DATABASE: users
     #Redis Config
-    REDIS_ENDPOINT: redis-14546.c1.asia-northeast1-1.gce.cloud.redislabs.com:14546
     REDIS_HOST: redis:6379
     # Auth config (Goth, JWT, etc)
     AUTH_API_KEY_HEADER: x-api-key
@@ -63,6 +62,8 @@ steps:
         from_secret: MONGO_INITDB_ROOT_USERNAME
     MONGO_INITDB_ROOT_PASSWORD: 
         from_secret: MONGO_INITDB_ROOT_PASSWORD
+    REDIS_ENDPOINT: 
+        from_secret: REDIS_ENDPOINT
     REDIS_PWD: 
         from_secret: REDIS_PWD
     PROVIDER_AUTH0_KEY:
@@ -90,6 +91,8 @@ steps:
         from_secret: MONGO_INITDB_ROOT_USERNAME
     MONGO_INITDB_ROOT_PASSWORD: 
         from_secret: MONGO_INITDB_ROOT_PASSWORD
+    REDIS_ENDPOINT: 
+        from_secret: REDIS_ENDPOINT
     REDIS_PWD: 
         from_secret: REDIS_PWD
     PROVIDER_AUTH0_KEY:
