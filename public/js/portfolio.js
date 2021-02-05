@@ -503,9 +503,9 @@ function addPortfolio(res, type) {
   vote_label.innerText = vote;
   let voteBtn = form.querySelector('#vote');
   voteBtn.addEventListener('click', (e)=>{
-    isLogin();
     e.preventDefault();
-    //vote_label.innerText += 1;
+    isLogin();
+    vote_label.innerText += 1;
     let target = '/api/v1/' + casePortfolioType(type, false) + '/vote/' + id;
     superagent
         .put(target)

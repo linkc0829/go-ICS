@@ -89,7 +89,7 @@ https://icsharing.herokuapp.com/
 2. [gqlgen](https://github.com/99designs/gqlgen): 使用gqlgen套件架設GraphQL Server端
 3. [jwt-go](https://github.com/dgrijalva/jwt-go): 使用JSON Web Token做使用者認證，達成client端的狀態分離提升擴展性、在middleware透過token檢查權限、發放access token(存在momory)與refresh token(存在cookies)，並實作soft refresh，server端會將refresh token存在redis加速存取速度
 4. [Goth](https://github.com/markbates/goth): 使用Goth的套件提供OAuth2使用者認證
-5. [MongoDB](https://go.mongodb.org/mongo-driver): 儲存使用者資料與收入支出資料，並利用Goroutine實作Multiple Queue進行資料同步最佳化，方便擴展部屬
+5. [MongoDB](https://go.mongodb.org/mongo-driver): 儲存使用者資料與收入支出資料，並利用Goroutine實作Multiple Queue進行資料同步最佳化，方便擴展部屬([附單元測試](https://github.com/linkc0829/go-icsharing/blob/master/internal/db/mongodb/mongo_test.go))
 6. [GORM](https://github.com/jinzhu/gorm): 使用GORM在memory建立sqlite，作為軟體試用介面的資料庫
 7. [Redigo](https://github.com/gomodule/redigo): 使用套件作為Redis Client，存取Redis中的refresh token
 8. [graphql](https://github.com/shurcooL/graphql): 架設GraphQL Client端，提供restful API
@@ -112,5 +112,3 @@ https://icsharing.herokuapp.com/
 ### DevOps使用技術
 1. Docker: 利用容器技術方便擴展及部屬, docker-compose up 完成架構部屬
 2. Drone: CI/CD工具，自動執行單元測試，並發布映像檔至Dockerhub、Google與Heroku Container Registry
-
-

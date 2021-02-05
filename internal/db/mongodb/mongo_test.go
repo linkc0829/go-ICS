@@ -50,6 +50,7 @@ func TestConnectMongoDB(t *testing.T) {
 	for i := 0; i < runs; i++ {
 		voter = append(voter, primitive.NewObjectID())
 	}
+	//vote many times in background
 	wg := sync.WaitGroup{}
 	wg.Add(runs)
 	for _, v := range voter {
