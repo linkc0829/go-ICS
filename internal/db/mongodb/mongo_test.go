@@ -2,7 +2,7 @@ package mongodb
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"math/rand"
 	"sync"
 	"testing"
@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func TestConnectMongoDB(t *testing.T) {
+func Test_initMultipleQueue(t *testing.T) {
 	runs := 50
 
 	mongoRoot := utils.MustGet("MONGO_INITDB_ROOT_USERNAME")
@@ -36,63 +36,64 @@ func TestConnectMongoDB(t *testing.T) {
 	db := ConnectMongoDB(conf)
 	ctx := context.Background()
 
-	income := models.IncomeModel{
-		ID:          primitive.NewObjectID(),
-		Description: "TEST VOTE",
-		VoteVer:     0,
-	}
-	_, err := db.Income.InsertOne(ctx, income)
-	if err != nil {
-		t.Fatal(err)
-	}
+	t.Run(fmt.Sprintf("test Vote Income for %d times", runs), func(t *testing.T) {
+		income := models.IncomeModel{
+			ID:          primitive.NewObjectID(),
+			Description: "TEST VOTE",
+			VoteVer:     0,
+		}
+		_, err := db.Income.InsertOne(ctx, income)
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	voter := []primitive.ObjectID{}
-	for i := 0; i < runs; i++ {
-		voter = append(voter, primitive.NewObjectID())
-	}
-	//vote many times in background
-	wg := sync.WaitGroup{}
-	wg.Add(runs)
-	for _, v := range voter {
-		go MongoIncomeOCT(&wg, income, v)
-	}
-	wg.Wait()
+		voter := []primitive.ObjectID{}
+		for i := 0; i < runs; i++ {
+			voter = append(voter, primitive.NewObjectID())
+		}
+		//vote many times in background
+		wg := sync.WaitGroup{}
+		wg.Add(runs)
+		for _, v := range voter {
+			go MongoIncomeOCT(&wg, income, v)
+		}
+		wg.Wait()
 
-	q := bson.M{"_id": income.ID}
-	err = db.Income.FindOne(ctx, q).Decode(&income)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if income.VoteVer != runs {
-		t.Error("wrong voteVer")
-	}
-	if len(income.Vote) != runs {
-		t.Error("wrong Vote")
-	}
+		q := bson.M{"_id": income.ID}
+		err = db.Income.FindOne(ctx, q).Decode(&income)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if income.VoteVer != runs {
+			t.Error("wrong voteVer")
+		}
+		if len(income.Vote) != runs {
+			t.Error("wrong Vote")
+		}
 
-	//vote again, should get zero vote
-	wg = sync.WaitGroup{}
-	wg.Add(runs)
-	for _, v := range voter {
-		go MongoIncomeOCT(&wg, income, v)
-	}
-	wg.Wait()
+		//vote again, should get zero vote
+		wg = sync.WaitGroup{}
+		wg.Add(runs)
+		for _, v := range voter {
+			go MongoIncomeOCT(&wg, income, v)
+		}
+		wg.Wait()
 
-	q = bson.M{"_id": income.ID}
-	err = db.Income.FindOne(ctx, q).Decode(&income)
-	if err != nil {
-		t.Fatal(err)
-	}
+		q = bson.M{"_id": income.ID}
+		err = db.Income.FindOne(ctx, q).Decode(&income)
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	if len(income.Vote) != 0 {
-		t.Error("wrong Vote, should be zero")
-		log.Println(len(income.Vote))
-	}
+		if len(income.Vote) != 0 {
+			t.Error("wrong Vote, should be zero")
+		}
 
-	_, err = db.Income.DeleteOne(ctx, q)
-	if err != nil {
-		t.Fatal(err)
-	}
+		_, err = db.Income.DeleteOne(ctx, q)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
 }
 
 //MongoDB optimistic concurancy transaction

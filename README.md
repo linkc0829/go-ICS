@@ -112,3 +112,10 @@ https://icsharing.herokuapp.com/
 ### DevOps使用技術
 1. Docker: 利用容器技術方便擴展及部屬, docker-compose up 完成架構部屬
 2. Drone: CI/CD工具，自動執行單元測試，並發布映像檔至Dockerhub、Google與Heroku Container Registry
+
+
+### 未來發展方向
+1. 將前後端分開部屬
+2. 將後端發放jwt token的功能獨立部屬
+3. 前端加入數據分析功能
+4. 實作graceful shutdown，用docker-compose達成rolling update

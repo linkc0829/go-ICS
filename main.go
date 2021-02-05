@@ -15,7 +15,6 @@ import (
 )
 
 var serverconf *utils.ServerConfig
-var ServerConf *utils.ServerConfig
 
 func init() {
 	demo := utils.MustGet("DEMO_MODE")
@@ -80,7 +79,6 @@ func init() {
 			},
 		},
 	}
-	ServerConf = serverconf
 }
 
 func main() {

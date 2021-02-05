@@ -52,8 +52,6 @@ func ConnectMongoDB(cfg *utils.ServerConfig) (db *MongoDB) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	IncomeChan = make([]chan IncomeData, 10)
-	CostChan = make([]chan CostData, 10)
 
 	db = &MongoDB{
 		Session:       client,
@@ -66,6 +64,15 @@ func ConnectMongoDB(cfg *utils.ServerConfig) (db *MongoDB) {
 		IncomeHistory: client.Database("ics").Collection("incomeHistory"),
 		CostHistory:   client.Database("ics").Collection("costHistory"),
 	}
+	initMultipleQueue(db)
+	return
+}
+
+//init multiple queue for mongoDB optimistic concurrency transaction
+func initMultipleQueue(db *MongoDB) {
+	IncomeChan = make([]chan IncomeData, 10)
+	CostChan = make([]chan CostData, 10)
+
 	for i := range IncomeChan {
 		IncomeChan[i] = make(chan IncomeData)
 		go CommitIncomeVote(context.Background(), &IncomeChan[i], db)
@@ -74,7 +81,7 @@ func ConnectMongoDB(cfg *utils.ServerConfig) (db *MongoDB) {
 		CostChan[i] = make(chan CostData)
 		go CommitCostVote(context.Background(), &CostChan[i], db)
 	}
-	return
+
 }
 
 //CloseDB will dissconnect to MongoDB
