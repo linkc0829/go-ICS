@@ -81,7 +81,7 @@ https://icsharing.herokuapp.com/
 3. 登入/註冊/登出: 除了可在app上註冊使用者帳戶，也可連結google/facebook等帳戶登入
 4. 社交功能: 可以加別人為好友(friend)，表示願意分享收入支出給朋友觀看，同時您的名字也會出現在對方的追隨者(follower)清單
 5. 權限管理: 可以將收入支出設定PUBLIC(供所有人觀看)，FRIEND(僅供朋友觀看)，PRIVATE(僅自己能看)
-6. 附API整合測試
+6. 附單元測試，整合測試
 
 
 ### 後端使用技術
@@ -89,7 +89,7 @@ https://icsharing.herokuapp.com/
 2. [gqlgen](https://github.com/99designs/gqlgen): 使用gqlgen套件架設GraphQL Server端
 3. [jwt-go](https://github.com/dgrijalva/jwt-go): 使用JSON Web Token做使用者認證，達成client端的狀態分離提升擴展性、在middleware透過token檢查權限、發放access token(存在momory)與refresh token(存在cookies)，並實作soft refresh，server端會將refresh token存在redis加速存取速度
 4. [Goth](https://github.com/markbates/goth): 使用Goth的套件提供OAuth2使用者認證
-5. [MongoDB](https://go.mongodb.org/mongo-driver): 儲存使用者資料與收入支出資料，並利用Goroutine實作Job Queue進行資料同步最佳化，方便擴展部屬
+5. [MongoDB](https://go.mongodb.org/mongo-driver): 儲存使用者資料與收入支出資料，並利用Goroutine實作Multiple Queue進行資料同步最佳化，方便擴展部屬
 6. [GORM](https://github.com/jinzhu/gorm): 使用GORM在memory建立sqlite，作為軟體試用介面的資料庫
 7. [Redigo](https://github.com/gomodule/redigo): 使用套件作為Redis Client，存取Redis中的refresh token
 8. [graphql](https://github.com/shurcooL/graphql): 架設GraphQL Client端，提供restful API

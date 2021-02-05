@@ -5,7 +5,6 @@ import (
 	"errors"
 	"math/rand"
 	"sync"
-	"time"
 
 	"github.com/linkc0829/go-icsharing/internal/db/mongodb"
 	dbModel "github.com/linkc0829/go-icsharing/internal/db/mongodb/models"
@@ -161,23 +160,7 @@ func (r *mutationResolver) VoteIncome(ctx context.Context, id string) (int, erro
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			//update fail, go to optimistic concurrency control for mongoTransaction
-			wg := sync.WaitGroup{}
-			wg.Add(1)
-			go func(wg *sync.WaitGroup) {
-				rand.Seed(time.Now().UTC().UnixNano())
-				channelNumber := rand.Intn(10)
-				result := make(chan []primitive.ObjectID)
-				mongodb.IncomeChan[channelNumber] <- mongodb.IncomeData{
-					Income: income,
-					Voter:  me.ID,
-					Result: &result,
-				}
-				select {
-				case income.Vote = <-result:
-					wg.Done()
-				}
-			}(&wg)
-			wg.Wait()
+			MongoIncomeOCT(income, me.ID)
 		} else {
 			return -1, err
 		}
@@ -197,4 +180,24 @@ func (r *incomeResolver) Owner(ctx context.Context, obj *models.Income) (*models
 		return nil, err
 	}
 	return owner[0], nil
+}
+
+//MongoDB optimistic concurancy transaction
+func MongoIncomeOCT(income dbModel.IncomeModel, voter primitive.ObjectID) {
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		channelNumber := rand.Intn(100) % 10
+		result := make(chan []primitive.ObjectID)
+		mongodb.IncomeChan[channelNumber] <- mongodb.IncomeData{
+			Income: income,
+			Voter:  voter,
+			Result: &result,
+		}
+		select {
+		case income.Vote = <-result:
+			wg.Done()
+		}
+	}(&wg)
+	wg.Wait()
 }

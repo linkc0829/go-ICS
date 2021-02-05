@@ -198,3 +198,23 @@ func (r *costResolver) Owner(ctx context.Context, obj *models.Cost) (*models.Use
 	}
 	return owner[0], nil
 }
+
+//MongoDB optimistic concurancy transaction
+func MongoCostOCT(cost dbModel.CostModel, voter primitive.ObjectID) {
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		channelNumber := rand.Intn(100) % 10
+		result := make(chan []primitive.ObjectID)
+		mongodb.CostChan[channelNumber] <- mongodb.CostData{
+			Cost:   cost,
+			Voter:  voter,
+			Result: &result,
+		}
+		select {
+		case cost.Vote = <-result:
+			wg.Done()
+		}
+	}(&wg)
+	wg.Wait()
+}

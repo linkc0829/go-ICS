@@ -53,6 +53,7 @@ func ConnectMongoDB(cfg *utils.ServerConfig) (db *MongoDB) {
 		log.Fatal(err)
 	}
 	IncomeChan = make([]chan IncomeData, 10)
+	CostChan = make([]chan CostData, 10)
 
 	db = &MongoDB{
 		Session:       client,
@@ -68,6 +69,10 @@ func ConnectMongoDB(cfg *utils.ServerConfig) (db *MongoDB) {
 	for i := range IncomeChan {
 		IncomeChan[i] = make(chan IncomeData)
 		go CommitIncomeVote(context.Background(), &IncomeChan[i], db)
+	}
+	for i := range IncomeChan {
+		CostChan[i] = make(chan CostData)
+		go CommitCostVote(context.Background(), &CostChan[i], db)
 	}
 	return
 }
@@ -112,10 +117,13 @@ func CommitIncomeVote(ctx context.Context, in *chan IncomeData, db *MongoDB) {
 			}
 			//step3: update DB
 			q = bson.M{"_id": income.ID, "voteVer": income.VoteVer}
-			upd := bson.M{"$set": bson.M{"vote": income.Vote, "voteVer": income.VoteVer + 1}}
-			_, err := db.Income.UpdateOne(ctx, q, upd)
+			upd := bson.M{"$set": bson.M{"vote": income.Vote, "voteVer": (income.VoteVer + 1)}}
+			result, err := db.Income.UpdateOne(ctx, q, upd)
 			if err != nil {
-				log.Println("got error during commitVoteIncome: " + err.Error())
+				log.Fatal(err)
+			}
+			if result.ModifiedCount == 0 {
+				log.Println("CommitIncomeVote modify unsucceed, retry")
 				goto Loop
 			}
 			*data.Result <- income.Vote
@@ -156,9 +164,12 @@ func CommitCostVote(ctx context.Context, in *chan CostData, db *MongoDB) {
 			//step3: update DB
 			q = bson.M{"_id": cost.ID, "voteVer": cost.VoteVer}
 			upd := bson.M{"$set": bson.M{"vote": cost.Vote, "voteVer": cost.VoteVer + 1}}
-			_, err := db.Cost.UpdateOne(ctx, q, upd)
+			result, err := db.Income.UpdateOne(ctx, q, upd)
 			if err != nil {
-				log.Println("got error during commitVoteCost: " + err.Error())
+				log.Fatal(err)
+			}
+			if result.ModifiedCount == 0 {
+				log.Println("CommitCostVote modify unsucceed, retry")
 				goto Loop
 			}
 			*data.Result <- cost.Vote
