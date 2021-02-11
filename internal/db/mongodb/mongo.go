@@ -13,19 +13,13 @@ import (
 )
 
 var dbUser, pwd, dbName, dsn string
-var IncomeChan []chan IncomeData
-var CostChan []chan CostData
+var PortfolioChan []chan PortfolioData
 
-type IncomeData struct {
-	Income models.IncomeModel
-	Voter  primitive.ObjectID
-	Result *chan []primitive.ObjectID
-}
-
-type CostData struct {
-	Cost   models.CostModel
-	Voter  primitive.ObjectID
-	Result *chan []primitive.ObjectID
+type PortfolioData struct {
+	Portfolio models.PortfolioModel
+	Voter     primitive.ObjectID
+	DB        *mongo.Collection
+	Result    *chan []primitive.ObjectID
 }
 
 type MongoDB struct {
@@ -70,16 +64,11 @@ func ConnectMongoDB(cfg *utils.ServerConfig) (db *MongoDB) {
 
 //init multiple queue for mongoDB optimistic concurrency transaction
 func initMultipleQueue(db *MongoDB) {
-	IncomeChan = make([]chan IncomeData, 10)
-	CostChan = make([]chan CostData, 10)
+	PortfolioChan = make([]chan PortfolioData, 10)
 
-	for i := range IncomeChan {
-		IncomeChan[i] = make(chan IncomeData)
-		go CommitIncomeVote(context.Background(), &IncomeChan[i], db)
-	}
-	for i := range IncomeChan {
-		CostChan[i] = make(chan CostData)
-		go CommitCostVote(context.Background(), &CostChan[i], db)
+	for i := range PortfolioChan {
+		PortfolioChan[i] = make(chan PortfolioData)
+		go CommitPortfolioVote(context.Background(), &PortfolioChan[i], db)
 	}
 
 }
@@ -93,39 +82,39 @@ func CloseMongoDB(db *MongoDB) {
 }
 
 //implement mongodb transaction for vote income
-func CommitIncomeVote(ctx context.Context, in *chan IncomeData, db *MongoDB) {
+func CommitPortfolioVote(ctx context.Context, in *chan PortfolioData, db *MongoDB) {
 	for {
 		select {
 		case data := <-*in:
 		Loop:
 			//step1: reload data from mongo
-			q := bson.M{"_id": data.Income.ID}
-			income := models.IncomeModel{}
-			if err := db.Income.FindOne(context.TODO(), q).Decode(&income); err != nil {
+			q := bson.M{"_id": data.Portfolio.ID}
+			target := models.PortfolioModel{}
+			if err := db.Income.FindOne(context.TODO(), q).Decode(&target); err != nil {
 				panic("mongoDB err during commitIncomeVote: " + err.Error())
 			}
 			//step2: exec vote
 			//if already voted, revoke
-			length := len(income.Vote)
-			for i, v := range income.Vote {
+			length := len(target.Vote)
+			for i, v := range target.Vote {
 				if v == data.Voter {
 					if length == 1 {
-						income.Vote = income.Vote[:0]
+						target.Vote = target.Vote[:0]
 					} else {
-						income.Vote[i] = income.Vote[length-1]
-						income.Vote = income.Vote[:length-1]
+						target.Vote[i] = target.Vote[length-1]
+						target.Vote = target.Vote[:length-1]
 					}
 					break
 				}
 			}
-			if length == len(income.Vote) {
+			if length == len(target.Vote) {
 				//add to vote
-				income.Vote = append(income.Vote, data.Voter)
+				target.Vote = append(target.Vote, data.Voter)
 			}
 			//step3: update DB
-			q = bson.M{"_id": income.ID, "voteVer": income.VoteVer}
-			upd := bson.M{"$set": bson.M{"vote": income.Vote, "voteVer": (income.VoteVer + 1)}}
-			result, err := db.Income.UpdateOne(ctx, q, upd)
+			q = bson.M{"_id": target.ID, "voteVer": target.VoteVer}
+			upd := bson.M{"$set": bson.M{"vote": target.Vote, "voteVer": (target.VoteVer + 1)}}
+			result, err := data.DB.UpdateOne(ctx, q, upd)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -133,53 +122,7 @@ func CommitIncomeVote(ctx context.Context, in *chan IncomeData, db *MongoDB) {
 				log.Println("CommitIncomeVote modify unsucceed, retry")
 				goto Loop
 			}
-			*data.Result <- income.Vote
-		}
-	}
-}
-
-//implement mongodb transaction for vote cost
-func CommitCostVote(ctx context.Context, in *chan CostData, db *MongoDB) {
-	for {
-		select {
-		case data := <-*in:
-		Loop:
-			//step1: reload data from mongo
-			q := bson.M{"_id": data.Cost.ID}
-			cost := models.CostModel{}
-			if err := db.Cost.FindOne(context.TODO(), q).Decode(&cost); err != nil {
-				panic("mongoDB err during commitCostVote: " + err.Error())
-			}
-			//step2: exec vote
-			//if already voted, revoke
-			length := len(cost.Vote)
-			for i, v := range cost.Vote {
-				if v == data.Voter {
-					if length == 1 {
-						cost.Vote = cost.Vote[:0]
-					} else {
-						cost.Vote[i] = cost.Vote[length-1]
-						cost.Vote = cost.Vote[:length-1]
-					}
-					break
-				}
-			}
-			if length == len(cost.Vote) {
-				//add to vote
-				cost.Vote = append(cost.Vote, data.Voter)
-			}
-			//step3: update DB
-			q = bson.M{"_id": cost.ID, "voteVer": cost.VoteVer}
-			upd := bson.M{"$set": bson.M{"vote": cost.Vote, "voteVer": cost.VoteVer + 1}}
-			result, err := db.Income.UpdateOne(ctx, q, upd)
-			if err != nil {
-				log.Fatal(err)
-			}
-			if result.ModifiedCount == 0 {
-				log.Println("CommitCostVote modify unsucceed, retry")
-				goto Loop
-			}
-			*data.Result <- cost.Vote
+			*data.Result <- target.Vote
 		}
 	}
 }

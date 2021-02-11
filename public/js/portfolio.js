@@ -505,7 +505,7 @@ function addPortfolio(res, type) {
   voteBtn.addEventListener('click', (e)=>{
     e.preventDefault();
     isLogin();
-    vote_label.innerText += 1;
+    vote_label.innerText = parseInt(vote_label.innerText) + 1;
     let target = '/api/v1/' + casePortfolioType(type, false) + '/vote/' + id;
     superagent
         .put(target)

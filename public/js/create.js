@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     initPortfolio(currentUser, INCOME);
                     clearForm();
                   })
-              }
+              }  
             }
         }, false);
   
@@ -84,7 +84,6 @@ document.addEventListener('DOMContentLoaded', function () {
           let date = new Date(occurDate.value);
           data.occurDate = date.toISOString();
           data.privacy = privacy.value;
-          console.log(data);
   
           if(data.description == "" || data.amount == "" ||  data.category == "ZERO"){
             alert('input incomplete');
@@ -104,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .send(data)
             .set('accept', 'json')
             .set('Authorization', jwt.token)
-            .then(function (res) {            
+            .then(function (res) {          
                 if(type == COST){
                   addPortfolio(type, res.body.CreateCost);
                 }

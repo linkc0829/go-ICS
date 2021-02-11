@@ -5,43 +5,35 @@ import (
 	gqlModel "github.com/linkc0829/go-icsharing/internal/graph/models"
 )
 
-func DBPortfolioToGQLPortfolio(db dbModel.PortfolioModel) gqlModel.Portfolio {
+func DBPortfolioToGQLPortfolio(db dbModel.PortfolioModel, pType string) gqlModel.Portfolio {
 
 	var gql gqlModel.Portfolio
-	switch m := db.(type) {
-	case dbModel.CostModel:
-		vote := []string{}
-		for _, v := range m.Vote {
-			vote = append(vote, v.Hex())
-		}
+	vote := []string{}
+	for _, v := range db.Vote {
+		vote = append(vote, v.Hex())
+	}
+	if pType == "cost" {
 		gql = gqlModel.Cost{
-			ID:          m.ID.Hex(),
-			Owner:       m.Owner.Hex(),
-			Amount:      m.Amount,
-			Category:    m.Category,
-			Description: m.Description,
-			OccurDate:   m.OccurDate,
+			ID:          db.ID.Hex(),
+			Owner:       db.Owner.Hex(),
+			Amount:      db.Amount,
+			Category:    db.Category,
+			Description: db.Description,
+			OccurDate:   db.OccurDate,
 			Vote:        vote,
-			Privacy:     m.Privacy,
-		}
-		return gql
-
-	case dbModel.IncomeModel:
-		vote := []string{}
-		for _, v := range m.Vote {
-			vote = append(vote, v.Hex())
-		}
-		gql = gqlModel.Income{
-			ID:          m.ID.Hex(),
-			Owner:       m.Owner.Hex(),
-			Amount:      m.Amount,
-			Category:    m.Category,
-			Description: m.Description,
-			OccurDate:   m.OccurDate,
-			Vote:        vote,
-			Privacy:     m.Privacy,
+			Privacy:     db.Privacy,
 		}
 		return gql
 	}
-	return nil
+	gql = gqlModel.Income{
+		ID:          db.ID.Hex(),
+		Owner:       db.Owner.Hex(),
+		Amount:      db.Amount,
+		Category:    db.Category,
+		Description: db.Description,
+		OccurDate:   db.OccurDate,
+		Vote:        vote,
+		Privacy:     db.Privacy,
+	}
+	return gql
 }

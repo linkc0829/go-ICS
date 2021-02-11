@@ -30,11 +30,7 @@ const (
 	USER  string = "USER"
 )
 
-type PortfolioModel interface {
-	IsPortfolio()
-}
-
-type IncomeModel struct {
+type PortfolioModel struct {
 	ID          primitive.ObjectID       `bson:"_id" json:"_id,omitempty"`
 	Owner       primitive.ObjectID       `bson:"owner" json:"owner,omitempty"`
 	Amount      int                      `bson:"amount" json:"amount,omitempty"`
@@ -45,19 +41,3 @@ type IncomeModel struct {
 	VoteVer     int                      `bson:"voteVer" json:"voteVer,omitempty"`
 	Privacy     models.Privacy           `bson:"privacy" json:"privacy,omitempty"`
 }
-
-func (IncomeModel) IsPortfolio() {}
-
-type CostModel struct {
-	ID          primitive.ObjectID       `bson:"_id" json:"_id,omitempty"`
-	Owner       primitive.ObjectID       `bson:"owner" json:"owner,omitempty"`
-	Amount      int                      `bson:"amount" json:"amount,omitempty"`
-	OccurDate   time.Time                `bson:"occurDate" json:"occurDate,omitempty"`
-	Category    models.PortfolioCategory `bson:"category" json:"category,omitempty"`
-	Description string                   `bson:"description" json:"description,omitempty"`
-	Vote        []primitive.ObjectID     `bson:"vote" json:"vote,omitempty"`
-	VoteVer     int                      `bson:"voteVer" json:"voteVer,omitempty"`
-	Privacy     models.Privacy           `bson:"privacy" json:"privacy,omitempty"`
-}
-
-func (CostModel) IsPortfolio() {}

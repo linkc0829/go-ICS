@@ -12,6 +12,7 @@ import (
 	"github.com/linkc0829/go-icsharing/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func Test_initMultipleQueue(t *testing.T) {
@@ -37,7 +38,7 @@ func Test_initMultipleQueue(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run(fmt.Sprintf("test Vote Income for %d times", runs), func(t *testing.T) {
-		income := models.IncomeModel{
+		income := models.PortfolioModel{
 			ID:          primitive.NewObjectID(),
 			Description: "TEST VOTE",
 			VoteVer:     0,
@@ -55,7 +56,7 @@ func Test_initMultipleQueue(t *testing.T) {
 		wg := sync.WaitGroup{}
 		wg.Add(runs)
 		for _, v := range voter {
-			go MongoIncomeOCT(&wg, income, v)
+			go MongoPortfolioOCT(&wg, income, v, db.Income)
 		}
 		wg.Wait()
 
@@ -75,7 +76,7 @@ func Test_initMultipleQueue(t *testing.T) {
 		wg = sync.WaitGroup{}
 		wg.Add(runs)
 		for _, v := range voter {
-			go MongoIncomeOCT(&wg, income, v)
+			go MongoPortfolioOCT(&wg, income, v, db.Income)
 		}
 		wg.Wait()
 
@@ -97,17 +98,18 @@ func Test_initMultipleQueue(t *testing.T) {
 }
 
 //MongoDB optimistic concurancy transaction
-func MongoIncomeOCT(wg *sync.WaitGroup, income models.IncomeModel, voter primitive.ObjectID) {
+func MongoPortfolioOCT(wg *sync.WaitGroup, portfolio models.PortfolioModel, voter primitive.ObjectID, db *mongo.Collection) {
 
 	channelNumber := rand.Intn(100) % 10
 	result := make(chan []primitive.ObjectID)
-	IncomeChan[channelNumber] <- IncomeData{
-		Income: income,
-		Voter:  voter,
-		Result: &result,
+	PortfolioChan[channelNumber] <- PortfolioData{
+		Portfolio: portfolio,
+		Voter:     voter,
+		DB:        db,
+		Result:    &result,
 	}
 	select {
-	case income.Vote = <-result:
+	case portfolio.Vote = <-result:
 		wg.Done()
 	}
 }
