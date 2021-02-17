@@ -35,7 +35,7 @@ type MongoDB struct {
 }
 
 //ConnectDB will build connection to MongoDB Atlas
-func ConnectMongoDB(cfg *utils.ServerConfig) (db *MongoDB) {
+func ConnectDB(cfg *utils.ServerConfig) (db *MongoDB) {
 
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(cfg.MongoDB.DSN))
 	if err != nil {
@@ -58,23 +58,23 @@ func ConnectMongoDB(cfg *utils.ServerConfig) (db *MongoDB) {
 		IncomeHistory: client.Database("ics").Collection("incomeHistory"),
 		CostHistory:   client.Database("ics").Collection("costHistory"),
 	}
-	initMultipleQueue(db)
-	return
+	db.initMultipleQueue()
+	return db
 }
 
 //init multiple queue for mongoDB optimistic concurrency transaction
-func initMultipleQueue(db *MongoDB) {
+func (db *MongoDB) initMultipleQueue() {
 	PortfolioChan = make([]chan PortfolioData, 10)
 
 	for i := range PortfolioChan {
 		PortfolioChan[i] = make(chan PortfolioData)
-		go CommitPortfolioVote(context.Background(), &PortfolioChan[i], db, i)
+		go db.CommitPortfolioVote(context.Background(), &PortfolioChan[i], i)
 	}
 
 }
 
 //CloseDB will dissconnect to MongoDB
-func CloseMongoDB(db *MongoDB) {
+func (db *MongoDB) CloseDB() {
 	err := db.Session.Disconnect(context.Background())
 	if err != nil {
 		log.Fatal(err)
@@ -82,7 +82,7 @@ func CloseMongoDB(db *MongoDB) {
 }
 
 //implement mongodb transaction for vote income
-func CommitPortfolioVote(ctx context.Context, in *chan PortfolioData, db *MongoDB, i int) {
+func (db *MongoDB) CommitPortfolioVote(ctx context.Context, in *chan PortfolioData, i int) {
 	for {
 		select {
 		case data := <-*in:

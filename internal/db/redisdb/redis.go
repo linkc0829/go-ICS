@@ -7,16 +7,23 @@ import (
 	"github.com/linkc0829/go-icsharing/pkg/utils"
 )
 
-func ConnectRedis(cfg *utils.ServerConfig) redis.Conn {
+type RedisDB struct {
+	Conn redis.Conn
+}
+
+func ConnectDB(cfg *utils.ServerConfig) *RedisDB {
 	conn, err := redis.Dial("tcp", cfg.Redis.EndPoint, redis.DialPassword(cfg.Redis.PWD))
 	if err != nil {
 		log.Fatal(err)
 	}
-	return conn
+	db := &RedisDB{
+		Conn: conn,
+	}
+	return db
 }
 
-func CloseRedis(c redis.Conn) {
-	err := c.Close()
+func (db *RedisDB) CloseDB() {
+	err := db.Conn.Close()
 	if err != nil {
 		log.Fatal(err)
 	}

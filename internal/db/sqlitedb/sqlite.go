@@ -22,25 +22,32 @@ type Portfolios struct {
 	Portfolios []Portfolio `json:"portfolios"`
 }
 
+type SqliteDB struct {
+	Client *gorm.DB
+}
+
 // TableName set the name of the table.
 func (Portfolio) TableName() string {
 	return "portfolio"
 }
 
-func ConnectSqlite() *gorm.DB {
-	db, err := gorm.Open("sqlite3", ":memory:")
+func ConnectDB() *SqliteDB {
+	client, err := gorm.Open("sqlite3", ":memory:")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if !db.HasTable(&Portfolio{}) {
-		db.CreateTable(&Portfolio{})
+	if !client.HasTable(&Portfolio{}) {
+		client.CreateTable(&Portfolio{})
+	}
+	db := &SqliteDB{
+		Client: client,
 	}
 	return db
 }
 
-func CloseSqlite(db *gorm.DB) {
-	if err := db.Close(); err != nil {
+func (db *SqliteDB) CloseDB() {
+	if err := db.Client.Close(); err != nil {
 		log.Fatal(err)
 	}
 }

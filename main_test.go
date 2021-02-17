@@ -104,21 +104,19 @@ func init() {
 
 func TestGraphQLAPI(t *testing.T) {
 
-	mongoDB := mongodb.ConnectMongoDB(serverconf)
-	defer mongodb.CloseMongoDB(mongoDB)
-	log.Println("Mongo connected")
+	mongo := mongodb.ConnectDB(serverconf)
+	defer mongo.CloseDB()
 
-	sqlite := sqlitedb.ConnectSqlite()
-	defer sqlitedb.CloseSqlite(sqlite)
+	sqlite := sqlitedb.ConnectDB()
+	defer sqlite.CloseDB()
 
-	redis := redisdb.ConnectRedis(serverconf)
-	defer redisdb.CloseRedis(redis)
-	log.Println("Redis connected")
+	redis := redisdb.ConnectDB(serverconf)
+	defer redis.CloseDB()
 
 	db := &datasource.DB{
-		Mongo:  mongoDB,
-		Sqlite: sqlite,
-		Redis:  redis,
+		Mongo:  mongo,
+		Sqlite: sqlite.Client,
+		Redis:  redis.Conn,
 	}
 
 	r := server.SetupServer(serverconf, db)
@@ -155,12 +153,12 @@ func TestGraphQLAPI(t *testing.T) {
 			Role:            dbModel.ADMIN,
 		}
 		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-		_, err = mongoDB.Users.InsertOne(ctx, newUser)
+		_, err = mongo.Users.InsertOne(ctx, newUser)
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 		test := &dbModel.UserModel{}
-		mongoDB.Users.FindOne(ctx, bson.M{"_id": newUser.ID}).Decode(test)
+		mongo.Users.FindOne(ctx, bson.M{"_id": newUser.ID}).Decode(test)
 
 	})
 

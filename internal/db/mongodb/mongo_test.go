@@ -34,7 +34,8 @@ func Test_initMultipleQueue(t *testing.T) {
 			DSN: mongoDSN,
 		},
 	}
-	db := ConnectMongoDB(conf)
+	db := ConnectDB(conf)
+	defer db.CloseDB()
 	ctx := context.Background()
 
 	t.Run(fmt.Sprintf("test Vote Income for %d times", runs), func(t *testing.T) {

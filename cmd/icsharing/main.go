@@ -83,19 +83,19 @@ func init() {
 
 func main() {
 
-	mongoDB := mongodb.ConnectMongoDB(serverconf)
-	defer mongodb.CloseMongoDB(mongoDB)
+	mongo := mongodb.ConnectDB(serverconf)
+	defer mongo.CloseDB()
 
-	sqlite := sqlitedb.ConnectSqlite()
-	defer sqlitedb.CloseSqlite(sqlite)
+	sqlite := sqlitedb.ConnectDB()
+	defer sqlite.CloseDB()
 
-	redis := redisdb.ConnectRedis(serverconf)
-	defer redisdb.CloseRedis(redis)
+	redis := redisdb.ConnectDB(serverconf)
+	defer redis.CloseDB()
 
 	db := &datasource.DB{
-		Mongo:  mongoDB,
-		Sqlite: sqlite,
-		Redis:  redis,
+		Mongo:  mongo,
+		Sqlite: sqlite.Client,
+		Redis:  redis.Conn,
 	}
 
 	r := server.SetupServer(serverconf, db)
@@ -123,19 +123,19 @@ func main() {
 
 //helper function for testing
 func getServer() http.Handler {
-	mongoDB := mongodb.ConnectMongoDB(serverconf)
-	defer mongodb.CloseMongoDB(mongoDB)
+	mongo := mongodb.ConnectDB(serverconf)
+	defer mongo.CloseDB()
 
-	sqlite := sqlitedb.ConnectSqlite()
-	defer sqlitedb.CloseSqlite(sqlite)
+	sqlite := sqlitedb.ConnectDB()
+	defer sqlite.CloseDB()
 
-	redis := redisdb.ConnectRedis(serverconf)
-	defer redisdb.CloseRedis(redis)
+	redis := redisdb.ConnectDB(serverconf)
+	defer redis.CloseDB()
 
 	db := &datasource.DB{
-		Mongo:  mongoDB,
-		Sqlite: sqlite,
-		Redis:  redis,
+		Mongo:  mongo,
+		Sqlite: sqlite.Client,
+		Redis:  redis.Conn,
 	}
 	return server.SetupServer(serverconf, db)
 }
