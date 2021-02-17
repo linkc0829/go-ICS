@@ -68,7 +68,7 @@ func initMultipleQueue(db *MongoDB) {
 
 	for i := range PortfolioChan {
 		PortfolioChan[i] = make(chan PortfolioData)
-		go CommitPortfolioVote(context.Background(), &PortfolioChan[i], db)
+		go CommitPortfolioVote(context.Background(), &PortfolioChan[i], db, i)
 	}
 
 }
@@ -82,7 +82,7 @@ func CloseMongoDB(db *MongoDB) {
 }
 
 //implement mongodb transaction for vote income
-func CommitPortfolioVote(ctx context.Context, in *chan PortfolioData, db *MongoDB) {
+func CommitPortfolioVote(ctx context.Context, in *chan PortfolioData, db *MongoDB, i int) {
 	for {
 		select {
 		case data := <-*in:
@@ -119,7 +119,7 @@ func CommitPortfolioVote(ctx context.Context, in *chan PortfolioData, db *MongoD
 				log.Fatal(err)
 			}
 			if result.ModifiedCount == 0 {
-				log.Println("CommitIncomeVote modify unsucceed, retry")
+				log.Printf("CommitIncomeVote modify %d voteVer unsucceed in channel #%d, retry", target.VoteVer, i)
 				goto Loop
 			}
 			*data.Result <- target.Vote

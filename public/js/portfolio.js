@@ -502,10 +502,11 @@ function addPortfolio(res, type) {
   let vote_label = form.querySelector('#vote_label');
   vote_label.innerText = vote;
   let voteBtn = form.querySelector('#vote');
+  let hasVote = false;
   voteBtn.addEventListener('click', (e)=>{
     e.preventDefault();
     isLogin();
-    vote_label.innerText = parseInt(vote_label.innerText) + 1;
+    vote_label.innerText = (hasVote? parseInt(vote_label.innerText)-1: parseInt(vote_label.innerText) + 1);
     let target = '/api/v1/' + casePortfolioType(type, false) + '/vote/' + id;
     superagent
         .put(target)
@@ -516,7 +517,12 @@ function addPortfolio(res, type) {
             alert(res.errors);
             initPortfolio(currentUser, type);
           }
-          vote_label.innerText = (type==INCOME? res.body.VoteIncome:res.body.VoteCost);
+          let voteNumber = (type==INCOME? res.body.VoteIncome:res.body.VoteCost);
+          if (parseInt(vote_label.innerText) > parseInt(voteNumber))
+            hasVote = false;
+          else
+            hasVote = true;
+          vote_label.innerText = voteNumber;
         })
         .catch(function (err) {
           alert(err);
