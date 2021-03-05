@@ -15,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Test_initMultipleQueue(t *testing.T) {
+func Test_CommitPortfolioVote(t *testing.T) {
 	runs := 50
 
 	mongoRoot := utils.MustGet("MONGO_INITDB_ROOT_USERNAME")
@@ -112,5 +112,58 @@ func MongoPortfolioOCT(wg *sync.WaitGroup, portfolio models.PortfolioModel, vote
 	select {
 	case portfolio.Vote = <-result:
 		wg.Done()
+	}
+}
+
+func BenchmarkInitMultipleQueue(b *testing.B) {
+	runs := 1000
+
+	mongoRoot := utils.MustGet("MONGO_INITDB_ROOT_USERNAME")
+	mongoRootPWD := utils.MustGet("MONGO_INITDB_ROOT_PASSWORD")
+	mongoHost := utils.MustGet("MONGO_HOST")
+	connectDB := utils.MustGet("MONGO_INITDB_DATABASE")
+	mongoDSN := "mongodb://" + mongoRoot + ":" + mongoRootPWD + "@" + mongoHost + "/" + connectDB + "?authSource=admin"
+
+	demo := utils.MustGet("DEMO_MODE")
+	if demo == "on" {
+		mongoDSN = utils.MustGet("MONGO_CONNECTION_DSN")
+	}
+
+	conf := &utils.ServerConfig{
+		MongoDB: utils.MGDBConfig{
+			DSN: mongoDSN,
+		},
+	}
+	db := ConnectDB(conf)
+	defer db.CloseDB()
+	ctx := context.Background()
+
+	income := models.PortfolioModel{
+		ID:          primitive.NewObjectID(),
+		Description: "TEST VOTE",
+		VoteVer:     0,
+	}
+	_, err := db.Income.InsertOne(ctx, income)
+	if err != nil {
+		fmt.Println(err)
+	}
+	voter := []primitive.ObjectID{}
+	for i := 0; i < runs; i++ {
+		voter = append(voter, primitive.NewObjectID())
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		//vote many times in background
+		wg := sync.WaitGroup{}
+		wg.Add(runs)
+		for _, v := range voter {
+			go MongoPortfolioOCT(&wg, income, v, db.Income)
+		}
+		wg.Wait()
+	}
+	q := bson.M{"_id": income.ID}
+	_, err = db.Income.DeleteOne(ctx, q)
+	if err != nil {
+		fmt.Println(err)
 	}
 }

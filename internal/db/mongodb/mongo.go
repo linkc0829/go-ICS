@@ -58,13 +58,13 @@ func ConnectDB(cfg *utils.ServerConfig) (db *MongoDB) {
 		IncomeHistory: client.Database("ics").Collection("incomeHistory"),
 		CostHistory:   client.Database("ics").Collection("costHistory"),
 	}
-	db.initMultipleQueue()
+	db.initMultipleQueue(10)
 	return db
 }
 
 //init multiple queue for mongoDB optimistic concurrency transaction
-func (db *MongoDB) initMultipleQueue() {
-	PortfolioChan = make([]chan PortfolioData, 10)
+func (db *MongoDB) initMultipleQueue(maxThread int) {
+	PortfolioChan = make([]chan PortfolioData, maxThread)
 
 	for i := range PortfolioChan {
 		PortfolioChan[i] = make(chan PortfolioData)
