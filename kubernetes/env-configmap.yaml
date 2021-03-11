@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-configmap
+data:
+  ADMIN_EMAIL: linkc0829@gmail.com
+  AUTH_API_KEY_HEADER: x-api-key
+  AUTH_JWT_ACCESSTOKEN_EXPIRE: 1h
+  AUTH_JWT_REFRESHTOKEN_EXPIRE: 72h
+  AUTH_JWT_SIGNING_ALGORITHM: HS512
+  COOKIES_DOMAIN: icsharing.com
+  DEMO_MODE: "off"
+  GIN_MODE: release
+  GQL_SERVER_GRAPHQL_PATH: /graph
+  GQL_SERVER_GRAPHQL_PLAYGROUND_ENABLED: "true"
+  GQL_SERVER_GRAPHQL_PLAYGROUND_PATH: /playground
+  ISHEROKU: "false"
+  MONGO_HOST: mongo:27017
+  MONGO_INITDB_DATABASE: users
+  PROVIDER_AUTH0_SCOPES: email,profile,openid
+  PROVIDER_GOOGLE_SCOPES: email,profile,openid
+  REDIS_HOST: redis:6379
+  SERVER_HOST: 0.0.0.0
+  SERVER_PATH_VERSION: v1
+  SERVER_PORT: "443"
+  SERVER_STATIC_PATH: public/
+  SERVER_URI_SCHEMA: https://

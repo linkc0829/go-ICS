@@ -16,7 +16,7 @@ import (
 )
 
 func Test_CommitPortfolioVote(t *testing.T) {
-	runs := 50
+	runs := 500
 
 	mongoRoot := utils.MustGet("MONGO_INITDB_ROOT_USERNAME")
 	mongoRootPWD := utils.MustGet("MONGO_INITDB_ROOT_PASSWORD")
@@ -101,7 +101,7 @@ func Test_CommitPortfolioVote(t *testing.T) {
 //MongoDB optimistic concurancy transaction
 func MongoPortfolioOCT(wg *sync.WaitGroup, portfolio models.PortfolioModel, voter primitive.ObjectID, db *mongo.Collection) {
 
-	channelNumber := rand.Intn(100) % 10
+	channelNumber := rand.Intn(100) % 1
 	result := make(chan []primitive.ObjectID)
 	PortfolioChan[channelNumber] <- PortfolioData{
 		Portfolio: portfolio,

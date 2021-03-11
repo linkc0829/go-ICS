@@ -58,7 +58,7 @@ func ConnectDB(cfg *utils.ServerConfig) (db *MongoDB) {
 		IncomeHistory: client.Database("ics").Collection("incomeHistory"),
 		CostHistory:   client.Database("ics").Collection("costHistory"),
 	}
-	db.initMultipleQueue(10)
+	db.initMultipleQueue(1)
 	return db
 }
 
